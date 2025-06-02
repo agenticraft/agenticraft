@@ -1,11 +1,11 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/agenticraft/.github/main/assets/logo-dark.png">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/agenticraft/.github/main/assets/logo-light.png">
-    <img alt="AgentiCraft" src="https://raw.githubusercontent.com/agenticraft/.github/main/assets/logo-light.png" width="200">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/agenticraft/agenticraft/refs/heads/main/.github/main/assets/default-monochrome-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/agenticraft/agenticraft/refs/heads/main/.github/main/assets/default-monochrome-black.svg">
+    <img alt="AgentiCraft" src="https://raw.githubusercontent.com/agenticraft/agenticraft/refs/heads/main/.github/main/assets/default-monochrome.svg" width="200">
   </picture>
   
-  # AgentiCraft
+  <!-- # AgentiCraft -->
   
   **Build production-ready AI agents with ease**
   
