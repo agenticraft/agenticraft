@@ -1,145 +1,181 @@
 # Contributing to AgentiCraft
 
-First off, thank you for considering contributing to AgentiCraft! It's people like you that make AgentiCraft such a great tool.
+Thank you for your interest in contributing to AgentiCraft! We love your input and appreciate your effort to make AI agent development simpler for everyone.
 
-## Code of Conduct
+## 🎯 Our Philosophy
 
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+Before contributing, please read our [Philosophy](docs/philosophy.md) to understand our core principles:
+- **Simplicity First**: If it's complex, it doesn't belong in core
+- **Transparent by Default**: Show reasoning, not just results
+- **Production-Ready**: Real-world usage drives decisions
+- **Developer Joy**: APIs should be intuitive and delightful
 
-## How Can I Contribute?
+## 🚀 Getting Started
 
-### Reporting Bugs
-
-Before creating bug reports, please check existing issues as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
-
-- **Use a clear and descriptive title**
-- **Describe the exact steps to reproduce the problem**
-- **Provide specific examples to demonstrate the steps**
-- **Describe the behavior you observed after following the steps**
-- **Explain which behavior you expected to see instead and why**
-- **Include screenshots if possible**
-
-### Suggesting Enhancements
-
-Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion, please include:
-
-- **Use a clear and descriptive title**
-- **Provide a step-by-step description of the suggested enhancement**
-- **Provide specific examples to demonstrate the steps**
-- **Describe the current behavior and explain which behavior you expected to see instead**
-- **Explain why this enhancement would be useful**
-
-### Your First Code Contribution
-
-Unsure where to begin contributing? You can start by looking through these issues:
-
-- [Good first issues](https://github.com/agenticraft/agenticraft/labels/good%20first%20issue)
-- [Help wanted issues](https://github.com/agenticraft/agenticraft/labels/help%20wanted)
-
-### Pull Requests
-
-1. Fork the repo and create your branch from `main`.
-2. If you've added code that should be tested, add tests.
-3. If you've changed APIs, update the documentation.
-4. Ensure the test suite passes.
-5. Make sure your code lints.
-6. Issue that pull request!
-
-## Development Setup
-
+### 1. Fork and Clone
 ```bash
-# Clone your fork
 git clone https://github.com/YOUR_USERNAME/agenticraft.git
 cd agenticraft
+```
 
-# Create a virtual environment
+### 2. Set Up Development Environment
+```bash
+make setup
+# or manually:
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install in development mode
-pip install -e ".[dev]"
-
-# Install pre-commit hooks
+pip install -e ".[dev,test]"
 pre-commit install
-
-# Run tests
-pytest
-
-# Run linting
-make lint
 ```
 
-## Style Guide
-
-### Python Style Guide
-
-We use [Black](https://github.com/psf/black) for code formatting and [Ruff](https://github.com/astral-sh/ruff) for linting.
-
+### 3. Validate Setup
 ```bash
-# Format code
-black src tests
-
-# Run linter
-ruff check src tests
-
-# Type checking
-mypy src
+python scripts/validate_env.py
 ```
 
-### Commit Messages
+## 📝 Development Workflow
 
-- Use the present tense ("Add feature" not "Added feature")
-- Use the imperative mood ("Move cursor to..." not "Moves cursor to...")
-- Limit the first line to 72 characters or less
-- Reference issues and pull requests liberally after the first line
+### 1. Create a Branch
+```bash
+git checkout -b feature/your-feature-name
+# or
+git checkout -b fix/issue-description
+```
+
+### 2. Make Changes
+- Write clean, simple code
+- Add tests for new functionality
+- Update documentation
+- Follow our code style
+
+### 3. Run Checks
+```bash
+make check  # Runs lint, type-check, and tests
+# or individually:
+make lint
+make type-check
+make test
+```
+
+### 4. Commit Changes
+```bash
+git add .
+git commit -m "component: clear description of change"
+```
+
+Commit message format:
+- `core: add new reasoning pattern`
+- `tools: implement web search tool`
+- `docs: update installation guide`
+- `fix: resolve memory leak in workflows`
+
+### 5. Push and Create PR
+```bash
+git push origin your-branch-name
+```
+
+Then create a Pull Request on GitHub.
+
+## 🏗️ Code Guidelines
+
+### Style
+- We use Black for formatting (line length: 88)
+- We use Ruff for linting
+- Type hints are required for all public APIs
+- Google-style docstrings
+
+### Testing
+- Minimum 95% test coverage required
+- Write unit tests for all new code
+- Integration tests for cross-component features
+- Use pytest fixtures for common setups
+
+Example test:
+```python
+def test_agent_creation():
+    """Test basic agent creation."""
+    agent = Agent(name="test", instructions="Test agent")
+    assert agent.name == "test"
+    assert agent.instructions == "Test agent"
+```
 
 ### Documentation
+- Every public function needs a docstring
+- Include usage examples in docstrings
+- Update relevant .md files for features
+- Add to changelog for notable changes
 
-- Use [Google style](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) for docstrings
-- Update the README.md with details of changes to the interface
-- Update the docs/ folder with any new functionality
+## 🔧 Common Tasks
 
-## Testing
+### Adding a New Tool
+1. Create tool in `agenticraft/tools/`
+2. Add tests in `tests/tools/`
+3. Document in `docs/guides/creating-tools.md`
+4. Add example in `examples/`
 
-```bash
-# Run all tests
-pytest
+### Adding a Provider
+1. Implement provider interface in `agenticraft/providers/`
+2. Add configuration in `core/config.py`
+3. Write integration tests
+4. Update provider documentation
 
-# Run with coverage
-pytest --cov=agenticraft
+### Improving Performance
+1. Profile with real workloads
+2. Optimize hot paths only
+3. Maintain simplicity
+4. Document any trade-offs
 
-# Run specific test file
-pytest tests/test_agent.py
+## 🐛 Reporting Issues
 
-# Run with verbose output
-pytest -v
-```
+### Bug Reports
+Include:
+- Python version
+- AgentiCraft version
+- Minimal reproduction code
+- Expected vs actual behavior
+- Full error traceback
 
-## Project Structure
+### Feature Requests
+Include:
+- Use case description
+- Why existing features don't work
+- Proposed API (if applicable)
+- How it aligns with our philosophy
 
-```
-agenticraft/
-├── src/agenticraft/    # Source code
-│   ├── core/          # Core functionality
-│   ├── tools/         # Built-in tools
-│   └── utils/         # Utilities
-├── tests/             # Test files
-├── docs/              # Documentation
-└── examples/          # Example usage
-```
+## 📊 Pull Request Process
 
-## Release Process
+1. **PR Title**: Clear and descriptive
+2. **Description**: What, why, and how
+3. **Tests**: All tests must pass
+4. **Coverage**: Must maintain 95%+ coverage
+5. **Documentation**: Updated as needed
+6. **Review**: Address feedback promptly
 
-1. Update version in `src/agenticraft/__version__.py`
-2. Update CHANGELOG.md
-3. Create a pull request
-4. After merge, create a release on GitHub
-5. Package will be automatically published to PyPI
+### PR Checklist
+- [ ] Tests added/updated
+- [ ] Documentation updated
+- [ ] Changelog entry added (if needed)
+- [ ] Code follows style guidelines
+- [ ] Commit messages are clear
+- [ ] PR description is complete
 
-## Questions?
+## 🎉 Recognition
 
-Feel free to ask questions in:
-- [Discord](https://discord.gg/agenticraft)
-- [GitHub Discussions](https://github.com/agenticraft/agenticraft/discussions)
+Contributors are recognized in:
+- [CONTRIBUTORS.md](CONTRIBUTORS.md)
+- Release notes
+- Project documentation
 
-Thank you for contributing! 🎉
+## 💬 Getting Help
+
+- **Discord**: [Join our community](https://discord.gg/agenticraft)
+- **Discussions**: [GitHub Discussions](https://github.com/agenticraft/agenticraft/discussions)
+- **Issues**: [GitHub Issues](https://github.com/agenticraft/agenticraft/issues)
+
+## 📜 License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.
+
+---
+
+Thank you for helping make AgentiCraft better! 🚀

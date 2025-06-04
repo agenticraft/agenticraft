@@ -1,0 +1,34 @@
+# Core dependencies
+agenticraft>=0.1.0
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Async support
+httpx>=0.25.0
+aiofiles>=23.0.0
+
+# Monitoring and metrics
+prometheus-client>=0.17.0
+psutil>=5.9.0
+
+# Middleware and security
+python-multipart>=0.0.6
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# Redis for caching/rate limiting
+redis>=5.0.0
+hiredis>=2.2.0
+
+# Environment and configuration
+python-dotenv>=1.0.0
+
+# Development dependencies (optional)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+black>=23.0.0
+ruff>=0.1.0
+mypy>=1.0.0

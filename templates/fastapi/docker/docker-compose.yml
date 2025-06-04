@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: agenticraft-api
+    ports:
+      - "8000:8000"
+    environment:
+      - SERVICE_NAME=agenticraft-api
+      - ENVIRONMENT=production
+      - ENABLE_TELEMETRY=true
+      - OTLP_ENDPOINT=http://otel-collector:4317
+      - CORS_ORIGINS=http://localhost:3000,https://yourdomain.com
+      # Provider configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    depends_on:
+      - redis
+      - otel-collector
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - agenticraft-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: agenticraft-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - agenticraft-network
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: agenticraft-otel
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8888:8888"   # Prometheus metrics
+    networks:
+      - agenticraft-network
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: agenticraft-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - agenticraft-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: agenticraft-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - agenticraft-network
+    restart: unless-stopped
+
+  # Optional: PostgreSQL for persistent storage
+  postgres:
+    image: postgres:15-alpine
+    container_name: agenticraft-postgres
+    environment:
+      - POSTGRES_USER=agenticraft
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-agenticraft}
+      - POSTGRES_DB=agenticraft
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - agenticraft-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  postgres-data:
+
+networks:
+  agenticraft-network:
+    driver: bridge

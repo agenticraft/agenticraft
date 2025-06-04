@@ -1,0 +1,1 @@
+"""MCP examples for AgentiCraft."""

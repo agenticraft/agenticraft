@@ -1,14 +1,22 @@
+#!/usr/bin/env python3
 """
 Simple chatbot example with memory
 """
 
 import asyncio
-from agenticraft import ChatAgent
+from agenticraft import Agent
+from agenticraft.core.memory import ConversationMemory
 
 
 async def main():
     # Create a chatbot with memory
-    chatbot = ChatAgent(name="ChatBot", memory=True)
+    memory = ConversationMemory()
+    chatbot = Agent(
+        name="ChatBot",
+        model="gpt-4",
+        instructions="You are a helpful AI assistant. Be friendly and conversational.",
+        memory=[memory]
+    )
     
     print("ChatBot: Hello! I'm your AI assistant. Type 'quit' to exit.")
     
@@ -19,8 +27,8 @@ async def main():
             print("ChatBot: Goodbye!")
             break
         
-        response = await chatbot.chat(user_input)
-        print(f"ChatBot: {response}")
+        response = await chatbot.arun(user_input)
+        print(f"ChatBot: {response.content}")
 
 
 if __name__ == "__main__":

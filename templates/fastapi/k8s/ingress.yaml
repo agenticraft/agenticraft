@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agenticraft-api
+  namespace: agenticraft
+  labels:
+    app: agenticraft-api
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-period: "1m"
+spec:
+  tls:
+  - hosts:
+    - api.agenticraft.example.com
+    secretName: agenticraft-api-tls
+  rules:
+  - host: api.agenticraft.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: agenticraft-api
+            port:
+              number: 80
