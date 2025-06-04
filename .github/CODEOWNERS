@@ -1,0 +1,25 @@
+# CODEOWNERS for AgentiCraft
+# These owners will be requested for review when someone opens a pull request
+
+# Global owners for all files
+* @zahere
+
+# Core framework components (require careful review)
+/agenticraft/core/ @zahere
+/agenticraft/protocols/ @zahere
+
+# Providers need careful testing
+/agenticraft/providers/ @zahere
+
+# Documentation can be updated more freely
+/docs/ @zahere
+/examples/ @zahere
+/README.md @zahere
+
+# GitHub configuration
+/.github/ @zahere
+
+# Critical configuration files
+/pyproject.toml @zahere
+/setup.py @zahere
+/requirements*.txt @zahere
