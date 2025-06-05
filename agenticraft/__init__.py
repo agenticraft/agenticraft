@@ -5,7 +5,7 @@ A lightweight, production-ready framework for building AI agents with
 transparent reasoning, MCP protocol support, and comprehensive observability.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "AgentiCraft Team"
 __email__ = "hello@agenticraft.ai"
 

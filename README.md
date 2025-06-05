@@ -5,7 +5,7 @@
   
   **Build AI agents as simple as writing Python**
 
-  ![Version](https://img.shields.io/badge/version-0.1.0-blue)
+  ![Version](https://img.shields.io/badge/version-0.1.1-blue)
   [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
   [![License](https://img.shields.io/github/license/agenticraft/agenticraft.svg)](https://github.com/agenticraft/agenticraft/blob/main/LICENSE)
   [![Tests](https://github.com/agenticraft/agenticraft/actions/workflows/test.yml/badge.svg)](https://github.com/agenticraft/agenticraft/actions)
@@ -16,9 +16,10 @@
 
 ## 📌 Project Status
 
-**Current Version**: v0.1.0 (Beta)  
+**Current Version**: v0.1.1 (Beta)  
 **Status**: Active Development  
 **Released**: June 2025  
+**PyPI Release**: Coming June 6, 2025 🎉  
 
 This is the initial public release. We're actively working on additional features and welcome community feedback!
 
@@ -40,13 +41,16 @@ Building AI agents should be as simple as writing Python. We focus on intuitive 
 ### Installation
 
 ```bash
-# Install from GitHub (available now)
+# Install from PyPI (coming June 6, 2025)
+pip install agenticraft
+
+# Or install from GitHub (available now)
 pip install git+https://github.com/agenticraft/agenticraft.git
 
-# Also install OpenAI provider
-pip install openai>=1.0.0
-
-# Coming soon: pip install agenticraft
+# Also install provider dependencies as needed
+pip install openai>=1.0.0    # For OpenAI
+pip install anthropic        # For Anthropic/Claude
+# Ollama runs locally, no extra dependencies needed
 ```
 
 ### Create Your First Agent
@@ -191,18 +195,19 @@ agent.connect_mcp_server("github.com/owner/mcp-server")
 Switch between providers with a single line.
 
 ```python
-# OpenAI (currently supported)
+# OpenAI (GPT-4, GPT-3.5)
 agent = Agent(model="gpt-4", api_key=openai_key)
 
-# Coming in v0.1.1:
-# Anthropic
+# Anthropic (Claude 3 Opus, Sonnet, Haiku)
 agent = Agent(model="claude-3-opus", api_key=anthropic_key)
 
-# Google
-agent = Agent(model="gemini-pro", api_key=google_key)
+# Open source via Ollama (Llama 2, Mistral, CodeLlama, etc.)
+agent = Agent(model="llama2:latest", base_url="http://localhost:11434")
+# or with explicit provider prefix
+agent = Agent(model="ollama/mistral")
 
-# Open source via Ollama
-agent = Agent(model="ollama/llama2", base_url="http://localhost:11434")
+# Coming soon:
+agent = Agent(model="gemini-pro", api_key=google_key)  # Google
 ```
 
 ### Production Templates
@@ -270,8 +275,9 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - **[Examples](examples/)** - Real-world usage examples
 - **[Philosophy](docs/philosophy.md)** - Our design principles
 - **[MCP Integration](docs/guides/mcp-integration.md)** - Model Context Protocol guide
+- **[Provider Guide](agenticraft/providers/README.md)** - LLM provider documentation
 
-Documentation website coming soon at docs.agenticraft.ai!
+📚 **Documentation website coming soon at [docs.agenticraft.ai](https://docs.agenticraft.ai)!**
 
 ## 🎯 Examples
 
@@ -282,6 +288,11 @@ Check out the [`examples/`](examples/) directory for complete, working examples:
 - **[Configuration](examples/03_configuration.py)** - Agent configuration
 - **[Workflow](examples/04_workflow_research.py)** - Multi-step processes
 - **[Tools Showcase](examples/05_tools_showcase.py)** - Advanced tool usage
+- **Provider Examples**:
+  - [OpenAI Example](examples/providers/openai_example.py) - 11 usage scenarios
+  - [Anthropic Example](examples/providers/anthropic_example.py) - Claude integration
+  - [Ollama Example](examples/providers/ollama_example.py) - Local model usage
+  - [Provider Switching](examples/providers/provider_switching.py) - Compare providers
 
 ## 🚀 Installation
 
@@ -305,8 +316,13 @@ pip install -e ".[all]"
 
 ### Coming Soon
 ```bash
-# From PyPI (coming soon)
+# From PyPI (available June 6, 2025)
 pip install agenticraft
+
+# Install with specific providers
+pip install agenticraft[openai]     # OpenAI support
+pip install agenticraft[anthropic]  # Anthropic support
+pip install agenticraft[all]        # All providers
 ```
 
 ## 🤝 Contributing
@@ -336,7 +352,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 🗺️ Roadmap
 
-### v0.1.0 (Current Release)
+### v0.1.0 (June 4, 2025)
 - ✅ Core framework (<2000 LOC)
 - ✅ Base Agent with reasoning patterns
 - ✅ Tool system with decorators
@@ -347,11 +363,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 - ✅ CLI tool
 - ✅ Production templates
 
-### v0.1.1 (Next Week)
-- [ ] Complete Anthropic provider
-- [ ] Complete Ollama provider
-- [ ] PyPI package release
-- [ ] Documentation website
+### v0.1.1 (Current Release - June 6, 2025)
+- ✅ Complete Anthropic provider (Claude 3 support)
+- ✅ Complete Ollama provider (local models)
+- ✅ Provider factory with smart model detection
+- ✅ 90+ provider tests with >95% coverage
+- ⏳ PyPI package release (in progress)
+- ⏳ Documentation website (deployment pending)
 
 ### v0.2.0
 - [ ] Streaming responses
@@ -365,17 +383,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 - [ ] Enterprise features
 - [ ] Cloud deployment helpers
 - [ ] GUI for agent building
-
-## 📊 Benchmarks
-
-> *Benchmarks based on initial testing. Community validation welcome!*
-
-| Framework | Setup Time | Core Size | Time to First Agent | Documentation |
-|-----------|------------|-----------|-------------------|---------------|
-| **AgentiCraft** | 1 min | <2k LOC | 5 min | 100% |
-| LangChain | 5 min | >100k LOC | 30 min | 70% |
-| AutoGen | 3 min | >50k LOC | 20 min | 60% |
-| Custom | ∞ | Varies | Days | Varies |
 
 ## 🤔 Philosophy
 

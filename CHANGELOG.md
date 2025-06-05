@@ -65,14 +65,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No known security issues
 - Sandboxed tool execution planned for v0.2.0
 
-## [Upcoming]
+## [Unreleased]
 
-### [0.1.1] - Week of 2025-06-11
-- Complete Anthropic provider implementation
-- Complete Ollama provider for local models
-- PyPI package release
-- Documentation website (docs.agenticraft.ai)
-- Bug fixes from community feedback
+### Added (for v0.1.1)
+- ✅ **Anthropic Provider** - Full support for Claude 3 models (Opus, Sonnet, Haiku)
+  - Streaming support
+  - Tool calling
+  - System message handling
+  - Comprehensive test coverage (25+ tests)
+  - Example usage guide
+- ✅ **Ollama Provider** - Run open-source models locally
+  - Support for Llama 2, Mistral, CodeLlama, and more
+  - Model management (list, pull)
+  - Custom server configuration
+  - Comprehensive test coverage (30+ tests)
+  - 10 example scenarios
+- 📝 Updated documentation and examples
+
+### [0.1.1] - Target: 2025-06-11
+- [ ] PyPI package release
+- [ ] Documentation website (docs.agenticraft.ai)
+- [ ] Bug fixes from community feedback
 
 ### [0.2.0] - July 2025
 - Streaming response support
