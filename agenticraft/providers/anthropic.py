@@ -1,16 +1,19 @@
 """Anthropic provider implementation for AgentiCraft."""
 
+import asyncio
+import json
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, AsyncIterator, Dict, List, Optional, Union
 
 from ..core.config import settings
 from ..core.exceptions import ProviderError, ProviderAuthError
 from ..core.provider import BaseProvider
+from ..core.streaming import StreamingProvider, StreamChunk, StreamInterruptedError
 from ..core.types import CompletionResponse, Message, ToolCall, ToolDefinition
 
 
-class AnthropicProvider(BaseProvider):
-    """Provider for Anthropic models (Claude)."""
+class AnthropicProvider(BaseProvider, StreamingProvider):
+    """Provider for Anthropic models (Claude) with streaming support."""
     
     def __init__(self, **kwargs):
         """Initialize Anthropic provider."""
@@ -222,3 +225,149 @@ class AnthropicProvider(BaseProvider):
             raise ProviderAuthError("anthropic")
         # Modern Anthropic keys may have different prefixes
         # Just ensure we have a non-empty key
+    
+    async def stream(
+        self,
+        messages: Union[List[Message], List[Dict[str, Any]]],
+        model: Optional[str] = None,
+        tools: Optional[Union[List[ToolDefinition], List[Dict[str, Any]]]] = None,
+        tool_choice: Optional[Any] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        **kwargs: Any
+    ) -> AsyncIterator[StreamChunk]:
+        """Stream completion from Anthropic.
+        
+        Args:
+            messages: List of messages
+            model: Model to use (defaults to instance model)
+            tools: Optional tools for the model to use
+            tool_choice: How to handle tool selection
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens to generate
+            **kwargs: Additional Anthropic-specific parameters
+            
+        Yields:
+            StreamChunk: Individual chunks of the response
+            
+        Raises:
+            StreamInterruptedError: If the stream is interrupted
+            ProviderError: If the provider encounters an error
+        """
+        try:
+            # Use provided model or default
+            actual_model = model or self.model
+            
+            # Format messages - extract system message (Anthropic pattern)
+            system_prompt, chat_messages = self._extract_system_message(messages)
+            
+            # Prepare request parameters
+            request_params = {
+                "model": actual_model,
+                "messages": self._format_messages(chat_messages),
+                "max_tokens": max_tokens or 4096,
+                "temperature": temperature,
+                "stream": True,  # Enable streaming
+                **kwargs
+            }
+            
+            # Add system prompt if present
+            if system_prompt:
+                request_params["system"] = system_prompt
+            
+            # Add tools if provided
+            if tools:
+                request_params["tools"] = self._convert_tools(tools)
+                if tool_choice is not None:
+                    request_params["tool_choice"] = self._format_tool_choice(tool_choice)
+            
+            # Make streaming request
+            stream = await self.client.messages.create(**request_params)
+            
+            # Process stream
+            accumulated_content = ""
+            accumulated_tool_calls = []
+            current_tool_call = None
+            
+            try:
+                async for event in stream:
+                    # Handle different event types
+                    if event.type == "content_block_start":
+                        if hasattr(event.content_block, "type"):
+                            if event.content_block.type == "text":
+                                # Text content block starting
+                                pass
+                            elif event.content_block.type == "tool_use":
+                                # Tool use block starting
+                                current_tool_call = {
+                                    "id": event.content_block.id,
+                                    "name": event.content_block.name,
+                                    "input": ""
+                                }
+                    
+                    elif event.type == "content_block_delta":
+                        if hasattr(event.delta, "text"):
+                            # Text delta
+                            content = event.delta.text
+                            accumulated_content += content
+                            
+                            yield StreamChunk(
+                                content=content,
+                                token=content,
+                                metadata={
+                                    "model": actual_model,
+                                    "type": "text_delta"
+                                }
+                            )
+                        
+                        elif hasattr(event.delta, "partial_json"):
+                            # Tool input delta
+                            if current_tool_call:
+                                current_tool_call["input"] += event.delta.partial_json
+                    
+                    elif event.type == "content_block_stop":
+                        # Content block finished
+                        if current_tool_call and current_tool_call.get("input"):
+                            # Parse the accumulated tool input
+                            try:
+                                input_data = json.loads(current_tool_call["input"])
+                                accumulated_tool_calls.append(ToolCall(
+                                    id=current_tool_call["id"],
+                                    name=current_tool_call["name"],
+                                    arguments=input_data
+                                ))
+                            except json.JSONDecodeError:
+                                pass  # Skip malformed tool calls
+                            current_tool_call = None
+                    
+                    elif event.type == "message_stop":
+                        # Message complete
+                        yield StreamChunk(
+                            content="",
+                            is_final=True,
+                            metadata={
+                                "model": actual_model,
+                                "stop_reason": getattr(event, "stop_reason", None),
+                                "tool_calls": [tc.model_dump() for tc in accumulated_tool_calls] if accumulated_tool_calls else None,
+                                "total_content": accumulated_content
+                            }
+                        )
+                        
+            except asyncio.CancelledError:
+                raise StreamInterruptedError(
+                    "Anthropic stream was interrupted",
+                    partial_response=accumulated_content
+                )
+                
+        except Exception as e:
+            if isinstance(e, StreamInterruptedError):
+                raise
+            raise ProviderError(f"Anthropic streaming failed: {e}") from e
+    
+    def supports_streaming(self) -> bool:
+        """Check if this provider supports streaming.
+        
+        Returns:
+            bool: True (Anthropic supports streaming)
+        """
+        return True

@@ -1,20 +1,22 @@
 """OpenAI provider implementation for AgentiCraft."""
 
+import asyncio
 import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, AsyncIterator, Dict, List, Optional, Union
 
 from ..core.config import settings
 from ..core.exceptions import ProviderError, ProviderAuthError
 from ..core.provider import BaseProvider
+from ..core.streaming import StreamingProvider, StreamChunk, StreamInterruptedError
 from ..core.types import CompletionResponse, Message, ToolCall, ToolDefinition
 
 logger = logging.getLogger(__name__)
 
 
-class OpenAIProvider(BaseProvider):
-    """Provider for OpenAI models (GPT-4, GPT-3.5, etc.)."""
+class OpenAIProvider(BaseProvider, StreamingProvider):
+    """Provider for OpenAI models (GPT-4, GPT-3.5, etc.) with streaming support."""
     
     def __init__(self, **kwargs):
         """Initialize OpenAI provider."""
@@ -164,3 +166,149 @@ class OpenAIProvider(BaseProvider):
             else:
                 raise ValueError(f"Invalid message type: {type(msg)}")
         return formatted
+    
+    async def stream(
+        self,
+        messages: Union[List[Message], List[Dict[str, Any]]],
+        model: Optional[str] = None,
+        tools: Optional[Union[List[ToolDefinition], List[Dict[str, Any]]]] = None,
+        tool_choice: Optional[Any] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        **kwargs: Any
+    ) -> AsyncIterator[StreamChunk]:
+        """Stream completion from OpenAI.
+        
+        Args:
+            messages: List of messages
+            model: Model to use (defaults to instance model)
+            tools: Optional tools for the model to use
+            tool_choice: How to handle tool selection
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens to generate
+            **kwargs: Additional OpenAI-specific parameters
+            
+        Yields:
+            StreamChunk: Individual chunks of the response
+            
+        Raises:
+            StreamInterruptedError: If the stream is interrupted
+            ProviderError: If the provider encounters an error
+        """
+        try:
+            # Remove model from kwargs to avoid duplication
+            kwargs.pop('model', None)
+            
+            # Use provided model or default
+            actual_model = model or self.model
+            
+            # Format messages
+            formatted_messages = self._format_messages(messages)
+            
+            # Prepare request parameters
+            request_params = {
+                "model": actual_model,
+                "messages": formatted_messages,
+                "temperature": temperature,
+                "stream": True,  # Enable streaming
+                **kwargs
+            }
+            
+            if max_tokens:
+                request_params["max_tokens"] = max_tokens
+            
+            # Add tools if provided
+            if tools:
+                # Handle both ToolDefinition objects and raw dicts
+                if tools and isinstance(tools[0], dict):
+                    request_params["tools"] = tools
+                else:
+                    request_params["tools"] = [tool.to_openai_schema() for tool in tools]
+                request_params["tool_choice"] = tool_choice if tool_choice is not None else "auto"
+            
+            # Make streaming request
+            stream = await self.client.chat.completions.create(**request_params)
+            
+            # Process stream
+            accumulated_content = ""
+            accumulated_tool_calls = {}
+            
+            try:
+                async for chunk in stream:
+                    if not chunk.choices:
+                        continue
+                        
+                    choice = chunk.choices[0]
+                    
+                    # Handle content chunks
+                    if choice.delta and choice.delta.content:
+                        content = choice.delta.content
+                        accumulated_content += content
+                        
+                        yield StreamChunk(
+                            content=content,
+                            token=content,  # For OpenAI, content is the token
+                            metadata={
+                                "model": actual_model,
+                                "index": choice.index
+                            }
+                        )
+                    
+                    # Handle tool call chunks
+                    if hasattr(choice.delta, "tool_calls") and choice.delta.tool_calls:
+                        for tc in choice.delta.tool_calls:
+                            if tc.id not in accumulated_tool_calls:
+                                accumulated_tool_calls[tc.id] = {
+                                    "id": tc.id,
+                                    "name": tc.function.name if tc.function else "",
+                                    "arguments": ""
+                                }
+                            
+                            if tc.function and tc.function.arguments:
+                                accumulated_tool_calls[tc.id]["arguments"] += tc.function.arguments
+                    
+                    # Check if this is the final chunk
+                    if choice.finish_reason:
+                        # Parse accumulated tool calls
+                        tool_calls = []
+                        for tc_data in accumulated_tool_calls.values():
+                            try:
+                                args = json.loads(tc_data["arguments"])
+                                tool_calls.append(ToolCall(
+                                    id=tc_data["id"],
+                                    name=tc_data["name"],
+                                    arguments=args
+                                ))
+                            except json.JSONDecodeError:
+                                logger.warning(f"Failed to parse tool arguments")
+                        
+                        # Yield final chunk with metadata
+                        yield StreamChunk(
+                            content="",
+                            is_final=True,
+                            metadata={
+                                "model": actual_model,
+                                "finish_reason": choice.finish_reason,
+                                "tool_calls": [tc.model_dump() for tc in tool_calls] if tool_calls else None,
+                                "total_content": accumulated_content
+                            }
+                        )
+                        
+            except asyncio.CancelledError:
+                raise StreamInterruptedError(
+                    "OpenAI stream was interrupted",
+                    partial_response=accumulated_content
+                )
+                
+        except Exception as e:
+            if isinstance(e, StreamInterruptedError):
+                raise
+            raise ProviderError(f"OpenAI streaming failed: {e}") from e
+    
+    def supports_streaming(self) -> bool:
+        """Check if this provider supports streaming.
+        
+        Returns:
+            bool: True (OpenAI supports streaming)
+        """
+        return True

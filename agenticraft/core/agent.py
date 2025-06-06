@@ -25,7 +25,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, AsyncIterator, Dict, List, Optional, Type, Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -35,6 +35,7 @@ from .exceptions import ProviderError, AgentError, ToolExecutionError
 from .memory import BaseMemory, MemoryStore
 from .provider import BaseProvider, ProviderFactory
 from .reasoning import BaseReasoning, ReasoningTrace, SimpleReasoning
+from .streaming import StreamChunk, StreamingResponse, StreamInterruptedError
 from .tool import BaseTool, ToolRegistry
 from .types import Message, MessageRole, ToolCall, ToolResult
 
@@ -394,6 +395,171 @@ class Agent:
             logger.error(f"Agent execution failed: {e}")
             raise AgentError(f"Agent execution failed: {e}") from e
     
+    async def stream(
+        self,
+        prompt: str,
+        context: Optional[Dict[str, Any]] = None,
+        **kwargs: Any
+    ) -> AsyncIterator[StreamChunk]:
+        """Stream the agent's response token by token.
+        
+        This method provides real-time streaming of responses, allowing for
+        better user experience with long responses.
+        
+        Args:
+            prompt: The user's prompt/question
+            context: Optional context to provide to the agent
+            **kwargs: Additional arguments passed to the LLM
+            
+        Yields:
+            StreamChunk: Individual chunks of the response
+            
+        Raises:
+            StreamInterruptedError: If the stream is interrupted
+            ProviderError: If the provider doesn't support streaming
+            
+        Example:
+            Basic streaming::
+            
+                async for chunk in agent.stream("Tell me a story"):
+                    print(chunk.content, end="", flush=True)
+                    
+            With interruption handling::
+            
+                try:
+                    async for chunk in agent.stream("Long response"):
+                        print(chunk.content, end="")
+                        if some_condition:
+                            break
+                except StreamInterruptedError as e:
+                    print(f"Stream interrupted: {e.partial_response}")
+        """
+        # Check if provider supports streaming
+        if not hasattr(self.provider, 'stream'):
+            raise ProviderError(
+                f"Provider {self.provider.__class__.__name__} does not support streaming. "
+                f"Use run() or arun() instead."
+            )
+        
+        try:
+            # Start reasoning
+            reasoning_trace = self._reasoning.start_trace(prompt)
+            
+            # Add user message
+            user_message = Message(
+                role=MessageRole.USER,
+                content=prompt,
+                metadata={"context": context} if context else {}
+            )
+            self._messages.append(user_message)
+            
+            # Get memory context
+            memory_context = await self._memory_store.get_context(
+                query=prompt,
+                max_items=10
+            )
+            
+            # Build conversation
+            messages = self._build_messages(memory_context, context)
+            
+            # Get available tools
+            tools_schema = self._tool_registry.get_tools_schema()
+            
+            # Track streaming
+            reasoning_trace.add_step("streaming_start", {
+                "model": self.config.model,
+                "temperature": self.config.temperature,
+                "streaming": True
+            })
+            
+            # Stream from provider
+            accumulated_content = ""
+            accumulated_tool_calls = []
+            
+            async for chunk in self.provider.stream(
+                messages=messages,
+                tools=tools_schema if tools_schema else None,
+                temperature=self.config.temperature,
+                max_tokens=self.config.max_tokens,
+                **kwargs
+            ):
+                # Yield content chunks
+                if chunk.content:
+                    accumulated_content += chunk.content
+                    yield chunk
+                
+                # Handle final chunk with metadata
+                if chunk.is_final and chunk.metadata:
+                    # Extract tool calls if any
+                    if "tool_calls" in chunk.metadata and chunk.metadata["tool_calls"]:
+                        # Process tool calls
+                        tool_calls = [
+                            ToolCall(**tc) for tc in chunk.metadata["tool_calls"]
+                        ]
+                        
+                        # Execute tools
+                        tool_results = await self._execute_tools(
+                            tool_calls,
+                            reasoning_trace
+                        )
+                        
+                        if tool_results:
+                            # Add tool message
+                            tool_message = Message(
+                                role=MessageRole.ASSISTANT,
+                                content=accumulated_content,
+                                tool_calls=[tc.model_dump() for tc in tool_calls]
+                            )
+                            self._messages.append(tool_message)
+                            
+                            # Add tool results to messages
+                            for result in tool_results:
+                                result_message = Message(
+                                    role=MessageRole.TOOL,
+                                    content=json.dumps(result.result),
+                                    metadata={"tool_call_id": result.tool_call_id}
+                                )
+                                messages.append(result_message.to_dict())
+                            
+                            # Stream final response after tool execution
+                            accumulated_content = ""
+                            async for final_chunk in self.provider.stream(
+                                messages=messages,
+                                temperature=self.config.temperature,
+                                max_tokens=self.config.max_tokens,
+                                **kwargs
+                            ):
+                                if final_chunk.content:
+                                    accumulated_content += final_chunk.content
+                                yield final_chunk
+            
+            # Add assistant message
+            assistant_message = Message(
+                role=MessageRole.ASSISTANT,
+                content=accumulated_content,
+                metadata={"streamed": True}
+            )
+            self._messages.append(assistant_message)
+            
+            # Store in memory
+            await self._memory_store.store(
+                user_message=user_message,
+                assistant_message=assistant_message
+            )
+            
+            # Complete reasoning
+            reasoning_trace.complete({
+                "response": accumulated_content,
+                "streamed": True
+            })
+            
+        except StreamInterruptedError:
+            # Re-raise stream interruptions
+            raise
+        except Exception as e:
+            logger.error(f"Agent streaming failed: {e}")
+            raise AgentError(f"Agent streaming failed: {e}") from e
+    
     def _build_messages(
         self,
         memory_context: List[Message],
@@ -621,7 +787,7 @@ class Agent:
         return {
             "provider": provider_name,
             "model": self.config.model,
-            "supports_streaming": hasattr(provider, 'stream'),
+            "supports_streaming": hasattr(provider, 'stream') and hasattr(provider, 'supports_streaming') and provider.supports_streaming(),
             "supports_tools": True,  # All providers support tools via adaptation
             "timeout": self.config.timeout,
             "max_retries": self.config.max_retries,

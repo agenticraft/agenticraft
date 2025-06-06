@@ -21,18 +21,19 @@ Example:
 import asyncio
 import json
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, AsyncIterator, Dict, List, Optional, Union
 
 import httpx
 
 from ..core.config import settings
 from ..core.exceptions import ProviderError
 from ..core.provider import BaseProvider
+from ..core.streaming import StreamingProvider, StreamChunk, StreamInterruptedError
 from ..core.types import CompletionResponse, Message, ToolCall, ToolDefinition
 
 
-class OllamaProvider(BaseProvider):
-    """Provider for local Ollama models.
+class OllamaProvider(BaseProvider, StreamingProvider):
+    """Provider for local Ollama models with streaming support.
     
     Ollama allows running open-source LLMs locally. This provider
     supports all Ollama features including streaming, custom models,
@@ -322,6 +323,167 @@ class OllamaProvider(BaseProvider):
         )
         
         return "\n".join(tool_descriptions)
+    
+    async def stream(
+        self,
+        messages: Union[List[Message], List[Dict[str, Any]]],
+        model: Optional[str] = None,
+        tools: Optional[Union[List[ToolDefinition], List[Dict[str, Any]]]] = None,
+        tool_choice: Optional[Any] = None,
+        temperature: float = 0.7,
+        max_tokens: Optional[int] = None,
+        **kwargs: Any
+    ) -> AsyncIterator[StreamChunk]:
+        """Stream completion from Ollama.
+        
+        Args:
+            messages: List of messages
+            model: Model to use (defaults to instance model)
+            tools: Optional tools (included in prompt)
+            tool_choice: Tool choice strategy (not used)
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens to generate
+            **kwargs: Additional Ollama parameters
+            
+        Yields:
+            StreamChunk: Individual chunks of the response
+            
+        Raises:
+            StreamInterruptedError: If the stream is interrupted
+            ProviderError: If the provider encounters an error
+        """
+        try:
+            # Use provided model or default
+            actual_model = model or self.model
+            if actual_model.startswith('ollama/'):
+                actual_model = actual_model[7:]
+            
+            # Format messages for Ollama
+            formatted_messages = self._format_messages(messages)
+            
+            # Prepare request body
+            request_body = {
+                "model": actual_model,
+                "messages": formatted_messages,
+                "stream": True,  # Enable streaming
+                "options": {
+                    "temperature": temperature,
+                }
+            }
+            
+            # Add max_tokens as num_predict in Ollama
+            if max_tokens:
+                request_body["options"]["num_predict"] = max_tokens
+            
+            # Add any additional options
+            for key, value in kwargs.items():
+                if key not in ["model", "messages", "stream"]:
+                    request_body["options"][key] = value
+            
+            # Include tools in system prompt if provided
+            if tools:
+                tool_description = self._format_tools_as_text(tools)
+                if formatted_messages and formatted_messages[0]["role"] == "system":
+                    formatted_messages[0]["content"] += f"\n\n{tool_description}"
+                else:
+                    formatted_messages.insert(0, {
+                        "role": "system",
+                        "content": tool_description
+                    })
+            
+            # Make streaming request
+            accumulated_content = ""
+            
+            try:
+                async with self._client.stream(
+                    "POST",
+                    "/api/chat",
+                    json=request_body
+                ) as response:
+                    response.raise_for_status()
+                    
+                    # Process stream
+                    async for line in response.aiter_lines():
+                        if not line:
+                            continue
+                        
+                        try:
+                            # Parse JSON response
+                            data = json.loads(line)
+                            
+                            # Extract message content
+                            message = data.get("message", {})
+                            content = message.get("content", "")
+                            
+                            if content:
+                                accumulated_content += content
+                                
+                                # Yield content chunk
+                                yield StreamChunk(
+                                    content=content,
+                                    token=content,
+                                    metadata={
+                                        "model": actual_model,
+                                        "eval_count": data.get("eval_count")
+                                    }
+                                )
+                            
+                            # Check if this is the final message
+                            if data.get("done", False):
+                                # Extract final metadata
+                                metadata = {
+                                    "model": actual_model,
+                                    "total_duration": data.get("total_duration"),
+                                    "load_duration": data.get("load_duration"),
+                                    "eval_duration": data.get("eval_duration"),
+                                    "eval_count": data.get("eval_count"),
+                                    "prompt_eval_count": data.get("prompt_eval_count"),
+                                    "total_content": accumulated_content
+                                }
+                                
+                                # Yield final chunk
+                                yield StreamChunk(
+                                    content="",
+                                    is_final=True,
+                                    metadata=metadata
+                                )
+                                break
+                                
+                        except json.JSONDecodeError:
+                            # Skip malformed JSON lines
+                            continue
+                            
+            except asyncio.CancelledError:
+                raise StreamInterruptedError(
+                    "Ollama stream was interrupted",
+                    partial_response=accumulated_content
+                )
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 404:
+                    raise ProviderError(
+                        f"Model '{actual_model}' not found. "
+                        f"Try: ollama pull {actual_model}"
+                    )
+                else:
+                    raise ProviderError(f"Ollama streaming error: {e}")
+            except httpx.ConnectError:
+                raise ProviderError(
+                    f"Cannot connect to Ollama at {self.base_url}. "
+                    "Is Ollama running? Start with: ollama serve"
+                )
+                
+        except Exception as e:
+            if isinstance(e, (StreamInterruptedError, ProviderError)):
+                raise
+            raise ProviderError(f"Ollama streaming failed: {e}") from e
+    
+    def supports_streaming(self) -> bool:
+        """Check if this provider supports streaming.
+        
+        Returns:
+            bool: True (Ollama supports streaming)
+        """
+        return True
     
     async def __aenter__(self):
         """Async context manager entry."""
