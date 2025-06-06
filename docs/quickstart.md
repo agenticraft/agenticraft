@@ -173,18 +173,17 @@ You've learned the basics! Here's what to explore next:
 
 ### Learn More
 - [Core Concepts](concepts/agents.md) - Understand how agents work
-- [Building Tools](guides/creating-tools.md) - Create powerful agent capabilities
-- [Designing Workflows](guides/designing-workflows.md) - Build complex systems
+- [Building Tools](concepts/tools.md) - Create powerful agent capabilities  
+- [Designing Workflows](concepts/workflows.md) - Build complex systems
 
 ### See Examples
-- [Chatbot Example](examples/chatbot.md) - Build a full conversational agent
-- [Data Pipeline](examples/data-pipeline.md) - Process data with agent workflows
-- [MCP Integration](examples/mcp-tools.md) - Use Model Context Protocol tools
+- [Hello World](examples/hello-world.md) - Simple agent examples
+- [Provider Switching](examples/provider-switching.md) - Dynamic provider usage
+- [Advanced Agents](examples/advanced-agents.md) - ReasoningAgent and WorkflowAgent
 
 ### Production Ready
-- [Observability Guide](guides/observability.md) - Monitor your agents
-- [Production Templates](templates/index.md) - Start from proven patterns
-- [Best Practices](guides/production.md) - Deploy with confidence
+- [Performance Tuning](guides/performance-tuning.md) - Optimize your agents
+- [Best Practices](features/provider_switching.md) - Use providers effectively
 
 ## Quick Tips
 
@@ -214,7 +213,7 @@ You've learned the basics! Here's what to explore next:
 
 - 💬 [Join our Discord](https://discord.gg/agenticraft)
 - 🐛 [Report issues on GitHub](https://github.com/agenticraft/agenticraft/issues)
-- 📚 [Read the full documentation](/)
+- 📚 [Read the full documentation](index.md)
 
 ---
 

@@ -1,6 +1,6 @@
-site_name: AgentiCraft Documentation
-site_url: https://docs.agenticraft.ai
-site_description: Production-ready AI agent framework documentation
+site_name: AgentiCraft
+site_url: https://agenticraft.github.io/agenticraft/
+site_description: Production-ready AI agent framework with dynamic provider switching
 site_author: AgentiCraft Team
 
 repo_name: agenticraft/agenticraft
@@ -11,9 +11,8 @@ copyright: Copyright &copy; 2025 AgentiCraft Team
 
 theme:
   name: material
-  # custom_dir: docs/overrides  # Uncomment when custom overrides are needed
-  # logo: assets/logo.png  # Uncomment when logo is added
-  # favicon: assets/favicon.png  # Uncomment when favicon is added
+  logo: assets/logo/vector/default-monochrome-white.svg
+  favicon: assets/logo/profile.png
   
   palette:
     # Light mode
@@ -37,11 +36,9 @@ theme:
     - navigation.instant
     - navigation.tracking
     - navigation.tabs
-    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.path
-    - navigation.indexes
     - navigation.top
     - navigation.footer
     - toc.follow
@@ -53,66 +50,29 @@ theme:
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
-    - content.tooltips
     - content.action.edit
-    - content.action.view
 
 plugins:
   - search:
       separator: '[\s\-\.]+'
-  - mkdocstrings:
-      default_handler: python
-      handlers:
-        python:
-          paths: [.]
-          options:
-            docstring_style: google
-            show_source: true
-            show_symbol_type_heading: true
-            show_symbol_type_toc: true
-            show_root_full_path: false
-            show_root_heading: true
-            show_object_full_path: false
-            members_order: source
-            heading_level: 2
-  - gen-files:
-      scripts:
-        - docs/gen_ref_pages.py
-  - literate-nav:
-      nav_file: SUMMARY.md
-  - section-index
-  - autorefs
 
 markdown_extensions:
-  - abbr
   - admonition
   - attr_list
   - def_list
   - footnotes
-  - md_in_html
   - tables
   - toc:
       permalink: true
       toc_depth: 3
-  - pymdownx.arithmatex:
-      generic: true
-  - pymdownx.betterem:
-      smart_enable: all
-  - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
-      line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.keys
-  - pymdownx.mark
-  - pymdownx.smartsymbols
-  - pymdownx.snippets:
-      check_paths: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -122,11 +82,8 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.tasklist:
       custom_checkbox: true
-  - pymdownx.tilde
 
 extra:
-  version:
-    provider: mike
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/agenticraft
@@ -134,65 +91,50 @@ extra:
       link: https://discord.gg/agenticraft
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/agenticraft
-  analytics:
-    provider: google
-    property: G-XXXXXXXXXX
-
-# extra_css:
-#   - stylesheets/extra.css
-
-# extra_javascript:
-#   - javascripts/mathjax.js
-#   - https://polyfill.io/v3/polyfill.min.js?features=es6
-#   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 nav:
-  - Home:
-    - index.md
-    - quickstart.md
-    - philosophy.md
+  - Home: index.md
   - Getting Started:
-    - getting-started/installation.md
-    - getting-started/configuration.md
-    - getting-started/first-agent.md
+    - Installation: getting-started/installation.md
+    - Quick Start: quickstart.md
+    - Configuration: getting-started/configuration.md
+    - Your First Agent: getting-started/first-agent.md
+
   - Core Concepts:
-    - concepts/agents.md
-    - concepts/tools.md
-    - concepts/workflows.md
-    - concepts/memory.md
-    - concepts/reasoning.md
-  - Guides:
-    - guides/building-agents.md
-    - guides/creating-tools.md
-    - guides/designing-workflows.md
-    - guides/mcp-integration.md
-    - guides/observability.md
-    - guides/production.md
-  - API Reference:
-    - reference/index.md
-    - reference/agent.md
-    - reference/tool.md
-    - reference/workflow.md
-    - reference/memory.md
-    - reference/providers.md
+    - Philosophy: philosophy.md
+    - Agents: concepts/agents.md
+    - Tools: concepts/tools.md
+    - Workflows: concepts/workflows.md
+    - Memory: concepts/memory.md
+    - Reasoning: concepts/reasoning.md
+
+  - Features:
+    - Provider Switching: features/provider_switching.md
+    - Advanced Agents: features/advanced_agents.md
+    - MCP Integration: features/mcp_integration.md
+
   - Examples:
-    - examples/index.md
-    - examples/hello-world.md
-    - examples/chatbot.md
-    - examples/data-pipeline.md
-    - examples/mcp-tools.md
+    - Overview: examples/index.md
+    - Hello World: examples/hello-world.md
+    - Provider Switching: examples/provider-switching.md
+    - Advanced Agents: examples/advanced-agents.md
+    - Real-World Apps: examples/real-world.md
+
+  - API Reference:
+    - Overview: reference/index.md
+    - Agent: reference/agent.md
+    - Tool: reference/tool.md
+    - Workflow: reference/workflow.md
+    - Providers:
+      - OpenAI: reference/providers/openai.md
+      - Anthropic: reference/providers/anthropic.md
+      - Ollama: reference/providers/ollama.md
+    - v0.1.1 Summary: reference/api-v0.1.1.md
+
+  - Guides:
+    - Performance Tuning: guides/performance-tuning.md
+
   - Plugins:
-    - plugins/index.md
-    - plugins/creating-plugins.md
-    - plugins/available-plugins.md
-  - Templates:
-    - templates/index.md
-    - templates/support-agent.md
-    - templates/data-analyst.md
-    - templates/content-generator.md
-  - Contributing:
-    - contributing/index.md
-    - contributing/development.md
-    - contributing/testing.md
-    - contributing/documentation.md
+    - Creating Plugins: plugins/creating-plugins.md
+
   - Changelog: changelog.md

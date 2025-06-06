@@ -476,12 +476,12 @@ agenticraft plugin install ./my-plugin
 
 ## Examples
 
-See the `examples/plugins/` directory for complete examples:
+Plugin examples demonstrate common patterns:
 
-- `weather_plugin.py` - Basic tool plugin
-- `research_plugin.py` - Agent plugin
-- `telemetry_plugin.py` - Monitoring integration
-- `composite_plugin.py` - Full-featured plugin
+- **Weather Plugin** - Basic tool plugin for weather data
+- **Research Plugin** - Agent plugin for research capabilities
+- **Telemetry Plugin** - Monitoring and metrics integration
+- **Composite Plugin** - Full-featured plugin with tools, agents, and providers
 
 ## Plugin Discovery
 
@@ -545,7 +545,7 @@ AgentiCraft supports both. Use async when possible for better performance.
 
 ## Getting Help
 
-- Check the [examples](../examples/plugins/)
+- Check plugin examples in the repository
 - Join our [Discord](https://discord.gg/agenticraft)
 - Open an [issue](https://github.com/agenticraft/agenticraft/issues)
-- Read the [API docs](api/plugins.md)
+- Read the [API Reference](../reference/index.md)

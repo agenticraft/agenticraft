@@ -1,61 +1,138 @@
 # API Reference
 
-Welcome to the AgentiCraft API Reference. This documentation covers all public APIs in v0.1.1.
+Complete API documentation for AgentiCraft v0.1.1.
 
-## Quick Links
+## Core APIs
 
-- [Complete API Reference v0.1.1](api-v0.1.1.md) - Detailed API documentation
-- [Core Classes](#core-classes) - Agent, ReasoningAgent, WorkflowAgent
-- [Tools](#tools) - Tool decorators and base classes
-- [Providers](#providers) - LLM provider configuration
-- [Memory](#memory) - Memory implementations
-- [Workflows](#workflows) - Workflow system
-
-## Core Classes
-
-### Agents
-- [`Agent`](api-v0.1.1.md#agent) - Base agent class
-- [`ReasoningAgent`](api-v0.1.1.md#reasoningagent-new-in-v011) - Step-by-step reasoning (v0.1.1)
-- [`WorkflowAgent`](api-v0.1.1.md#workflowagent-new-in-v011) - Multi-step workflows (v0.1.1)
-
-### Tools
-- [`@tool`](api-v0.1.1.md#tool-decorator) - Tool decorator
-- [`BaseTool`](api-v0.1.1.md#basetool) - Base tool class
-
-### Workflows
-- [`Workflow`](api-v0.1.1.md#workflow) - Workflow definition
-- [`WorkflowStep`](api-v0.1.1.md#workflowstep-v011) - Step configuration
-
-### Memory
-- [`ConversationMemory`](api-v0.1.1.md#conversationmemory) - Short-term memory
-- [`KnowledgeMemory`](api-v0.1.1.md#knowledgememory) - Long-term storage
-
-### Providers
-- [Provider Configuration](api-v0.1.1.md#provider-configuration) - Setup guide
-- [Provider Factory](api-v0.1.1.md#provider-factory-v011) - Dynamic provider creation
-
-## What's New in v0.1.1
-
-- **Dynamic Provider Switching** - Change providers at runtime with `agent.set_provider()`
-- **ReasoningAgent** - New agent type for transparent reasoning
-- **WorkflowAgent** - New agent type for complex workflows
-- **Anthropic Provider** - Full Claude 3 support
-- **Ollama Provider** - Local model support
-- **Provider Auto-detection** - Automatic provider selection from model names
-
-## Getting Started
+### [Agent](agent.md)
+The foundation of AgentiCraft - create intelligent agents with tools, memory, and provider flexibility.
 
 ```python
-from agenticraft import Agent, ReasoningAgent, WorkflowAgent
+from agenticraft import Agent
 
-# Basic agent
 agent = Agent(name="Assistant", model="gpt-4")
-
-# Reasoning agent
-reasoner = ReasoningAgent(name="ProblemSolver")
-
-# Workflow agent
-workflow_agent = WorkflowAgent(name="Processor")
+response = agent.run("Hello!")
 ```
 
-For more examples, see the [Examples Directory](../../examples/).
+### [ReasoningAgent](agent.md#reasoningagent)
+Transparent reasoning with step-by-step thought processes.
+
+```python
+from agenticraft import ReasoningAgent
+
+agent = ReasoningAgent(name="Thinker", model="gpt-4")
+response = agent.run("Solve this problem...")
+# Access reasoning: response.reasoning
+```
+
+### [WorkflowAgent](workflow.md#workflowagent)
+Execute complex multi-step workflows with parallel processing.
+
+```python
+from agenticraft import WorkflowAgent, Step
+
+agent = WorkflowAgent(name="Processor", model="gpt-4")
+response = agent.run_workflow(prompt, workflow=[...])
+```
+
+## Provider APIs
+
+### [OpenAI](providers/openai.md)
+- GPT-4, GPT-3.5-Turbo
+- Function calling
+- Streaming support
+
+### [Anthropic](providers/anthropic.md)
+- Claude 3 (Opus, Sonnet, Haiku)
+- Large context windows
+- Constitutional AI
+
+### [Ollama](providers/ollama.md)
+- Local models (Llama2, Mistral, CodeLlama)
+- Privacy-first
+- No API costs
+
+## Tool System
+
+### [@tool Decorator](tool.md#tool-decorator)
+Create tools with a simple decorator:
+
+```python
+@tool
+def search(query: str) -> str:
+    """Search the web."""
+    return results
+```
+
+### [Tool Class](tool.md#tool-class)
+Advanced tool configuration:
+
+```python
+tool = Tool(
+    name="search",
+    description="Search the web",
+    function=search_function
+)
+```
+
+## Configuration
+
+### AgentConfig
+Configure agents with type-safe dataclasses:
+
+```python
+config = AgentConfig(
+    name="Bot",
+    model="gpt-4",
+    provider="openai",
+    temperature=0.7
+)
+```
+
+## Quick Reference
+
+### Provider Switching
+```python
+# Runtime provider changes
+agent.set_provider("anthropic", model="claude-3-opus-20240229")
+
+# Get current provider
+info = agent.get_provider_info()
+
+# List available providers
+providers = agent.list_available_providers()
+```
+
+### Memory
+```python
+# Enable conversation memory
+agent = Agent(name="MemBot", memory_enabled=True)
+
+# Access memory
+history = agent.memory.get_history()
+```
+
+### Error Handling
+```python
+from agenticraft import ProviderError, ToolError
+
+try:
+    response = agent.run(prompt)
+except ProviderError as e:
+    # Handle provider issues
+    agent.set_provider("ollama", model="llama2")
+except ToolError as e:
+    # Handle tool failures
+    pass
+```
+
+## Complete Examples
+
+See the [Examples](../examples/index.md) section for complete working code:
+- [Basic usage](../examples/hello-world.md)
+- [Provider switching](../examples/provider-switching.md)
+- [Advanced agents](../examples/advanced-agents.md)
+
+## API Versioning
+
+This documentation covers AgentiCraft v0.1.1. For detailed changes, see the [Changelog](../changelog.md).
