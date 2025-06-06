@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Production-ready AI agent framework documentation">
+        <meta name="description" content="Production-ready AI agent framework with dynamic provider switching">
       
       
         <meta name="author" content="AgentiCraft Team">
@@ -15,19 +15,19 @@
       
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+      <link rel="icon" href="/agenticraft/assets/logo/profile.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
     
     
       
-        <title>AgentiCraft Documentation</title>
+        <title>AgentiCraft</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.342714a4.min.css">
+      <link rel="stylesheet" href="/agenticraft/assets/stylesheets/main.342714a4.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="/agenticraft/assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -46,21 +46,9 @@
       
     
     
-      <link rel="stylesheet" href="/assets/_mkdocstrings.css">
-    
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("/agenticraft/",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
-  
-
-
-  
-  
-
-<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-XXXXXXXXXX"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-XXXXXXXXXX",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
-  
-    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
-  
 
     
     
@@ -88,21 +76,14 @@
       
     </div>
     
-      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
-        
-      </div>
-    
     
       
 
-  
-
-<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="AgentiCraft Documentation" class="md-header__button md-logo" aria-label="AgentiCraft Documentation" data-md-component="logo">
+    <a href="/agenticraft/." title="AgentiCraft" class="md-header__button md-logo" aria-label="AgentiCraft" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="/agenticraft/assets/logo/vector/default-monochrome-white.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -113,7 +94,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            AgentiCraft Documentation
+            AgentiCraft
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -219,8 +200,14 @@
     
   </nav>
   
+</header>
     
+    <div class="md-container" data-md-component="container">
       
+      
+        
+          
+            
 <nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
@@ -230,20 +217,17 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="/." class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href="/agenticraft/." class="md-tabs__link">
+        
   
   
     
   
   Home
 
-        </a>
-      </li>
-    
+      </a>
+    </li>
   
 
       
@@ -252,36 +236,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="/getting-started/installation/" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="/agenticraft/getting-started/installation/" class="md-tabs__link">
+          
+  
   
   Getting Started
 
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="/concepts/agents/" class="md-tabs__link">
-        
-  
-  
+        </a>
+      </li>
     
-  
-  Core Concepts
-
-      </a>
-    </li>
   
 
       
@@ -293,13 +259,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="/guides/building-agents.md" class="md-tabs__link">
+        <a href="/agenticraft/philosophy/" class="md-tabs__link">
           
   
   
-    
-  
-  Guides
+  Core Concepts
 
         </a>
       </li>
@@ -312,17 +276,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="/reference/" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="/agenticraft/features/provider_switching/" class="md-tabs__link">
+          
   
-  API Reference
+  
+  Features
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -334,11 +299,9 @@
     
     
       <li class="md-tabs__item">
-        <a href="/examples/index.md" class="md-tabs__link">
+        <a href="/agenticraft/examples/" class="md-tabs__link">
           
   
-  
-    
   
   Examples
 
@@ -356,11 +319,49 @@
     
     
       <li class="md-tabs__item">
-        <a href="/plugins/index.md" class="md-tabs__link">
+        <a href="/agenticraft/reference/" class="md-tabs__link">
           
   
   
+  API Reference
+
+        </a>
+      </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="/agenticraft/guides/performance-tuning/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="/agenticraft/plugins/creating-plugins/" class="md-tabs__link">
+          
+  
   
   Plugins
 
@@ -375,52 +376,8 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="/templates/index.md" class="md-tabs__link">
-          
-  
-  
-    
-  
-  Templates
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="/contributing/index.md" class="md-tabs__link">
-          
-  
-  
-    
-  
-  Contributing
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
     <li class="md-tabs__item">
-      <a href="/changelog/" class="md-tabs__link">
+      <a href="/agenticraft/changelog/" class="md-tabs__link">
         
   
   
@@ -436,13 +393,7 @@
     </ul>
   </div>
 </nav>
-    
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -463,13 +414,12 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="AgentiCraft Documentation" class="md-nav__button md-logo" aria-label="AgentiCraft Documentation" data-md-component="logo">
+    <a href="/agenticraft/." title="AgentiCraft" class="md-nav__button md-logo" aria-label="AgentiCraft" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="/agenticraft/assets/logo/vector/default-monochrome-white.svg" alt="logo">
 
     </a>
-    AgentiCraft Documentation
+    AgentiCraft
   </label>
   
     <div class="md-nav__source">
@@ -492,38 +442,9 @@
   
   
   
-    
-    
-      
+    <li class="md-nav__item">
+      <a href="/agenticraft/." class="md-nav__link">
         
-          
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="/." class="md-nav__link ">
-              
   
   
   <span class="md-ellipsis">
@@ -532,76 +453,10 @@
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1">
-            <span class="md-nav__icon md-icon"></span>
-            Home
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/quickstart/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    5-Minute Quickstart
-    
-  </span>
-  
-
       </a>
     </li>
   
 
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/philosophy/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Philosophy
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
     
       
       
@@ -610,12 +465,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
     
     
     
@@ -634,9 +483,8 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
         
           
-          <div class="md-nav__link md-nav__container">
-            <a href="/getting-started/installation/" class="md-nav__link ">
-              
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -645,14 +493,8 @@
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
@@ -668,12 +510,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/getting-started/configuration.md" class="md-nav__link">
+      <a href="/agenticraft/getting-started/installation/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Installation
     
   </span>
   
@@ -691,12 +533,58 @@
   
   
     <li class="md-nav__item">
-      <a href="/getting-started/first-agent.md" class="md-nav__link">
+      <a href="/agenticraft/quickstart/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/agenticraft/getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/agenticraft/getting-started/first-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Your First Agent
     
   </span>
   
@@ -721,16 +609,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -749,9 +627,8 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
         
           
-          <div class="md-nav__link md-nav__container">
-            <a href="/concepts/agents/" class="md-nav__link ">
-              
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -760,14 +637,8 @@
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
@@ -783,12 +654,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/concepts/tools.md" class="md-nav__link">
+      <a href="/agenticraft/philosophy/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Philosophy
     
   </span>
   
@@ -806,12 +677,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/concepts/workflows.md" class="md-nav__link">
+      <a href="/agenticraft/concepts/agents/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Agents
     
   </span>
   
@@ -829,12 +700,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/concepts/memory.md" class="md-nav__link">
+      <a href="/agenticraft/concepts/tools/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Tools
     
   </span>
   
@@ -852,12 +723,58 @@
   
   
     <li class="md-nav__item">
-      <a href="/concepts/reasoning.md" class="md-nav__link">
+      <a href="/agenticraft/concepts/workflows/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Workflows
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/agenticraft/concepts/memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Memory
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/agenticraft/concepts/reasoning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Reasoning
     
   </span>
   
@@ -882,20 +799,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -919,7 +822,7 @@
   
   
   <span class="md-ellipsis">
-    Guides
+    Features
     
   </span>
   
@@ -930,7 +833,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            Guides
+            Features
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -941,12 +844,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/building-agents.md" class="md-nav__link">
+      <a href="/agenticraft/features/provider_switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Provider Switching
     
   </span>
   
@@ -964,12 +867,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/creating-tools.md" class="md-nav__link">
+      <a href="/agenticraft/features/advanced_agents/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Advanced Agents
     
   </span>
   
@@ -987,81 +890,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/guides/designing-workflows.md" class="md-nav__link">
+      <a href="/agenticraft/features/mcp_integration/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/guides/mcp-integration/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    MCP Integration Guide
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/guides/observability.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/guides/production.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
+    MCP Integration
     
   </span>
   
@@ -1086,18 +920,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -1116,30 +938,23 @@
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
-          <div class="md-nav__link md-nav__container">
-            <a href="/reference/" class="md-nav__link ">
-              
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
-    API Reference
+    Examples
     
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
-            API Reference
+            Examples
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1150,12 +965,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/reference/agent.md" class="md-nav__link">
+      <a href="/agenticraft/examples/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Overview
     
   </span>
   
@@ -1173,12 +988,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/reference/tool.md" class="md-nav__link">
+      <a href="/agenticraft/examples/hello-world/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Hello World
     
   </span>
   
@@ -1196,12 +1011,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/reference/workflow.md" class="md-nav__link">
+      <a href="/agenticraft/examples/provider-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Provider Switching
     
   </span>
   
@@ -1219,12 +1034,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/reference/memory.md" class="md-nav__link">
+      <a href="/agenticraft/examples/advanced-agents/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Advanced Agents
     
   </span>
   
@@ -1242,12 +1057,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/reference/providers.md" class="md-nav__link">
+      <a href="/agenticraft/examples/real-world/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Real-World Apps
     
   </span>
   
@@ -1272,18 +1087,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -1307,7 +1110,7 @@
   
   
   <span class="md-ellipsis">
-    Examples
+    API Reference
     
   </span>
   
@@ -1318,7 +1121,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
-            Examples
+            API Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1329,12 +1132,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/index.md" class="md-nav__link">
+      <a href="/agenticraft/reference/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Overview
     
   </span>
   
@@ -1352,12 +1155,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/hello-world.md" class="md-nav__link">
+      <a href="/agenticraft/reference/agent/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Agent
     
   </span>
   
@@ -1375,12 +1178,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/chatbot.md" class="md-nav__link">
+      <a href="/agenticraft/reference/tool/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Tool
     
   </span>
   
@@ -1398,12 +1201,80 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/data-pipeline.md" class="md-nav__link">
+      <a href="/agenticraft/reference/workflow/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Workflow
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Providers
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
+            <span class="md-nav__icon md-icon"></span>
+            Providers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/agenticraft/reference/providers/openai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    OpenAI
     
   </span>
   
@@ -1421,12 +1292,66 @@
   
   
     <li class="md-nav__item">
-      <a href="/examples/mcp-tools.md" class="md-nav__link">
+      <a href="/agenticraft/reference/providers/anthropic/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Anthropic
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/agenticraft/reference/providers/ollama/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ollama
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="/agenticraft/reference/api-v0.1.1/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    v0.1.1 Summary
     
   </span>
   
@@ -1451,14 +1376,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -1482,7 +1399,7 @@
   
   
   <span class="md-ellipsis">
-    Plugins
+    Guides
     
   </span>
   
@@ -1493,7 +1410,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
-            Plugins
+            Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1504,58 +1421,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/plugins/index.md" class="md-nav__link">
+      <a href="/agenticraft/guides/performance-tuning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/plugins/creating-plugins.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/plugins/available-plugins.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
+    Performance Tuning
     
   </span>
   
@@ -1580,16 +1451,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -1613,7 +1474,7 @@
   
   
   <span class="md-ellipsis">
-    Templates
+    Plugins
     
   </span>
   
@@ -1624,7 +1485,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
-            Templates
+            Plugins
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1635,235 +1496,12 @@
   
   
     <li class="md-nav__item">
-      <a href="/templates/index.md" class="md-nav__link">
+      <a href="/agenticraft/plugins/creating-plugins/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/templates/support-agent.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/templates/data-analyst.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/templates/content-generator.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
-        
-          
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Contributing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
-            <span class="md-nav__icon md-icon"></span>
-            Contributing
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/contributing/index.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/contributing/development.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/contributing/testing.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="/contributing/documentation.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
+    Creating Plugins
     
   </span>
   
@@ -1888,7 +1526,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/changelog/" class="md-nav__link">
+      <a href="/agenticraft/changelog/" class="md-nav__link">
         
   
   
@@ -2003,10 +1641,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "/", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share", "header.autohide", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips", "content.action.edit", "content.action.view"], "search": "/assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": "/agenticraft/", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share", "header.autohide", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "/agenticraft/assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="/assets/javascripts/bundle.13a4f30d.min.js"></script>
+      <script src="/agenticraft/assets/javascripts/bundle.13a4f30d.min.js"></script>
       
     
   </body>

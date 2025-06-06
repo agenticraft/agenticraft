@@ -6,27 +6,27 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Production-ready AI agent framework documentation">
+        <meta name="description" content="Production-ready AI agent framework with dynamic provider switching">
       
       
         <meta name="author" content="AgentiCraft Team">
       
       
-        <link rel="canonical" href="https://docs.agenticraft.ai/reference/">
+        <link rel="canonical" href="https://agenticraft.github.io/agenticraft/reference/">
       
       
-        <link rel="prev" href="../guides/mcp-integration/">
+        <link rel="prev" href="../examples/real-world/">
       
       
-        <link rel="next" href="../changelog/">
+        <link rel="next" href="agent/">
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../assets/logo/profile.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
     
     
       
-        <title>API Reference - AgentiCraft Documentation</title>
+        <title>Overview - AgentiCraft</title>
       
     
     
@@ -52,21 +52,9 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
-    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
-  
-
-
-  
-  
-
-<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-XXXXXXXXXX"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-XXXXXXXXXX",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
-  
-    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
-  
 
     
     
@@ -99,21 +87,14 @@
       
     </div>
     
-      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
-        
-      </div>
-    
     
       
 
-  
-
-<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="AgentiCraft Documentation" class="md-header__button md-logo" aria-label="AgentiCraft Documentation" data-md-component="logo">
+    <a href=".." title="AgentiCraft" class="md-header__button md-logo" aria-label="AgentiCraft" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/logo/vector/default-monochrome-white.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -124,13 +105,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            AgentiCraft Documentation
+            AgentiCraft
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              API Reference
+              Overview
             
           </span>
         </div>
@@ -230,8 +211,14 @@
     
   </nav>
   
+</header>
     
+    <div class="md-container" data-md-component="container">
       
+      
+        
+          
+            
 <nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
@@ -241,20 +228,17 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href=".." class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
   
   
     
   
   Home
 
-        </a>
-      </li>
-    
+      </a>
+    </li>
   
 
       
@@ -263,36 +247,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../getting-started/installation/" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/installation/" class="md-tabs__link">
+          
+  
   
   Getting Started
 
-      </a>
-    </li>
-  
-
-      
-        
-  
-  
-  
-  
-    <li class="md-tabs__item">
-      <a href="../concepts/agents/" class="md-tabs__link">
-        
-  
-  
+        </a>
+      </li>
     
-  
-  Core Concepts
-
-      </a>
-    </li>
   
 
       
@@ -304,13 +270,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="../guides/building-agents.md" class="md-tabs__link">
+        <a href="../philosophy/" class="md-tabs__link">
           
   
   
-    
-  
-  Guides
+  Core Concepts
 
         </a>
       </li>
@@ -322,20 +286,19 @@
   
   
   
-    
-  
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
-        
-  
   
     
+    
+      <li class="md-tabs__item">
+        <a href="../features/provider_switching/" class="md-tabs__link">
+          
   
-  API Reference
+  
+  Features
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -347,11 +310,9 @@
     
     
       <li class="md-tabs__item">
-        <a href="../examples/index.md" class="md-tabs__link">
+        <a href="../examples/" class="md-tabs__link">
           
   
-  
-    
   
   Examples
 
@@ -365,61 +326,57 @@
   
   
   
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
   
     
     
       <li class="md-tabs__item">
-        <a href="../plugins/index.md" class="md-tabs__link">
+        <a href="../guides/performance-tuning/" class="md-tabs__link">
           
   
   
+  Guides
+
+        </a>
+      </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../plugins/creating-plugins/" class="md-tabs__link">
+          
+  
   
   Plugins
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../templates/index.md" class="md-tabs__link">
-          
-  
-  
-    
-  
-  Templates
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../contributing/index.md" class="md-tabs__link">
-          
-  
-  
-    
-  
-  Contributing
 
         </a>
       </li>
@@ -449,13 +406,7 @@
     </ul>
   </div>
 </nav>
-    
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -476,13 +427,12 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="AgentiCraft Documentation" class="md-nav__button md-logo" aria-label="AgentiCraft Documentation" data-md-component="logo">
+    <a href=".." title="AgentiCraft" class="md-nav__button md-logo" aria-label="AgentiCraft" data-md-component="logo">
       
-  
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <img src="../assets/logo/vector/default-monochrome-white.svg" alt="logo">
 
     </a>
-    AgentiCraft Documentation
+    AgentiCraft
   </label>
   
     <div class="md-nav__source">
@@ -505,17 +455,29 @@
   
   
   
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
     
+  </span>
+  
+
+      </a>
+    </li>
+  
+
     
       
-        
-          
-        
       
-        
-      
-        
-      
+  
+  
+  
+  
+    
     
     
     
@@ -531,36 +493,50 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
         
           
-          <div class="md-nav__link md-nav__container">
-            <a href=".." class="md-nav__link ">
-              
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
-    Home
+    Getting Started
     
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
-            Home
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Getting Started
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
               
             
               
@@ -575,7 +551,7 @@
   
   
   <span class="md-ellipsis">
-    5-Minute Quickstart
+    Quick Start
     
   </span>
   
@@ -585,6 +561,104 @@
   
 
               
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Configuration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/first-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Your First Agent
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core Concepts
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Core Concepts
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -609,71 +683,6 @@
 
               
             
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../getting-started/installation/" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    Getting Started
-    
-  </span>
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            Getting Started
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
               
                 
   
@@ -681,12 +690,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/configuration.md" class="md-nav__link">
+      <a href="../concepts/agents/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Agents
     
   </span>
   
@@ -704,104 +713,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/first-agent.md" class="md-nav__link">
+      <a href="../concepts/tools/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
-        
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../concepts/agents/" class="md-nav__link ">
-              
-  
-  
-  <span class="md-ellipsis">
-    Core Concepts
-    
-  </span>
-  
-
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            Core Concepts
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../concepts/tools.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
+    Tools
     
   </span>
   
@@ -819,12 +736,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../concepts/workflows.md" class="md-nav__link">
+      <a href="../concepts/workflows/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Workflows
     
   </span>
   
@@ -842,12 +759,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../concepts/memory.md" class="md-nav__link">
+      <a href="../concepts/memory/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Memory
     
   </span>
   
@@ -865,12 +782,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../concepts/reasoning.md" class="md-nav__link">
+      <a href="../concepts/reasoning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Reasoning
     
   </span>
   
@@ -895,20 +812,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -932,7 +835,7 @@
   
   
   <span class="md-ellipsis">
-    Guides
+    Features
     
   </span>
   
@@ -943,7 +846,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
-            Guides
+            Features
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -954,12 +857,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/building-agents.md" class="md-nav__link">
+      <a href="../features/provider_switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Provider Switching
     
   </span>
   
@@ -977,12 +880,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/creating-tools.md" class="md-nav__link">
+      <a href="../features/advanced_agents/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Advanced Agents
     
   </span>
   
@@ -1000,12 +903,87 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/designing-workflows.md" class="md-nav__link">
+      <a href="../features/mcp_integration/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    MCP Integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Examples
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Examples
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
     
   </span>
   
@@ -1023,12 +1001,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/mcp-integration/" class="md-nav__link">
+      <a href="../examples/hello-world/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    MCP Integration Guide
+    Hello World
     
   </span>
   
@@ -1046,12 +1024,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/observability.md" class="md-nav__link">
+      <a href="../examples/provider-switching/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Provider Switching
     
   </span>
   
@@ -1069,12 +1047,35 @@
   
   
     <li class="md-nav__item">
-      <a href="../guides/production.md" class="md-nav__link">
+      <a href="../examples/advanced-agents/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Advanced Agents
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/real-world/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Real-World Apps
     
   </span>
   
@@ -1101,18 +1102,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -1129,12 +1118,11 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <div class="md-nav__link md-nav__container">
-            <a href="./" class="md-nav__link md-nav__link--active">
-              
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
   
   
   <span class="md-ellipsis">
@@ -1143,17 +1131,11 @@
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link md-nav__link--active" for="__nav_5" id="__nav_5_label" tabindex="">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             API Reference
           </label>
@@ -1163,15 +1145,281 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="agent.md" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
-    None
+    Overview
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core APIs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core APIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Agent
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reasoningagent" class="md-nav__link">
+    <span class="md-ellipsis">
+      ReasoningAgent
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflowagent" class="md-nav__link">
+    <span class="md-ellipsis">
+      WorkflowAgent
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#provider-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider APIs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Provider APIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openai" class="md-nav__link">
+    <span class="md-ellipsis">
+      OpenAI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#anthropic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Anthropic
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ollama" class="md-nav__link">
+    <span class="md-ellipsis">
+      Ollama
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tool-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool System
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tool System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-decorator" class="md-nav__link">
+    <span class="md-ellipsis">
+      @tool Decorator
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-class" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Class
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#agentconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      AgentConfig
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider-switching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Provider Switching
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Memory
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Handling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Complete Examples
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Versioning
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Agent
     
   </span>
   
@@ -1189,12 +1437,12 @@
   
   
     <li class="md-nav__item">
-      <a href="tool.md" class="md-nav__link">
+      <a href="tool/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Tool
     
   </span>
   
@@ -1212,12 +1460,12 @@
   
   
     <li class="md-nav__item">
-      <a href="workflow.md" class="md-nav__link">
+      <a href="workflow/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Workflow
     
   </span>
   
@@ -1234,96 +1482,34 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="memory.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
     
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="providers.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_5" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
-    Examples
+    Providers
     
   </span>
   
@@ -1331,10 +1517,10 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
             <span class="md-nav__icon md-icon"></span>
-            Examples
+            Providers
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1345,12 +1531,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/index.md" class="md-nav__link">
+      <a href="providers/openai/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    OpenAI
     
   </span>
   
@@ -1368,12 +1554,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/hello-world.md" class="md-nav__link">
+      <a href="providers/anthropic/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Anthropic
     
   </span>
   
@@ -1391,17 +1577,25 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/chatbot.md" class="md-nav__link">
+      <a href="providers/ollama/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
+    Ollama
     
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1414,35 +1608,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/data-pipeline.md" class="md-nav__link">
+      <a href="api-v0.1.1/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../examples/mcp-tools.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
+    v0.1.1 Summary
     
   </span>
   
@@ -1467,14 +1638,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -1498,7 +1661,7 @@
   
   
   <span class="md-ellipsis">
-    Plugins
+    Guides
     
   </span>
   
@@ -1509,7 +1672,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
-            Plugins
+            Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1520,58 +1683,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../plugins/index.md" class="md-nav__link">
+      <a href="../guides/performance-tuning/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../plugins/creating-plugins.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../plugins/available-plugins.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
+    Performance Tuning
     
   </span>
   
@@ -1596,16 +1713,6 @@
   
   
     
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
     
     
     
@@ -1629,7 +1736,7 @@
   
   
   <span class="md-ellipsis">
-    Templates
+    Plugins
     
   </span>
   
@@ -1640,7 +1747,7 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
-            Templates
+            Plugins
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1651,235 +1758,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../templates/index.md" class="md-nav__link">
+      <a href="../plugins/creating-plugins/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../templates/support-agent.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../templates/data-analyst.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../templates/content-generator.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
-        
-          
-          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Contributing
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_9">
-            <span class="md-nav__icon md-icon"></span>
-            Contributing
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contributing/index.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contributing/development.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contributing/testing.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../contributing/documentation.md" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    None
+    Creating Plugins
     
   </span>
   
@@ -1934,31 +1818,122 @@
                   
 
 
+  
+    <a href="https://github.com/agenticraft/agenticraft/edit/main/docs/reference/index.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
 
 <h1 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h1>
-<p>This section contains the complete API reference for AgentiCraft.</p>
-<h2 id="core-components">Core Components<a class="headerlink" href="#core-components" title="Permanent link">&para;</a></h2>
+<p>Complete API documentation for AgentiCraft v0.1.1.</p>
+<h2 id="core-apis">Core APIs<a class="headerlink" href="#core-apis" title="Permanent link">&para;</a></h2>
+<h3 id="agent"><a href="agent/">Agent</a><a class="headerlink" href="#agent" title="Permanent link">&para;</a></h3>
+<p>The foundation of AgentiCraft - create intelligent agents with tools, memory, and provider flexibility.</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agenticraft</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Assistant&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;Hello!&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="reasoningagent"><a href="agent/#reasoningagent">ReasoningAgent</a><a class="headerlink" href="#reasoningagent" title="Permanent link">&para;</a></h3>
+<p>Transparent reasoning with step-by-step thought processes.</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agenticraft</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReasoningAgent</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">ReasoningAgent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Thinker&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;Solve this problem...&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Access reasoning: response.reasoning</span>
+</code></pre></div>
+<h3 id="workflowagent"><a href="workflow/#workflowagent">WorkflowAgent</a><a class="headerlink" href="#workflowagent" title="Permanent link">&para;</a></h3>
+<p>Execute complex multi-step workflows with parallel processing.</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agenticraft</span><span class="w"> </span><span class="kn">import</span> <span class="n">WorkflowAgent</span><span class="p">,</span> <span class="n">Step</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">WorkflowAgent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Processor&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_workflow</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">workflow</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">])</span>
+</code></pre></div>
+<h2 id="provider-apis">Provider APIs<a class="headerlink" href="#provider-apis" title="Permanent link">&para;</a></h2>
+<h3 id="openai"><a href="providers/openai/">OpenAI</a><a class="headerlink" href="#openai" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="agent.md"><code>agenticraft.core.agent</code></a> - Base Agent class and functionality</li>
-<li><a href="tool.md"><code>agenticraft.core.tool</code></a> - Tool decorators and abstractions</li>
-<li><a href="workflow.md"><code>agenticraft.core.workflow</code></a> - Workflow engine</li>
-<li><a href="memory.md"><code>agenticraft.core.memory</code></a> - Memory interfaces</li>
-<li><a href="reasoning.md"><code>agenticraft.core.reasoning</code></a> - Reasoning patterns</li>
-<li><a href="provider.md"><code>agenticraft.core.provider</code></a> - LLM provider interface</li>
+<li>GPT-4, GPT-3.5-Turbo</li>
+<li>Function calling</li>
+<li>Streaming support</li>
 </ul>
-<h2 id="subsystems">Subsystems<a class="headerlink" href="#subsystems" title="Permanent link">&para;</a></h2>
+<h3 id="anthropic"><a href="providers/anthropic/">Anthropic</a><a class="headerlink" href="#anthropic" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="tools/index.md"><code>agenticraft.tools</code></a> - Built-in tools</li>
-<li><a href="memory/index.md"><code>agenticraft.memory</code></a> - Memory implementations</li>
-<li><a href="providers/index.md"><code>agenticraft.providers</code></a> - LLM provider integrations</li>
-<li><a href="protocols/mcp/index.md"><code>agenticraft.protocols.mcp</code></a> - Model Context Protocol</li>
-<li><a href="telemetry/index.md"><code>agenticraft.telemetry</code></a> - Observability components</li>
-<li><a href="plugins/index.md"><code>agenticraft.plugins</code></a> - Plugin system</li>
+<li>Claude 3 (Opus, Sonnet, Haiku)</li>
+<li>Large context windows</li>
+<li>Constitutional AI</li>
 </ul>
-<h2 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h2>
+<h3 id="ollama"><a href="providers/ollama/">Ollama</a><a class="headerlink" href="#ollama" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="cli/index.md"><code>agenticraft.cli</code></a> - Command-line interface</li>
+<li>Local models (Llama2, Mistral, CodeLlama)</li>
+<li>Privacy-first</li>
+<li>No API costs</li>
 </ul>
+<h2 id="tool-system">Tool System<a class="headerlink" href="#tool-system" title="Permanent link">&para;</a></h2>
+<h3 id="tool-decorator"><a href="tool/#tool-decorator">@tool Decorator</a><a class="headerlink" href="#tool-decorator" title="Permanent link">&para;</a></h3>
+<p>Create tools with a simple decorator:</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@tool</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Search the web.&quot;&quot;&quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="k">return</span> <span class="n">results</span>
+</code></pre></div>
+<h3 id="tool-class"><a href="tool/#tool-class">Tool Class</a><a class="headerlink" href="#tool-class" title="Permanent link">&para;</a></h3>
+<p>Advanced tool configuration:</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">tool</span> <span class="o">=</span> <span class="n">Tool</span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;search&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Search the web&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">function</span><span class="o">=</span><span class="n">search_function</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
+</code></pre></div>
+<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
+<h3 id="agentconfig">AgentConfig<a class="headerlink" href="#agentconfig" title="Permanent link">&para;</a></h3>
+<p>Configure agents with type-safe dataclasses:</p>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">config</span> <span class="o">=</span> <span class="n">AgentConfig</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Bot&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">model</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">provider</span><span class="o">=</span><span class="s2">&quot;openai&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">temperature</span><span class="o">=</span><span class="mf">0.7</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">)</span>
+</code></pre></div>
+<h2 id="quick-reference">Quick Reference<a class="headerlink" href="#quick-reference" title="Permanent link">&para;</a></h2>
+<h3 id="provider-switching">Provider Switching<a class="headerlink" href="#provider-switching" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Runtime provider changes</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">agent</span><span class="o">.</span><span class="n">set_provider</span><span class="p">(</span><span class="s2">&quot;anthropic&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;claude-3-opus-20240229&quot;</span><span class="p">)</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Get current provider</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">info</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">get_provider_info</span><span class="p">()</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="c1"># List available providers</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="n">providers</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">list_available_providers</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="memory">Memory<a class="headerlink" href="#memory" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Enable conversation memory</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MemBot&quot;</span><span class="p">,</span> <span class="n">memory_enabled</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Access memory</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="n">history</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">memory</span><span class="o">.</span><span class="n">get_history</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">agenticraft</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProviderError</span><span class="p">,</span> <span class="n">ToolError</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">response</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="k">except</span> <span class="n">ProviderError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="c1"># Handle provider issues</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">agent</span><span class="o">.</span><span class="n">set_provider</span><span class="p">(</span><span class="s2">&quot;ollama&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;llama2&quot;</span><span class="p">)</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="k">except</span> <span class="n">ToolError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="c1"># Handle tool failures</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>    <span class="k">pass</span>
+</code></pre></div>
+<h2 id="complete-examples">Complete Examples<a class="headerlink" href="#complete-examples" title="Permanent link">&para;</a></h2>
+<p>See the <a href="../examples/">Examples</a> section for complete working code:
+- <a href="../examples/hello-world/">Basic usage</a>
+- <a href="../examples/provider-switching/">Provider switching</a>
+- <a href="../examples/advanced-agents/">Advanced agents</a></p>
+<h2 id="api-versioning">API Versioning<a class="headerlink" href="#api-versioning" title="Permanent link">&para;</a></h2>
+<p>This documentation covers AgentiCraft v0.1.1. For detailed changes, see the <a href="../changelog/">Changelog</a>.</p>
 
 
 
@@ -1967,8 +1942,6 @@
 
 
 
-
-  
 
 
 
@@ -1998,7 +1971,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../guides/mcp-integration/" class="md-footer__link md-footer__link--prev" aria-label="Previous: MCP Integration Guide">
+          <a href="../examples/real-world/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Real-World Apps">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2008,20 +1981,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                MCP Integration Guide
+                Real-World Apps
               </div>
             </div>
           </a>
         
         
           
-          <a href="../changelog/" class="md-footer__link md-footer__link--next" aria-label="Next: Changelog">
+          <a href="agent/" class="md-footer__link md-footer__link--next" aria-label="Next: Agent">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Changelog
+                Agent
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -2098,7 +2071,7 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.indexes", "navigation.top", "navigation.footer", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share", "header.autohide", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.tooltips", "content.action.edit", "content.action.view"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "navigation.footer", "toc.follow", "toc.integrate", "search.suggest", "search.highlight", "search.share", "header.autohide", "content.code.copy", "content.code.annotate", "content.tabs.link", "content.action.edit"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
