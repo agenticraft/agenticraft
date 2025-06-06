@@ -9,7 +9,7 @@
   [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
   [![License](https://img.shields.io/github/license/agenticraft/agenticraft.svg)](https://github.com/agenticraft/agenticraft/blob/main/LICENSE)
   [![Tests](https://github.com/agenticraft/agenticraft/actions/workflows/test.yml/badge.svg)](https://github.com/agenticraft/agenticraft/actions)
-  [![Documentation](https://img.shields.io/badge/docs-available-green.svg)](https://github.com/agenticraft/agenticraft/tree/main/docs)
+  [![Documentation](https://img.shields.io/badge/docs-available-green.svg)](https://agenticraft.github.io/agenticraft/)
   
   [Documentation](https://github.com/agenticraft/agenticraft/tree/main/docs) | [Examples](examples/) | [Discussions](https://github.com/agenticraft/agenticraft/discussions) | [Issues](https://github.com/agenticraft/agenticraft/issues)
 </div>

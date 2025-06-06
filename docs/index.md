@@ -3,13 +3,13 @@
 **Build AI agents as simple as writing Python**
 
 [![PyPI version](https://badge.fury.io/py/agenticraft.svg)](https://badge.fury.io/py/agenticraft)
-[![Documentation](https://img.shields.io/badge/docs-agenticraft.ai-blue.svg)](https://docs.agenticraft.ai)
+[![Documentation](https://img.shields.io/badge/docs-blue.svg)](https://agenticraft.github.io/agenticraft/)
 [![License](https://img.shields.io/github/license/agenticraft/agenticraft.svg)](https://github.com/agenticraft/agenticraft/blob/main/LICENSE)
 
 
 ## Why AgentiCraft?
 
-Building AI agents should be as simple as writing Python. No complex abstractions, no graph theory, no 500-page documentation. Just clean, simple code that works.
+Building AI agents should be as simple as writing Python. We focus on intuitive design and clear abstractions that scale with your needs.
 
 !!! tip "5-Minute Quickstart"
     
