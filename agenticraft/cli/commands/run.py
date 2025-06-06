@@ -113,7 +113,7 @@ def _run_python_agent(file_path: Path, prompt: Optional[str], interactive: bool,
         # Run single prompt
         async def run_once():
             result = await agent.run(prompt)
-            click.echo(f"\nAgent: {result.answer}")
+            click.echo(f"\nAgent: {result.content}")
             
             if hasattr(result, "reasoning") and result.reasoning:
                 click.echo(f"\nReasoning: {result.reasoning.synthesis}")
@@ -155,17 +155,17 @@ def _run_yaml_agent(file_path: Path, prompt: Optional[str], interactive: bool,
     # Add tools if specified
     tools = agent_config.get("tools", [])
     if tools:
-        from agenticraft.tools.core import (
-            search_tool, calculator_tool, files_tool,
-            http_tool, text_tool
+        from agenticraft.tools import (
+            web_search, simple_calculate, read_file,
+            write_file, extract_text
         )
         
         tool_map = {
-            "search": search_tool,
-            "calculator": calculator_tool,
-            "files": files_tool,
-            "http": http_tool,
-            "text": text_tool,
+            "search": web_search,
+            "calculator": simple_calculate,
+            "files": read_file,
+            "http": extract_text,
+            "text": write_file,
         }
         
         for tool_name in tools:
@@ -184,7 +184,10 @@ def _run_yaml_agent(file_path: Path, prompt: Optional[str], interactive: bool,
         
         async def run_once():
             result = await agent.run(prompt)
-            click.echo(f"\nAgent: {result.answer}")
+            click.echo(f"\nAgent: {result.content}")
+            
+            if hasattr(result, "reasoning") and result.reasoning:
+                click.echo(f"\nReasoning: {result.reasoning.synthesis}")
         
         asyncio.run(run_once())
 
@@ -210,7 +213,7 @@ def _run_interactive(agent):
                 result = await agent.run(user_input)
                 
                 # Display response
-                click.echo(f"\n{agent.name}: {result.answer}\n")
+                click.echo(f"\n{agent.name}: {result.content}\n")
                 
                 # Show reasoning if available
                 if hasattr(result, "reasoning") and result.reasoning:

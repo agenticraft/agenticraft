@@ -299,11 +299,7 @@ if __name__ == "__main__":
         tools = plugin.get_tools()
         print(f"[DEBUG] Got {len(tools)} tools")
         print(f"\nAvailable tools: {[t.name for t in tools]}")
-    except Exception as e:
-        print(f"[ERROR] Exception occurred: {type(e).__name__}: {e}")
-        import traceback
-        traceback.print_exc()
-    
+        
         # Test a tool
         async def test_weather():
             weather_tool = tools[0]
@@ -319,6 +315,7 @@ if __name__ == "__main__":
         print("[DEBUG] Done!")
         
     except Exception as e:
-        print(f"[ERROR] Exception in main: {type(e).__name__}: {e}")
+        print(f"[ERROR] Exception occurred: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
+

@@ -55,7 +55,7 @@ def test_imports():
     
     # Check version
     assert hasattr(agenticraft, '__version__')
-    assert agenticraft.__version__ == "0.1.0"
+    assert agenticraft.__version__ == "0.1.1"
     
     # Verify some basic imports work
     assert hasattr(exceptions, 'AgentError')

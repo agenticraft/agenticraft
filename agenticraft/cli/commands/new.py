@@ -83,7 +83,15 @@ def new(name: str, template: str, directory: Optional[str], no_git: bool):
         # Success message
         click.echo(f"\n✨ Project '{name}' created successfully!")
         click.echo(f"\nNext steps:")
-        click.echo(f"  cd {project_path.relative_to(Path.cwd())}")
+        
+        # Try to get relative path, but fall back to absolute if not possible
+        try:
+            display_path = project_path.relative_to(Path.cwd())
+        except ValueError:
+            # Paths are not relative to each other, use absolute path
+            display_path = project_path
+        
+        click.echo(f"  cd {display_path}")
         
         if template == "fastapi":
             click.echo("  cp .env.example .env")
@@ -222,7 +230,7 @@ def _update_project_files(project_path: Path, name: str, template: str):
     readme_path = project_path / "README.md"
     if readme_path.exists():
         content = readme_path.read_text()
-        content = content.replace("AgentiCraft Template", f"{name.title()}")
+        content = content.replace("AgentiCraft Template", name.replace("-", " ").title().replace(" ", "-"))
         content = content.replace("agenticraft-template", name)
         readme_path.write_text(content)
     

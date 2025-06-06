@@ -115,6 +115,7 @@ class ProviderFactory:
     def create(
         cls,
         model: str,
+        provider: Optional[str] = None,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
         **kwargs: Any
@@ -123,6 +124,7 @@ class ProviderFactory:
         
         Args:
             model: Model name (e.g., "gpt-4", "claude-3-opus", "ollama/llama2")
+            provider: Optional explicit provider name (overrides auto-detection)
             api_key: Optional API key
             base_url: Optional base URL
             **kwargs: Additional provider arguments
@@ -133,7 +135,23 @@ class ProviderFactory:
         Raises:
             ProviderNotFoundError: If no provider found for model
         """
-        # Common Ollama model prefixes
+        # If explicit provider specified, use it
+        if provider:
+            # Ensure providers are loaded
+            cls._lazy_load_providers()
+            
+            provider_class = cls._providers.get(provider)
+            if not provider_class:
+                raise ProviderNotFoundError(f"Unknown provider: {provider}")
+            
+            return provider_class(
+                api_key=api_key,
+                base_url=base_url,
+                model=model,
+                **kwargs
+            )
+            
+        # Otherwise, Common Ollama model prefixes
         ollama_models = (
             "llama", "llama2", "llama3", "codellama", "mistral", "mixtral",
             "gemma", "phi", "vicuna", "orca", "neural-chat", "starling",

@@ -27,13 +27,24 @@ from .core.exceptions import (
     StepExecutionError,
 )
 
+# Advanced agents
+from .agents import (
+    ReasoningAgent,
+    WorkflowAgent,
+)
+
 __all__ = [
     "__version__",
+    # Core
     "Agent",
     "tool",
     "BaseTool",
     "Workflow",
     "Step",
+    # Advanced agents
+    "ReasoningAgent",
+    "WorkflowAgent",
+    # Exceptions
     "AgenticraftError",
     "AgentError",
     "ToolError",

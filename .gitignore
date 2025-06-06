@@ -152,6 +152,10 @@ cython_debug/
 temp/
 tmp/
 
+# PyPI credentials (NEVER commit these!)
+.pypirc
+~/.pypirc
+
 # Documentation build
 docs/_build/
 docs/site/

@@ -489,9 +489,11 @@ def trace_agent_method(method_name: Optional[str] = None) -> Callable:
             if span and hasattr(self, 'name'):
                 span.set_attribute("agent.name", self.name)
                 span.set_attribute("agent.id", getattr(self, 'id', 'unknown'))
-            
-            # Add trace ID to kwargs for correlation
-            kwargs['_trace_id'] = get_current_trace_id()
+                
+                # Add trace ID to span attributes instead of kwargs
+                trace_id = get_current_trace_id()
+                if trace_id:
+                    span.set_attribute("trace.id", trace_id)
             
             return await func(self, *args, **kwargs)
         

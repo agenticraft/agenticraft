@@ -38,9 +38,14 @@ class TestAgentConfig:
         
         assert config.name == "Agent"
         assert config.instructions == "You are a helpful AI assistant."
-        assert config.model == "gpt-4"  # Default from settings
-        assert config.temperature == 0.7
-        assert config.max_tokens is None  # Default from settings
+        # The default comes from settings.default_model which might be overridden
+        # Let's check what the actual default is
+        from agenticraft.core.config import settings
+        assert config.model == settings.default_model
+        assert config.temperature == settings.default_temperature
+        assert config.max_tokens == settings.default_max_tokens
+        assert config.timeout == settings.default_timeout
+        assert config.max_retries == settings.default_max_retries
         assert config.tools == []
         assert config.memory == []
         assert config.reasoning_pattern is None

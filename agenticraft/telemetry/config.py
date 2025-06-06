@@ -21,7 +21,7 @@ import os
 from typing import Dict, Optional, List, Any
 from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ExportFormat(str, Enum):
@@ -65,20 +65,17 @@ class ExporterConfig(BaseModel):
         description="Whether to use insecure connection"
     )
     
-    @field_validator('endpoint')
-    def validate_endpoint(cls, v, values):
-        """Validate endpoint based on format."""
-        if values.get('format') == ExportFormat.CONSOLE:
-            return None  # Console doesn't need endpoint
-        if v is None:
-            # Provide sensible defaults
+    @model_validator(mode='after')
+    def set_endpoint_defaults(self):
+        """Set endpoint defaults based on format."""
+        if self.endpoint is None and self.format != ExportFormat.CONSOLE:
             format_map = {
                 ExportFormat.OTLP: "http://localhost:4317",
                 ExportFormat.JAEGER: "http://localhost:14250",
                 ExportFormat.ZIPKIN: "http://localhost:9411/api/v2/spans"
             }
-            return format_map.get(values.get('format'))
-        return v
+            self.endpoint = format_map.get(self.format)
+        return self
 
 
 class ResourceConfig(BaseModel):

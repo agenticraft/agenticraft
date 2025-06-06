@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Test all code examples in documentation and docstrings."""
+"""Standalone script to validate all code examples in documentation and docstrings.
+
+This is NOT a pytest test file - it's a standalone validation script.
+Run directly with: python tests/test_code_examples.py
+"""
 
 import ast
 import re
@@ -60,8 +64,8 @@ def extract_docstring_examples(file_path: Path) -> List[Tuple[str, str, int]]:
     return examples
 
 
-def test_code_block(code: str, context: str) -> Tuple[bool, str]:
-    """Test a code block and return success status and error message."""
+def validate_code_block(code: str, context: str) -> Tuple[bool, str]:
+    """Validate a code block and return success status and error message."""
     # Add common imports that might be assumed
     test_code = """
 import sys
@@ -144,7 +148,7 @@ def main():
                     print(f"  ⏭️  Skipping placeholder example at line {line_num}")
                     continue
                 
-                success, error = test_code_block(code, context)
+                success, error = validate_code_block(code, context)
                 
                 if success:
                     passed_examples += 1
@@ -172,7 +176,7 @@ def main():
                     print(f"  ⏭️  Skipping placeholder in {location}")
                     continue
                 
-                success, error = test_code_block(code, location)
+                success, error = validate_code_block(code, location)
                 
                 if success:
                     passed_examples += 1

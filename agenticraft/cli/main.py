@@ -12,7 +12,7 @@ from agenticraft import __version__
 from agenticraft.cli.commands import new, run, templates, plugin
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(version=__version__, prog_name="agenticraft")
 @click.pass_context
 def cli(ctx):
@@ -23,6 +23,12 @@ def cli(ctx):
     """
     # Ensure that ctx.obj exists and is a dict
     ctx.ensure_object(dict)
+    
+    # If no command was provided, show a welcome message
+    if ctx.invoked_subcommand is None:
+        click.echo("AgentiCraft - The AI Agent Framework")
+        click.echo("Build production-ready AI agents with ease.")
+        click.echo("\nUse 'agenticraft --help' for more information.")
 
 
 @cli.command()

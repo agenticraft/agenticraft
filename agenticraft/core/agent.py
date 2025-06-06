@@ -31,7 +31,7 @@ from uuid import UUID, uuid4
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .config import settings
-from .exceptions import AgentError, ToolExecutionError
+from .exceptions import ProviderError, AgentError, ToolExecutionError
 from .memory import BaseMemory, MemoryStore
 from .provider import BaseProvider, ProviderFactory
 from .reasoning import BaseReasoning, ReasoningTrace, SimpleReasoning
@@ -67,6 +67,7 @@ class AgentConfig(BaseModel):
     Attributes:
         name: The agent's name
         instructions: System instructions defining the agent's behavior
+        provider: Explicit provider name (optional, auto-detected if not specified)
         model: LLM model to use (e.g., "gpt-4", "claude-3-opus")
         temperature: Sampling temperature (0.0 to 1.0)
         max_tokens: Maximum tokens in response
@@ -87,6 +88,10 @@ class AgentConfig(BaseModel):
         default="You are a helpful AI assistant.",
         description="System instructions defining agent behavior"
     )
+    provider: Optional[str] = Field(
+        default=None,
+        description="Explicit provider name (e.g., 'openai', 'anthropic', 'ollama'). If not specified, auto-detected from model name."
+    )
     model: str = Field(default_factory=lambda: settings.default_model, description="LLM model to use")
     temperature: float = Field(default_factory=lambda: settings.default_temperature, ge=0.0, le=2.0)
     max_tokens: Optional[int] = Field(default_factory=lambda: settings.default_max_tokens, gt=0)
@@ -98,6 +103,18 @@ class AgentConfig(BaseModel):
     timeout: int = Field(default_factory=lambda: settings.default_timeout, gt=0)
     max_retries: int = Field(default_factory=lambda: settings.default_max_retries, ge=0)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    @field_validator('provider')
+    def validate_provider(cls, provider: Optional[str]) -> Optional[str]:
+        """Validate provider name if specified."""
+        if provider is not None:
+            valid_providers = ["openai", "anthropic", "ollama", "google"]
+            if provider not in valid_providers:
+                raise ValueError(
+                    f"Invalid provider: {provider}. "
+                    f"Valid providers are: {', '.join(valid_providers)}"
+                )
+        return provider
     
     @field_validator('tools')
     def validate_tools(cls, tools: List[Any]) -> List[Any]:
@@ -201,13 +218,25 @@ class Agent:
     def provider(self) -> BaseProvider:
         """Get or create the LLM provider."""
         if self._provider is None:
-            self._provider = ProviderFactory.create(
-                model=self.config.model,
-                api_key=self.config.api_key,
-                base_url=self.config.base_url,
-                timeout=self.config.timeout,
-                max_retries=self.config.max_retries
-            )
+            # Use explicit provider if specified in config
+            if self.config.provider:
+                self._provider = ProviderFactory.create(
+                    model=self.config.model,
+                    provider=self.config.provider,  # Pass explicit provider
+                    api_key=self.config.api_key,
+                    base_url=self.config.base_url,
+                    timeout=self.config.timeout,
+                    max_retries=self.config.max_retries
+                )
+            else:
+                # Auto-detect from model name
+                self._provider = ProviderFactory.create(
+                    model=self.config.model,
+                    api_key=self.config.api_key,
+                    base_url=self.config.base_url,
+                    timeout=self.config.timeout,
+                    max_retries=self.config.max_retries
+                )
         return self._provider
     
     def run(
@@ -472,3 +501,150 @@ class Agent:
             f"model='{self.config.model}', "
             f"tools={len(self.config.tools)})"
         )
+    
+    def set_provider(
+        self, 
+        provider_name: str,
+        model: Optional[str] = None,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        **kwargs: Any
+    ) -> None:
+        """Switch the agent's LLM provider dynamically.
+        
+        This method allows switching between different LLM providers while
+        preserving the agent's configuration, tools, memory, and state.
+        
+        Args:
+            provider_name: Name of the provider ("openai", "anthropic", "ollama")
+            model: Optional model override for the new provider
+            api_key: Optional API key for the new provider
+            base_url: Optional base URL (mainly for Ollama)
+            **kwargs: Additional provider-specific parameters
+            
+        Raises:
+            ProviderError: If the provider name is invalid or setup fails
+            
+        Example:
+            >>> # Switch to Anthropic
+            >>> agent.set_provider("anthropic", model="claude-3-opus-20240229")
+            >>> 
+            >>> # Switch to local Ollama
+            >>> agent.set_provider("ollama", model="llama2", base_url="http://localhost:11434")
+            >>> 
+            >>> # Switch back to OpenAI with specific model
+            >>> agent.set_provider("openai", model="gpt-3.5-turbo")
+        
+        Note:
+            When switching providers, the agent will:
+            - Preserve all configuration except model and API settings
+            - Maintain tool registrations and functionality
+            - Keep conversation memory intact
+            - Continue with the same reasoning patterns
+        """
+        # Map of provider names to their default models
+        provider_defaults = {
+            "openai": "gpt-4",
+            "anthropic": "claude-3-opus-20240229",
+            "ollama": "llama2"
+        }
+        
+        # Validate provider name
+        if provider_name not in provider_defaults:
+            raise ProviderError(
+                f"Unknown provider: {provider_name}. "
+                f"Valid providers are: {', '.join(provider_defaults.keys())}"
+            )
+        
+        # Determine model to use
+        if model is None:
+            # If no model specified, use provider default
+            model = provider_defaults[provider_name]
+        else:
+            # For Ollama, strip "ollama/" prefix if present
+            if provider_name == "ollama" and model.startswith("ollama/"):
+                model = model[7:]  # Remove "ollama/" prefix
+        
+        # Store current state for rollback
+        old_provider = self._provider
+        old_model = self.config.model
+        old_api_key = self.config.api_key
+        old_base_url = self.config.base_url
+        
+        try:
+            # Update configuration
+            self.config.model = model
+            self.config.provider = provider_name
+            if api_key is not None:
+                self.config.api_key = api_key
+            if base_url is not None:
+                self.config.base_url = base_url
+            
+            # Clear current provider to force recreation
+            self._provider = None
+            
+            # Access provider property to trigger creation with new settings
+            new_provider = self.provider
+            
+            # Validate the new provider works
+            new_provider.validate_auth()
+            
+            logger.info(
+                f"Agent '{self.name}' switched to {provider_name} "
+                f"(model: {model})"
+            )
+            
+        except Exception as e:
+            # Rollback on failure
+            self._provider = old_provider
+            self.config.model = old_model
+            self.config.api_key = old_api_key
+            self.config.base_url = old_base_url
+            
+            logger.error(f"Failed to switch provider: {e}")
+            raise ProviderError(f"Failed to switch to {provider_name}: {e}") from e
+
+
+    def get_provider_info(self) -> Dict[str, Any]:
+        """Get information about the current provider.
+        
+        Returns:
+            Dict containing provider name, model, and capabilities
+            
+        Example:
+            >>> info = agent.get_provider_info()
+            >>> print(f"Using {info['provider']} with model {info['model']}")
+        """
+        provider = self.provider
+        provider_name = provider.__class__.__name__.replace("Provider", "").lower()
+        
+        return {
+            "provider": provider_name,
+            "model": self.config.model,
+            "supports_streaming": hasattr(provider, 'stream'),
+            "supports_tools": True,  # All providers support tools via adaptation
+            "timeout": self.config.timeout,
+            "max_retries": self.config.max_retries,
+            "temperature": self.config.temperature,
+            "max_tokens": self.config.max_tokens
+        }
+
+
+    def list_available_providers(self) -> List[str]:
+        """List available LLM providers.
+        
+        Returns:
+            List of provider names that can be used with set_provider
+            
+        Example:
+            >>> providers = agent.list_available_providers()
+            >>> print(f"Available providers: {', '.join(providers)}")
+        """
+        # Import here to avoid circular imports
+        from .provider import ProviderFactory
+        
+        # Ensure providers are loaded
+        ProviderFactory._lazy_load_providers()
+        
+        return list(ProviderFactory._providers.keys())
+

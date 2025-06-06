@@ -12,7 +12,7 @@ Example:
         agent = Agent(
             name="Assistant",
             memory=[
-                ConversationMemory(max_turns=10),
+                ConversationMemory(max_entries=10),
                 KnowledgeMemory(persist=True)
             ]
         )
