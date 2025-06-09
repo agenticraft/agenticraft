@@ -2,122 +2,414 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://agenticraft.github.io/agenticraft/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/changelog/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/contributing/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/philosophy/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/quickstart/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/streaming/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/reasoning/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/reasoning/base/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/reasoning/chain_of_thought/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/reasoning/react/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/reasoning/selector/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/reasoning/tree_of_thoughts/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/workflows/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/workflows/patterns/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/workflows/templates/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/workflows/visualization/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/api/workflows/workflow_agent/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/concepts/agents/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/concepts/handlers/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/concepts/memory/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/concepts/reasoning/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/concepts/tool-issues/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/concepts/tools/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/concepts/workflows/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/examples/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/examples/advanced-agents/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/examples/hello-world/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/examples/organization-guide/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/examples/provider-switching/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/examples/real-world/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/features/advanced_agents/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/enhanced_workflows/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/features/mcp_integration/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/features/provider_switching/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/reasoning_patterns/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/streaming/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/marketplace/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/marketplace/api-reference/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/marketplace/plugin-development/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/marketplace/registry-setup/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/marketplace/version-management/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/memory/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/memory/api-reference/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/memory/knowledge-graph/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/memory/patterns/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/memory/performance/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/memory/vector-memory/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/api-reference/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/configuration/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/integration/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/metrics-reference/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/performance/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/quick-reference/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/features/telemetry/troubleshooting/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/getting-started/configuration/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/getting-started/first-agent/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/getting-started/installation/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/guides/handler-pattern-visual/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/guides/performance-tuning/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/guides/reasoning-integration/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/guides/simplified_workflows/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/guides/testing-examples/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/guides/tool-usage-patterns/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/guides/workflow_handler_pattern/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/mcp/examples_summary/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/mcp/practical_guide/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/mcp/tools_handlers_guide/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/migration/reasoning/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/migration/streaming/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/migration/workflows/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/AGENTICRAFT_MASTER_PLAN/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/VISION/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/WEEK3_IMPLEMENTATION_GUIDE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/WEEK3_PROGRESS_TRACKER/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/WEEK3_QUICK_REFERENCE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/agenticraft-plan/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/agenticraft-progress-tracker/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/agenticraft-structure-detailed/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/claude-implementation-prompt/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/opensource-agent-framework-plan-0/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/opensource-agent-framework-plan/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_COMPLETE_SUMMARY/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY1_COMPLETE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY2_COMPLETE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY3_COMPLETE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY4_COMPLETE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY5_COMPLETE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY6_COMPLETE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY7_COMPLETE/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/planning/week3_docs/WEEK3_DAY7_PLAN/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/plugins/creating-plugins/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/quick-reference/reasoning/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/quick-reference/streaming/</loc>
+         <lastmod>2025-06-09</lastmod>
+    </url>
+    <url>
+         <loc>https://agenticraft.github.io/agenticraft/quick-reference/workflows/</loc>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/agent/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/api-v0.1.1/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/tool/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/workflow/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/providers/anthropic/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/providers/ollama/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
     <url>
          <loc>https://agenticraft.github.io/agenticraft/reference/providers/openai/</loc>
-         <lastmod>2025-06-06</lastmod>
+         <lastmod>2025-06-09</lastmod>
     </url>
 </urlset>
