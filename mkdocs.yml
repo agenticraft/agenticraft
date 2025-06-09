@@ -187,6 +187,4 @@ nav:
     - Creating Plugins: plugins/creating-plugins.md
 
   - Changelog: changelog.md
-  
-  - Development:
-    - Streaming Documentation: STREAMING_DOCS_COMPLETE.md
+  - Contributing: contributing.md

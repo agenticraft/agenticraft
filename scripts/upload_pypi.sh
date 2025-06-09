@@ -33,4 +33,4 @@ python -m twine upload \
 
 echo ""
 echo "If successful, install with:"
-echo "pip install agenticraft==0.1.1"
+echo "pip install agenticraft==0.2.0-alpha"

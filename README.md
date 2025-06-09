@@ -48,7 +48,7 @@ print(response.content)
 **Released**: June 2025  
 **PyPI**: `pip install agenticraft` 🎉  
 
-This release includes major new features: streaming, advanced reasoning patterns, MCP protocol, and production telemetry!
+This release includes major new features: streaming, advanced reasoning patterns, MCP protocol, production telemetry, memory systems, and enhanced workflows!
 
 ## 🎯 Why AgentiCraft?
 

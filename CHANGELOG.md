@@ -138,14 +138,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No memory leaks when switching providers
 - Connection pooling for high-throughput scenarios
 
-## [Unreleased]
+## [0.2.0-alpha] - 2025-06-16
 
-### [0.2.0] - July 2025
-- Streaming response support
-- Advanced reasoning patterns
-- Tool marketplace (beta)
-- Performance optimizations
-- Enhanced error messages
+### Added
+- 🌊 **Streaming Support**
+  - Native streaming for all providers (OpenAI, Anthropic, Ollama)
+  - Real-time token-by-token responses with <100ms latency
+  - Unified streaming interface across providers
+  - Interrupt handling and partial response recovery
+  - Visual streaming examples with progress indicators
+
+- 🧠 **Advanced Reasoning Patterns**
+  - Chain of Thought (CoT) - Step-by-step reasoning with confidence scores
+  - Tree of Thoughts (ToT) - Explore multiple reasoning paths in parallel
+  - ReAct Pattern - Reasoning combined with tool actions
+  - Transparent reasoning traces for all patterns
+  - Side-by-side pattern comparison examples
+
+- 🔌 **Model Context Protocol (MCP)**
+  - First-class MCP support for tool interoperability
+  - WebSocket-based MCP client and server implementations
+  - Seamless tool discovery and execution
+  - Bridge between MCP tools and AgentiCraft agents
+  - Compatible with Anthropic's MCP ecosystem
+
+- 📊 **Production Telemetry**
+  - OpenTelemetry integration with <1% performance overhead
+  - Distributed tracing for multi-agent workflows
+  - Prometheus metrics export
+  - Jaeger and OTLP exporter support
+  - Production-ready observability from day one
+
+- 🔧 **Enhanced Workflows**
+  - Visual workflow design with Mermaid diagrams
+  - ASCII workflow visualization for terminals
+  - Parallel step execution with dependency management
+  - Workflow state persistence and resumption
+  - Error handling and retry mechanisms
+
+- 💾 **Advanced Memory Systems**
+  - Vector memory with ChromaDB integration
+  - Semantic search across conversation history
+  - Knowledge graph memory for relationships
+  - Hybrid memory combining vector and graph approaches
+  - Memory persistence across sessions
+
+- 🛍️ **Plugin Marketplace Foundation**
+  - Plugin discovery and loading system
+  - Standardized plugin interface
+  - Tool sharing capabilities
+  - Foundation for future marketplace UI
+
+- 📚 **Documentation & Examples**
+  - 50+ comprehensive examples covering all features
+  - Streaming examples with visual progress
+  - Reasoning pattern demonstrations
+  - MCP integration guides
+  - Production deployment templates
+  - Interactive tutorials
+
+### Changed
+- Streaming API now uses async iterators exclusively
+- ReasoningAgent replaces ChainOfThoughtAgent
+- Memory interface standardized across all types
+- Tool decorator signature updated for MCP compatibility
+
+### Fixed
+- Fixed OpenAI provider initialization without API key
+- Fixed tracer context injection/extraction
+- Resolved workflow step ordering issues
+- Fixed memory search with special characters
+- Corrected streaming interruption handling
+
+### Performance
+- Optimized provider initialization
+- Reduced memory footprint for base agents
+- Faster tool execution with caching
+- Efficient streaming buffer management
+
+## [Unreleased]
 
 ### [1.0.0] - Q4 2025
 - Stable API guarantee
