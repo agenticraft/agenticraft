@@ -34,78 +34,90 @@ agent = Agent(
 |-------|-------------|----------------|----------|
 | `gpt-4` | Most capable model | 8K tokens | Complex reasoning, analysis |
 | `gpt-4-32k` | Extended context | 32K tokens | Long documents |
-| `gpt-4-turbo` | Faster, cheaper GPT-4 | 128K tokens | Balanced performance |
+| `gpt-4-turbo-preview` | Faster, cheaper GPT-4 | 128K tokens | Balanced performance |
 | `gpt-3.5-turbo` | Fast and efficient | 16K tokens | Simple tasks, high volume |
 | `gpt-3.5-turbo-16k` | Extended context | 16K tokens | Longer conversations |
+
+## ⚠️ Important: Parameter Configuration
+
+**AgentiCraft currently does not support passing parameters in `run()` or `arun()` calls.** All parameters must be set during Agent initialization:
+
+```python
+# ❌ This will NOT work - causes "multiple values" error
+agent = Agent(model="gpt-4")
+response = await agent.arun("Hello", temperature=0.5)  # Error!
+
+# ✅ This works - set parameters during initialization
+agent = Agent(
+    model="gpt-4",
+    temperature=0.5,
+    max_tokens=100
+)
+response = await agent.arun("Hello")  # Success!
+```
 
 ## Provider-Specific Features
 
 ### Function Calling
 
-OpenAI models support native function calling:
+OpenAI models support native function calling (Note: AgentiCraft recommends using the WorkflowAgent pattern for reliable tool usage):
 
 ```python
-from agenticraft import Agent, tool
+from agenticraft.agents import WorkflowAgent
 
-@tool
-def get_weather(location: str) -> str:
-    return f"Weather in {location}: Sunny, 72°F"
-
-agent = Agent(
-    name="Assistant",
-    model="gpt-4",
-    tools=[get_weather]
+# Create workflow agent for reliable tool usage
+agent = WorkflowAgent(
+    name="ToolUser",
+    provider="openai",
+    model="gpt-3.5-turbo"
 )
 
-# OpenAI automatically handles function calling
-response = agent.run("What's the weather in NYC?")
+# Define and register handlers
+def calculate_handler(agent, step, context):
+    expression = context.get("expression", "")
+    try:
+        result = eval(expression, {"__builtins__": {}})
+        context["result"] = result
+        return f"Result: {result}"
+    except Exception as e:
+        return f"Error: {e}"
+
+agent.register_handler("calc", calculate_handler)
+
+# Use in workflow
+workflow = agent.create_workflow("math")
+workflow.add_step(name="calculate", handler="calc")
+context = {"expression": "144 ** 0.5"}
+result = await agent.execute_workflow(workflow, context=context)
 ```
 
-### Streaming Responses
+### Streaming Responses (Coming in v0.2.0)
 
 ```python
-agent = Agent(
-    name="Streamer",
-    model="gpt-4",
-    stream=True
-)
-
-for chunk in agent.run_stream("Tell me a story"):
-    print(chunk, end="", flush=True)
+# Note: Streaming support is coming soon
+# This is how it will work:
+# async for chunk in agent.stream("Tell me a story"):
+#     print(chunk, end="", flush=True)
 ```
 
 ### Response Format
 
 ```python
-# JSON mode
+# JSON mode (only with newer models)
 agent = Agent(
     name="JSONBot",
-    model="gpt-4-turbo",
+    model="gpt-4-turbo-preview",
     response_format={"type": "json_object"}
 )
 
-response = agent.run("List 3 colors as JSON")
+response = await agent.arun("List 3 colors as JSON")
 # Returns valid JSON
-```
-
-### Vision Capabilities
-
-```python
-# GPT-4 Vision
-agent = Agent(
-    name="VisionBot",
-    model="gpt-4-vision-preview"
-)
-
-response = agent.run(
-    prompt="What's in this image?",
-    images=["path/to/image.jpg"]
-)
 ```
 
 ## Configuration Options
 
 ```python
+# All parameters must be set during initialization
 agent = Agent(
     name="Configured",
     provider="openai",
@@ -118,23 +130,23 @@ agent = Agent(
     frequency_penalty=0.0, # -2.0 to 2.0
     presence_penalty=0.0,  # -2.0 to 2.0
     stop=["\n\n"],        # Stop sequences
-    n=1,                  # Number of completions
-    logprobs=True,        # Include log probabilities
+    seed=42,              # For reproducible outputs
     
-    # Retry configuration
-    max_retries=3,
-    timeout=30
+    # Connection settings
+    timeout=30,           # Request timeout in seconds
+    max_retries=3        # Retry attempts
 )
 ```
 
 ## Error Handling
 
 ```python
-from agenticraft import Agent, ProviderError
+from agenticraft import Agent
+from agenticraft.core.exceptions import ProviderError
 
 try:
     agent = Agent(name="Bot", model="gpt-4")
-    response = agent.run("Hello")
+    response = await agent.arun("Hello")
 except ProviderError as e:
     if "rate_limit" in str(e):
         print("Rate limit reached, waiting...")
@@ -149,47 +161,96 @@ except ProviderError as e:
 ### Model Selection by Task
 
 ```python
-class SmartAssistant:
-    def __init__(self):
-        self.agent = Agent(name="Smart", model="gpt-3.5-turbo")
-    
-    def process(self, task: str, complexity: str):
-        if complexity == "high":
-            self.agent.model = "gpt-4"
-        elif complexity == "medium":
-            self.agent.model = "gpt-4-turbo"
-        else:
-            self.agent.model = "gpt-3.5-turbo"
-        
-        return self.agent.run(task)
+# Create different agents for different complexity levels
+simple_agent = Agent(
+    name="Simple",
+    model="gpt-3.5-turbo",
+    temperature=0.3,
+    max_tokens=100
+)
+
+complex_agent = Agent(
+    name="Complex", 
+    model="gpt-4",
+    temperature=0.7,
+    max_tokens=2000
+)
+
+# Use simple agent for basic tasks
+response = await simple_agent.arun("What's 2+2?")
+
+# Use complex agent for advanced tasks
+response = await complex_agent.arun("Explain quantum mechanics")
 ```
 
 ### Token Usage Tracking
 
 ```python
-response = agent.run("Generate a report")
+response = await agent.arun("Generate a report")
 
-# Access token usage
-tokens = response.metadata.get("usage", {})
-print(f"Prompt tokens: {tokens.get('prompt_tokens')}")
-print(f"Completion tokens: {tokens.get('completion_tokens')}")
-print(f"Total tokens: {tokens.get('total_tokens')}")
+# Access token usage from metadata
+if hasattr(response, 'metadata') and response.metadata:
+    usage = response.metadata.get("usage", {})
+    print(f"Prompt tokens: {usage.get('prompt_tokens', 0)}")
+    print(f"Completion tokens: {usage.get('completion_tokens', 0)}")
+    print(f"Total tokens: {usage.get('total_tokens', 0)}")
+```
+
+## Common Issues and Solutions
+
+### Issue: "multiple values for keyword argument"
+
+**Problem**: Trying to pass parameters in `arun()` call
+```python
+# This causes an error
+response = await agent.arun("Hello", temperature=0.5)
+```
+
+**Solution**: Set all parameters during Agent initialization
+```python
+agent = Agent(model="gpt-4", temperature=0.5)
+response = await agent.arun("Hello")
+```
+
+### Issue: Timeout errors
+
+**Solution**: Increase timeout during initialization
+```python
+agent = Agent(
+    model="gpt-4",
+    timeout=60  # Increase from default 30 seconds
+)
+```
+
+### Issue: API key not found
+
+**Solution**: Check environment variable or pass explicitly
+```python
+# Option 1: Set environment variable
+# export OPENAI_API_KEY="sk-..."
+
+# Option 2: Pass in initialization
+agent = Agent(
+    model="gpt-4",
+    api_key="sk-..."
+)
 ```
 
 ## Best Practices
 
 1. **API Key Security**: Use environment variables, never hardcode keys
-2. **Rate Limiting**: Implement exponential backoff for retries
-3. **Context Management**: Monitor token usage to stay within limits
-4. **Model Selection**: Use GPT-3.5-Turbo for simple tasks, GPT-4 for complex ones
-5. **Error Handling**: Always handle API errors gracefully
+2. **Parameter Configuration**: Set all parameters during Agent initialization
+3. **Model Selection**: Use GPT-3.5-Turbo for simple tasks, GPT-4 for complex ones
+4. **Error Handling**: Always handle API errors gracefully
+5. **Cost Management**: Monitor token usage and use appropriate models
 
-## Complete Example
+## Complete Working Example
 
 ```python
 import os
-from agenticraft import Agent, tool
-from typing import List
+import asyncio
+from agenticraft import Agent
+from agenticraft.agents import WorkflowAgent
 
 class OpenAIAssistant:
     def __init__(self):
@@ -197,71 +258,86 @@ class OpenAIAssistant:
         if not os.getenv("OPENAI_API_KEY"):
             raise ValueError("OPENAI_API_KEY not set")
         
-        # Create agent with optimal settings
-        self.agent = Agent(
-            name="OpenAIAssistant",
+        # Create agents for different tasks
+        self.fast_agent = Agent(
+            name="FastAssistant",
             provider="openai",
-            model="gpt-4-turbo",
-            temperature=0.7,
-            max_tokens=2000,
-            tools=self._create_tools()
+            model="gpt-3.5-turbo",
+            temperature=0.3,
+            max_tokens=150
         )
-    
-    def _create_tools(self) -> List:
-        @tool
-        def search_docs(query: str) -> str:
-            """Search internal documentation."""
-            # Implementation
-            return f"Found docs about: {query}"
         
-        @tool
-        def calculate(expression: str) -> str:
-            """Perform calculations."""
+        self.smart_agent = Agent(
+            name="SmartAssistant",
+            provider="openai",
+            model="gpt-4",
+            temperature=0.7,
+            max_tokens=2000
+        )
+        
+        # Create workflow agent for tool usage
+        self.tool_agent = WorkflowAgent(
+            name="ToolAssistant",
+            provider="openai",
+            model="gpt-3.5-turbo"
+        )
+        self._setup_tools()
+    
+    def _setup_tools(self):
+        """Set up tool handlers for the workflow agent"""
+        def calc_handler(agent, step, context):
+            expr = context.get("expression", "")
             try:
-                result = eval(expression, {"__builtins__": {}})
-                return str(result)
+                result = eval(expr, {"__builtins__": {}})
+                return f"Result: {result}"
             except:
                 return "Invalid expression"
         
-        return [search_docs, calculate]
+        self.tool_agent.register_handler("calculate", calc_handler)
     
-    def chat(self, message: str) -> str:
-        """Process a chat message."""
-        try:
-            response = self.agent.run(message)
-            
-            # Track usage for cost monitoring
-            usage = response.metadata.get("usage", {})
-            self._log_usage(usage)
-            
-            return response.content
-            
-        except ProviderError as e:
-            # Handle specific errors
-            if "rate_limit" in str(e):
-                # Switch to cached responses or queue
-                return "I'm a bit busy right now, please try again in a moment."
-            raise
+    async def quick_answer(self, question: str) -> str:
+        """Use fast model for simple questions"""
+        response = await self.fast_agent.arun(question)
+        return response.content
     
-    def _log_usage(self, usage: dict):
-        """Log token usage for monitoring."""
-        total = usage.get("total_tokens", 0)
-        cost = self._estimate_cost(total)
-        print(f"Tokens: {total}, Est. cost: ${cost:.4f}")
+    async def detailed_analysis(self, topic: str) -> str:
+        """Use smart model for complex analysis"""
+        prompt = f"Provide a detailed analysis of: {topic}"
+        response = await self.smart_agent.arun(prompt)
+        return response.content
     
-    def _estimate_cost(self, tokens: int) -> float:
-        """Estimate cost based on current pricing."""
-        # GPT-4-Turbo pricing (example)
-        return (tokens / 1000) * 0.01
+    async def calculate(self, expression: str) -> str:
+        """Use workflow agent for calculations"""
+        workflow = self.tool_agent.create_workflow("calc")
+        workflow.add_step(name="calc", handler="calculate")
+        
+        context = {"expression": expression}
+        await self.tool_agent.execute_workflow(workflow, context=context)
+        
+        return context.get("result", "No result")
 
 # Usage
-assistant = OpenAIAssistant()
-response = assistant.chat("Help me analyze this data and create a chart")
-print(response)
+async def main():
+    assistant = OpenAIAssistant()
+    
+    # Quick answer
+    answer = await assistant.quick_answer("What's the capital of France?")
+    print(f"Quick: {answer}")
+    
+    # Detailed analysis
+    analysis = await assistant.detailed_analysis("impact of AI on society")
+    print(f"Analysis: {analysis[:200]}...")
+    
+    # Calculation
+    result = await assistant.calculate("(100 * 15) / 3")
+    print(f"Calculation: {result}")
+
+asyncio.run(main())
 ```
 
 ## See Also
 
 - [Agent API](../agent.md) - Core agent functionality
+- [WorkflowAgent Guide](../../concepts/workflows.md) - Reliable tool usage
 - [Provider Switching](../../features/provider_switching.md) - Dynamic provider changes
 - [OpenAI API Docs](https://platform.openai.com/docs) - Official OpenAI documentation

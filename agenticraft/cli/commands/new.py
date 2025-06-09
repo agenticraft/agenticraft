@@ -2,13 +2,10 @@
 New command - Create new AgentiCraft projects from templates.
 """
 
-import os
 import shutil
 from pathlib import Path
-from typing import Optional
 
 import click
-
 
 AVAILABLE_TEMPLATES = {
     "fastapi": "Production-ready REST API with agents",
@@ -39,10 +36,10 @@ AVAILABLE_TEMPLATES = {
     is_flag=True,
     help="Don't initialize a git repository",
 )
-def new(name: str, template: str, directory: Optional[str], no_git: bool):
+def new(name: str, template: str, directory: str | None, no_git: bool):
     """
     Create a new AgentiCraft project.
-    
+
     Example:
         agenticraft new my-api --template fastapi
     """
@@ -51,48 +48,48 @@ def new(name: str, template: str, directory: Optional[str], no_git: bool):
         project_path = Path(directory) / name
     else:
         project_path = Path.cwd() / name
-    
+
     # Check if directory already exists
     if project_path.exists():
         click.echo(f"Error: Directory '{project_path}' already exists", err=True)
         raise click.Abort()
-    
+
     # Get template path
     template_path = _get_template_path(template)
-    
+
     if not template_path.exists():
         click.echo(f"Error: Template '{template}' not found", err=True)
         click.echo(f"Available templates: {', '.join(AVAILABLE_TEMPLATES.keys())}")
         raise click.Abort()
-    
+
     # Create project directory
     click.echo(f"Creating new {template} project: {name}")
     project_path.mkdir(parents=True, exist_ok=True)
-    
+
     try:
         # Copy template files
         _copy_template(template_path, project_path, name)
-        
+
         # Initialize git repository
         if not no_git:
             _init_git(project_path)
-        
+
         # Update project files with name
         _update_project_files(project_path, name, template)
-        
+
         # Success message
         click.echo(f"\n✨ Project '{name}' created successfully!")
-        click.echo(f"\nNext steps:")
-        
+        click.echo("\nNext steps:")
+
         # Try to get relative path, but fall back to absolute if not possible
         try:
             display_path = project_path.relative_to(Path.cwd())
         except ValueError:
             # Paths are not relative to each other, use absolute path
             display_path = project_path
-        
+
         click.echo(f"  cd {display_path}")
-        
+
         if template == "fastapi":
             click.echo("  cp .env.example .env")
             click.echo("  # Edit .env with your API keys")
@@ -105,7 +102,7 @@ def new(name: str, template: str, directory: Optional[str], no_git: bool):
         else:
             click.echo("  pip install -r requirements.txt")
             click.echo("  python main.py")
-        
+
     except Exception as e:
         # Clean up on error
         click.echo(f"Error creating project: {str(e)}", err=True)
@@ -120,9 +117,10 @@ def _get_template_path(template: str) -> Path:
     dev_templates = Path(__file__).parent.parent.parent.parent / "templates"
     if dev_templates.exists():
         return dev_templates / template
-    
+
     # Otherwise, check installed templates
     import agenticraft
+
     package_path = Path(agenticraft.__file__).parent
     return package_path / "templates" / template
 
@@ -132,9 +130,9 @@ def _copy_template(src: Path, dst: Path, project_name: str):
     for item in src.iterdir():
         if item.name in [".git", "__pycache__", ".pytest_cache"]:
             continue
-        
+
         dest_item = dst / item.name
-        
+
         if item.is_dir():
             dest_item.mkdir(exist_ok=True)
             _copy_template(item, dest_item, project_name)
@@ -145,7 +143,7 @@ def _copy_template(src: Path, dst: Path, project_name: str):
 def _init_git(project_path: Path):
     """Initialize a git repository."""
     import subprocess
-    
+
     try:
         # Initialize git
         subprocess.run(
@@ -154,7 +152,7 @@ def _init_git(project_path: Path):
             check=True,
             capture_output=True,
         )
-        
+
         # Create .gitignore if it doesn't exist
         gitignore_path = project_path / ".gitignore"
         if not gitignore_path.exists():
@@ -193,7 +191,7 @@ logs/
 Thumbs.db
 """
             gitignore_path.write_text(gitignore_content)
-        
+
         # Initial commit
         subprocess.run(
             ["git", "add", "."],
@@ -207,9 +205,9 @@ Thumbs.db
             check=True,
             capture_output=True,
         )
-        
+
         click.echo("✓ Initialized git repository")
-        
+
     except subprocess.CalledProcessError:
         click.echo("⚠️  Failed to initialize git repository (git not found?)")
     except Exception as e:
@@ -222,18 +220,20 @@ def _update_project_files(project_path: Path, name: str, template: str):
     pyproject_path = project_path / "pyproject.toml"
     if pyproject_path.exists():
         content = pyproject_path.read_text()
-        content = content.replace("name = \"agenticraft-template\"", f'name = "{name}"')
+        content = content.replace('name = "agenticraft-template"', f'name = "{name}"')
         content = content.replace("agenticraft-template", name)
         pyproject_path.write_text(content)
-    
+
     # Update README.md
     readme_path = project_path / "README.md"
     if readme_path.exists():
         content = readme_path.read_text()
-        content = content.replace("AgentiCraft Template", name.replace("-", " ").title().replace(" ", "-"))
+        content = content.replace(
+            "AgentiCraft Template", name.replace("-", " ").title().replace(" ", "-")
+        )
         content = content.replace("agenticraft-template", name)
         readme_path.write_text(content)
-    
+
     # Template-specific updates
     if template == "fastapi":
         # Update docker-compose.yml

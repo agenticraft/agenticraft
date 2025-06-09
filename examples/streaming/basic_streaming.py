@@ -1,195 +1,125 @@
-"""Example: Basic streaming with AgentiCraft.
+"""Basic streaming example for AgentiCraft.
 
-This example demonstrates how to stream responses from agents token by token
-for a better user experience with long responses.
+This example shows how to stream responses token by token for better UX.
 """
 
 import asyncio
-import os
-import sys
-from typing import Optional
-
-# Add the parent directory to the path so we can import agenticraft
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from agenticraft import Agent
-from agenticraft.core.streaming import StreamInterruptedError
+from agenticraft.core.streaming import collect_stream
 
 
 async def basic_streaming_example():
-    """Demonstrate basic streaming functionality."""
-    print("=== Basic Streaming Example ===\n")
-    
+    """Basic example of streaming responses."""
+    print("🚀 Basic Streaming Example")
+    print("=" * 60)
+
     # Create an agent
     agent = Agent(
         name="StreamingAssistant",
-        instructions="You are a helpful AI assistant that provides detailed explanations.",
-        model="gpt-4"
+        instructions="You are a helpful assistant that provides detailed explanations.",
+        model="gpt-4",  # You can change this to your preferred model
     )
-    
-    # Check if the provider supports streaming
-    info = agent.get_provider_info()
-    print(f"Provider: {info['provider']}")
-    print(f"Model: {info['model']}")
-    print(f"Supports streaming: {info['supports_streaming']}\n")
-    
-    if not info['supports_streaming']:
-        print("⚠️  Current provider doesn't support streaming!")
-        print("Streaming is supported by: OpenAI, Anthropic")
-        return
-    
-    # Example 1: Simple streaming
-    print("1. Simple Streaming Response")
-    print("-" * 40)
-    print("Prompt: Tell me a short story about a robot learning to paint.\n")
-    print("Response: ", end="", flush=True)
-    
-    async for chunk in agent.stream(
-        "Tell me a short story about a robot learning to paint. Keep it under 100 words."
-    ):
-        print(chunk.content, end="", flush=True)
-    
-    print("\n\n")
-    
-    # Example 2: Streaming with progress indicator
-    print("2. Streaming with Progress Tracking")
-    print("-" * 40)
-    print("Prompt: Explain quantum computing in simple terms.\n")
-    print("Response:\n")
-    
-    chunk_count = 0
-    async for chunk in agent.stream(
-        "Explain quantum computing in simple terms. Include an analogy."
-    ):
-        chunk_count += 1
-        print(chunk.content, end="", flush=True)
-    
-    print(f"\n\n[Received {chunk_count} chunks]\n")
-    
-    # Example 3: Collecting streamed response
-    print("3. Collecting Streamed Response")
-    print("-" * 40)
-    print("Prompt: List 3 benefits of exercise.\n")
-    
-    from agenticraft.core.streaming import StreamingResponse
-    
-    response = StreamingResponse()
-    async for chunk in agent.stream("List 3 benefits of regular exercise."):
-        response.add_chunk(chunk)
-        print(".", end="", flush=True)  # Progress indicator
-    
-    print(f"\n\nComplete response ({response.chunk_count} chunks):")
-    print(response.complete_text)
-    print(f"\nStreaming duration: {response.duration:.2f} seconds\n")
 
+    # Example 1: Stream a simple response
+    print("\n📝 Example 1: Simple streaming")
+    print("-" * 40)
 
-async def streaming_with_interruption():
-    """Demonstrate stream interruption handling."""
-    print("\n=== Streaming with Interruption ===\n")
-    
-    agent = Agent(
-        name="InterruptibleAssistant",
-        instructions="You are a helpful AI assistant.",
-        model="gpt-4"
+    prompt = (
+        "Explain what streaming is in the context of AI responses in 2-3 sentences."
     )
-    
-    print("Streaming a long response (will interrupt after 50 characters)...\n")
-    
+
+    print(f"Prompt: {prompt}")
+    print("\nStreaming response:")
+
     try:
-        char_count = 0
-        async for chunk in agent.stream(
-            "Write a detailed explanation of the water cycle, "
-            "including evaporation, condensation, precipitation, and collection."
-        ):
+        async for chunk in agent.stream(prompt):
+            # Print each chunk as it arrives
             print(chunk.content, end="", flush=True)
-            char_count += len(chunk.content)
-            
-            # Interrupt after 50 characters
-            if char_count > 50:
-                print("\n\n[Interrupting stream...]")
-                break
-                
-    except StreamInterruptedError as e:
-        print(f"\nStream interrupted: {e}")
-        if e.partial_response:
-            print(f"Partial response: {e.partial_response}")
 
+            # You can also access metadata
+            if chunk.is_final:
+                print("\n\n✅ Streaming complete!")
+                if chunk.metadata:
+                    print(f"Metadata: {chunk.metadata}")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+        print("Make sure you have set up your API keys!")
 
-async def streaming_with_different_models():
-    """Compare streaming across different models."""
-    print("\n=== Streaming with Different Models ===\n")
-    
-    models = [
-        ("gpt-4", "OpenAI GPT-4"),
-        ("gpt-3.5-turbo", "OpenAI GPT-3.5 Turbo"),
-    ]
-    
-    prompt = "What is the meaning of life in one sentence?"
-    
-    for model, display_name in models:
-        try:
-            agent = Agent(name=f"Agent-{model}", model=model)
-            
-            print(f"\n{display_name}:")
-            print("-" * 30)
-            
-            start_time = asyncio.get_event_loop().time()
-            
-            async for chunk in agent.stream(prompt):
-                print(chunk.content, end="", flush=True)
-            
-            elapsed = asyncio.get_event_loop().time() - start_time
-            print(f"\n[Streaming time: {elapsed:.2f}s]\n")
-            
-        except Exception as e:
-            print(f"Error with {display_name}: {e}\n")
+    # Example 2: Collect entire stream
+    print("\n\n📝 Example 2: Collecting stream into response")
+    print("-" * 40)
 
+    prompt2 = "List 3 benefits of streaming AI responses."
+    print(f"Prompt: {prompt2}")
 
-async def streaming_with_temperature():
-    """Demonstrate how temperature affects streaming."""
-    print("\n=== Streaming with Different Temperatures ===\n")
-    
-    agent = Agent(
-        name="TemperatureTest",
-        instructions="You are a creative writer.",
-        model="gpt-3.5-turbo"
-    )
-    
-    prompt = "Write a creative opening line for a science fiction story."
-    temperatures = [0.0, 0.7, 1.5]
-    
-    for temp in temperatures:
-        print(f"\nTemperature {temp}:")
-        print("-" * 30)
-        
-        async for chunk in agent.stream(prompt, temperature=temp):
-            print(chunk.content, end="", flush=True)
-        
-        print("\n")
+    try:
+        # Create a new stream and collect it
+        stream = agent.stream(prompt2)
+        response = await collect_stream(stream)
+
+        print(f"\nComplete response ({response.chunk_count} chunks):")
+        print(response.complete_text)
+
+        if response.duration:
+            print(f"\nStreaming duration: {response.duration:.2f} seconds")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
+
+    # Example 3: Stream with custom handling
+    print("\n\n📝 Example 3: Custom chunk handling")
+    print("-" * 40)
+
+    prompt3 = "Count from 1 to 5 slowly, with a brief pause between each number."
+    print(f"Prompt: {prompt3}")
+    print("\nStreaming with chunk details:")
+
+    try:
+        chunk_count = 0
+        total_length = 0
+
+        async for chunk in agent.stream(prompt3):
+            chunk_count += 1
+            total_length += len(chunk.content)
+
+            # Custom handling - show chunk details
+            print(
+                f"\nChunk {chunk_count}: '{chunk.content}' "
+                f"(length: {len(chunk.content)}, "
+                f"total: {total_length} chars)"
+            )
+
+            # You could add custom logic here, like:
+            # - Update a progress bar
+            # - Store partial results
+            # - Check for specific content
+
+            if chunk.is_final:
+                print(f"\n✅ Received {chunk_count} chunks total")
+    except Exception as e:
+        print(f"\n❌ Error: {e}")
 
 
 async def main():
-    """Run all streaming examples."""
-    # Set up API key
-    if not os.getenv("OPENAI_API_KEY"):
-        print("⚠️  Please set OPENAI_API_KEY environment variable")
-        return
-    
+    """Run the examples."""
     try:
-        # Run examples
         await basic_streaming_example()
-        await streaming_with_interruption()
-        await streaming_with_different_models()
-        await streaming_with_temperature()
-        
     except KeyboardInterrupt:
-        print("\n\n✋ Examples interrupted by user")
+        print("\n\n👋 Streaming interrupted by user")
     except Exception as e:
-        print(f"\n❌ Error: {e}")
-    
-    print("\n✅ All streaming examples completed!")
+        print(f"\n❌ Unexpected error: {e}")
+        import traceback
+
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
-    # Run the async main function
+    # Note: Make sure you have set the appropriate API key
+    # For OpenAI: export OPENAI_API_KEY="your-key"
+    # For Anthropic: export ANTHROPIC_API_KEY="your-key"
+
+    print("🌊 AgentiCraft Streaming Examples")
+    print("Make sure you have set your API keys!")
+    print()
+
     asyncio.run(main())

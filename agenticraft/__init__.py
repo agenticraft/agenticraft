@@ -5,7 +5,7 @@ A lightweight, production-ready framework for building AI agents with
 transparent reasoning, MCP protocol support, and comprehensive observability.
 """
 
-__version__ = "0.1.1"
+__version__ = "0.2.0-alpha"
 __author__ = "AgentiCraft Team"
 __email__ = "hello@agenticraft.ai"
 
@@ -16,22 +16,21 @@ if sys.version_info < (3, 10):
     raise RuntimeError("AgentiCraft requires Python 3.10 or higher")
 
 # Core imports
-from .core.agent import Agent
-from .core.tool import tool, BaseTool
-from .core.workflow import Workflow, Step
-from .core.exceptions import (
-    AgenticraftError,
-    AgentError,
-    ToolError,
-    WorkflowError,
-    StepExecutionError,
-)
-
 # Advanced agents
 from .agents import (
     ReasoningAgent,
     WorkflowAgent,
 )
+from .core.agent import Agent
+from .core.exceptions import (
+    AgentError,
+    AgenticraftError,
+    StepExecutionError,
+    ToolError,
+    WorkflowError,
+)
+from .core.tool import BaseTool, tool
+from .core.workflow import Step, Workflow
 
 __all__ = [
     "__version__",

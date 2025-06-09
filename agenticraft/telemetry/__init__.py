@@ -1,96 +1,65 @@
-"""Telemetry and observability for AgentiCraft.
+"""Telemetry module for AgentiCraft.
 
-This package provides comprehensive telemetry support including:
-- OpenTelemetry integration for distributed tracing
+This module provides observability capabilities including:
+- Distributed tracing with OpenTelemetry
 - Metrics collection and export
-- Automatic instrumentation
-- Decorators for easy telemetry addition
-
-Example:
-    Basic telemetry setup::
-    
-        from agenticraft.telemetry import setup_telemetry, track_metrics
-        
-        # Initialize telemetry
-        setup_telemetry(
-            service_name="my-agent-app",
-            export_endpoint="http://localhost:4317"
-        )
-        
-        # Use decorators for automatic tracking
-        @track_metrics(labels=["agent_name"])
-        async def run_agent(agent_name: str):
-            # Your code here
-            pass
+- Performance monitoring
+- Error tracking
 """
 
-from .config import (
-    TelemetryConfig,
-    ExportFormat,
-    TelemetryEnvironment,
-    ExporterConfig,
-    ResourceConfig,
-    SamplingConfig,
-    InstrumentationConfig,
-    development_config,
-    production_config,
-    test_config
-)
-
-from .tracer import (
-    setup_tracing,
-    get_tracer,
-    shutdown_tracing,
-    traced_operation,
-    trace_function,
-    add_event,
-    set_attribute,
-    get_current_trace_id,
-    TracerManager
-)
-
 from .decorators import (
-    track_metrics,
-    trace,
-    measure_time,
     count_calls,
+    measure_time,
     observe_value,
+    trace,
     trace_agent_method,
-    trace_tool_execution
+    trace_tool_execution,
+    track_metrics,
 )
-
-# Re-export from core for convenience
-from ..core.telemetry import (
-    Telemetry,
-    set_global_telemetry,
-    get_global_telemetry,
-    init_telemetry
+from .metrics import (
+    LatencyTimer,
+    MetricsCollector,
+    MetricsConfig,
+    get_meter,
+    initialize_metrics,
+    record_error,
+    record_latency,
+    record_memory_operation,
+    record_token_usage,
+    shutdown_metrics,
+)
+from .tracer import (
+    TracerConfig,
+    create_span,
+    get_current_trace_id,
+    get_tracer,
+    initialize_tracer,
+    record_exception,
+    set_span_attributes,
+    shutdown_tracer,
 )
 
 __all__ = [
-    # Config
-    "TelemetryConfig",
-    "ExportFormat",
-    "TelemetryEnvironment",
-    "ExporterConfig",
-    "ResourceConfig",
-    "SamplingConfig",
-    "InstrumentationConfig",
-    "development_config",
-    "production_config",
-    "test_config",
-    
     # Tracer
-    "setup_tracing",
     "get_tracer",
-    "shutdown_tracing",
-    "traced_operation",
-    "trace_function",
-    "add_event",
-    "set_attribute",
+    "create_span",
+    "set_span_attributes",
+    "record_exception",
+    "TracerConfig",
     "get_current_trace_id",
-    "TracerManager",
-    
+    "initialize_tracer",
+    "shutdown_tracer",
+    # Metrics
+    "get_meter",
+    "MetricsCollector",
+    "record_token_usage",
+    "record_latency",
+    "record_error",
+    "record_memory_operation",
+    "LatencyTimer",
+    "initialize_metrics",
+    "shutdown_metrics",
+    "MetricsConfig",
     # Decorators
     "track_metrics",
     "trace",
@@ -99,71 +68,4 @@ __all__ = [
     "observe_value",
     "trace_agent_method",
     "trace_tool_execution",
-    
-    # Core telemetry
-    "Telemetry",
-    "set_global_telemetry",
-    "get_global_telemetry",
-    "init_telemetry",
 ]
-
-
-def setup_telemetry(
-    service_name: str = "agenticraft",
-    export_endpoint: str = "http://localhost:4317",
-    environment: str = "development",
-    **kwargs
-) -> Telemetry:
-    """Convenience function to set up both telemetry and tracing.
-    
-    Args:
-        service_name: Name of your service
-        export_endpoint: OTLP endpoint for telemetry export
-        environment: Deployment environment
-        **kwargs: Additional configuration options
-        
-    Returns:
-        Configured Telemetry instance
-        
-    Example:
-        telemetry = setup_telemetry(
-            service_name="my-agent-service",
-            export_endpoint="http://jaeger:4317",
-            environment="production",
-            sample_rate=0.1
-        )
-    """
-    # Create config based on environment
-    if environment == "development":
-        config = development_config()
-    elif environment == "production":
-        config = production_config(
-            service_name=service_name,
-            otlp_endpoint=export_endpoint,
-            sample_rate=kwargs.get("sample_rate", 0.1)
-        )
-    elif environment == "test":
-        config = test_config()
-    else:
-        config = TelemetryConfig()
-    
-    # Update with provided values
-    config.resource.service_name = service_name
-    if export_endpoint:
-        config.trace_exporter.endpoint = export_endpoint
-        config.metric_exporter.endpoint = export_endpoint
-    
-    # Apply any additional kwargs
-    for key, value in kwargs.items():
-        if hasattr(config, key):
-            setattr(config, key, value)
-    
-    # Set up tracing
-    setup_tracing(config)
-    
-    # Initialize and return telemetry
-    return init_telemetry(
-        service_name=service_name,
-        export_to=export_endpoint,
-        enabled=config.enabled
-    )

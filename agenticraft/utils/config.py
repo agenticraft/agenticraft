@@ -5,38 +5,33 @@ including environment setup, validation, and initialization.
 
 Example:
     Setting up configuration::
-    
+
         from agenticraft.utils.config import setup_environment, validate_config
-        
+
         # Set up from .env file
         setup_environment()
-        
+
         # Validate configuration
         validate_config(providers=["openai"])
 """
 
-import os
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from dotenv import load_dotenv
 
-from ..core.config import settings, reload_settings
+from ..core.config import reload_settings, settings
 
 
-def setup_environment(
-    env_file: Optional[str] = None,
-    override: bool = True
-) -> bool:
+def setup_environment(env_file: str | None = None, override: bool = True) -> bool:
     """Load environment variables from .env file.
-    
+
     Args:
         env_file: Path to .env file (defaults to searching for .env)
         override: Whether to override existing environment variables
-        
+
     Returns:
         True if a .env file was loaded
-        
+
     Example:
         setup_environment(".env.production")
     """
@@ -50,47 +45,46 @@ def setup_environment(
             if env_path.exists():
                 return load_dotenv(env_path, override=override)
             current = current.parent
-        
+
         # Try default location
         return load_dotenv(override=override)
 
 
 def validate_config(
-    providers: Optional[List[str]] = None,
-    require_telemetry: bool = False
+    providers: list[str] | None = None, require_telemetry: bool = False
 ) -> None:
     """Validate that configuration is properly set up.
-    
+
     Args:
         providers: List of providers that need API keys
         require_telemetry: Whether telemetry configuration is required
-        
+
     Raises:
         ValueError: If configuration is invalid
-        
+
     Example:
         validate_config(providers=["openai", "anthropic"])
     """
     errors = []
-    
+
     # Check API keys for requested providers
     if providers:
         for provider in providers:
             if not settings.get_api_key(provider):
                 errors.append(f"Missing API key for {provider}")
-    
+
     # Check telemetry if required
     if require_telemetry and settings.telemetry_enabled:
         if not settings.telemetry_export_endpoint:
             errors.append("Telemetry enabled but no export endpoint configured")
-    
+
     # Check memory path exists
     if not settings.memory_path.exists():
         try:
             settings.memory_path.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             errors.append(f"Cannot create memory path: {e}")
-    
+
     # Check plugin directories
     for plugin_dir in settings.plugin_dirs:
         if not plugin_dir.exists():
@@ -98,45 +92,44 @@ def validate_config(
                 plugin_dir.mkdir(parents=True, exist_ok=True)
             except Exception as e:
                 errors.append(f"Cannot create plugin directory {plugin_dir}: {e}")
-    
+
     if errors:
         raise ValueError(
-            "Configuration validation failed:\n" + 
-            "\n".join(f"  - {error}" for error in errors)
+            "Configuration validation failed:\n"
+            + "\n".join(f"  - {error}" for error in errors)
         )
 
 
 def init_from_env(
-    env_file: Optional[str] = None,
-    providers: Optional[List[str]] = None
+    env_file: str | None = None, providers: list[str] | None = None
 ) -> None:
     """Initialize AgentiCraft from environment variables.
-    
+
     This is a convenience function that:
     1. Loads environment variables from .env file
     2. Reloads settings
     3. Validates configuration
-    
+
     Args:
         env_file: Path to .env file
         providers: Providers that need API keys
-        
+
     Example:
         init_from_env(providers=["openai"])
     """
     # Load environment
     setup_environment(env_file)
-    
+
     # Reload settings to pick up new environment variables
     reload_settings()
-    
+
     # Validate
     validate_config(providers=providers)
 
 
-def get_config_info() -> Dict[str, any]:
+def get_config_info() -> dict[str, any]:
     """Get information about current configuration.
-    
+
     Returns:
         Dictionary with configuration information
     """
@@ -158,7 +151,7 @@ def get_config_info() -> Dict[str, any]:
 
 def create_env_template(path: str = ".env.example") -> None:
     """Create a template .env file with all available settings.
-    
+
     Args:
         path: Path to create the template file
     """
@@ -218,8 +211,8 @@ AGENTICRAFT_WORKFLOW_MAX_PARALLEL_STEPS=5
 AGENTICRAFT_ALLOW_CODE_EXECUTION=false
 AGENTICRAFT_ALLOWED_DOMAINS=[]
 """
-    
-    with open(path, 'w') as f:
+
+    with open(path, "w") as f:
         f.write(template)
-    
+
     print(f"Created environment template at {path}")

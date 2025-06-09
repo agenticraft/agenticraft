@@ -5,11 +5,11 @@ This module provides the main entry point for the AgentiCraft command-line tool.
 """
 
 import sys
+
 import click
-from typing import Optional
 
 from agenticraft import __version__
-from agenticraft.cli.commands import new, run, templates, plugin
+from agenticraft.cli.commands import new, plugin, run, templates
 
 
 @click.group(invoke_without_command=True)
@@ -18,12 +18,12 @@ from agenticraft.cli.commands import new, run, templates, plugin
 def cli(ctx):
     """
     AgentiCraft - The AI Agent Framework.
-    
+
     Build production-ready AI agents with ease.
     """
     # Ensure that ctx.obj exists and is a dict
     ctx.ensure_object(dict)
-    
+
     # If no command was provided, show a welcome message
     if ctx.invoked_subcommand is None:
         click.echo("AgentiCraft - The AI Agent Framework")
@@ -40,23 +40,24 @@ def version():
 @cli.command()
 def info():
     """Show information about AgentiCraft installation."""
-    import platform
     import os
-    
+    import platform
+
     click.echo(f"AgentiCraft {__version__}")
     click.echo(f"Python {platform.python_version()}")
     click.echo(f"Platform: {platform.platform()}")
     click.echo(f"Installation: {os.path.dirname(os.path.dirname(__file__))}")
-    
+
     # Check available providers
     click.echo("\nAvailable Providers:")
     try:
         from agenticraft.providers import list_providers
+
         for provider in list_providers():
             click.echo(f"  - {provider}")
     except:
         click.echo("  - Unable to load providers")
-    
+
     # Check available tools
     click.echo("\nCore Tools:")
     tools = ["search", "calculator", "files", "http", "text"]

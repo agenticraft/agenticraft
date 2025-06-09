@@ -1,458 +1,561 @@
-"""OpenTelemetry tracer setup for AgentiCraft.
+"""OpenTelemetry tracer implementation for AgentiCraft.
 
-This module provides the tracer initialization and configuration
-for distributed tracing across AgentiCraft applications.
-
-Example:
-    Basic tracer setup::
-    
-        from agenticraft.telemetry import setup_tracing, get_tracer
-        
-        # Initialize tracing
-        setup_tracing(
-            service_name="my-agent-service",
-            endpoint="http://jaeger:4317"
-        )
-        
-        # Get a tracer
-        tracer = get_tracer(__name__)
-        
-        # Create spans
-        with tracer.start_as_current_span("process_request"):
-            # Your code here
-            pass
+This module provides distributed tracing capabilities with:
+- Automatic span creation and propagation
+- Attribute collection
+- Error tracking
+- Context management
 """
 
-import logging
+import functools
+import time
+from collections.abc import Callable
 from contextlib import contextmanager
-from typing import Optional, Dict, Any, List, Callable
+from typing import Any, TypeVar
 
 from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
+from opentelemetry.context import attach, detach
 
-# Try to import exporters, but don't fail if they're not available
+# Optional imports for exporters
 try:
     from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+    HAS_OTLP = True
 except ImportError:
+    HAS_OTLP = False
     OTLPSpanExporter = None
-    
+
 try:
     from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+
+    HAS_JAEGER = True
 except ImportError:
+    HAS_JAEGER = False
     JaegerExporter = None
-    
-try:
-    from opentelemetry.exporter.zipkin.json import ZipkinExporter
-except ImportError:
-    ZipkinExporter = None
-from opentelemetry.sdk.trace import TracerProvider, SpanProcessor
+from opentelemetry.propagate import extract, inject
+from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
+from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
     ConsoleSpanExporter,
-    SimpleSpanProcessor
+    SimpleSpanProcessor,
 )
-from opentelemetry.sdk.trace.sampling import (
-    TraceIdRatioBased,
-    ParentBased,
-    Sampler
-)
-# AlwaysOff and AlwaysOn might not be available in all versions
-try:
-    from opentelemetry.sdk.trace.sampling import AlwaysOff, AlwaysOn
-except ImportError:
-    # Create simple implementations if not available
-    class AlwaysOff(Sampler):
-        def should_sample(self, *args, **kwargs):
-            return False
-    
-    class AlwaysOn(Sampler):
-        def should_sample(self, *args, **kwargs):
-            return True
+from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
 from opentelemetry.trace import Status, StatusCode
-# Try to import instrumentors
-try:
-    from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
-except ImportError:
-    HTTPXClientInstrumentor = None
-    
-try:
-    from opentelemetry.instrumentation.grpc import (
-        GrpcInstrumentorClient,
-        GrpcInstrumentorServer
-    )
-except ImportError:
-    GrpcInstrumentorClient = None
-    GrpcInstrumentorServer = None
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from pydantic import BaseModel
 
-from .config import TelemetryConfig, ExportFormat, ResourceConfig
-
-logger = logging.getLogger(__name__)
+# Type variable for decorators
+F = TypeVar("F", bound=Callable[..., Any])
 
 
-class TracerManager:
-    """Manages OpenTelemetry tracer setup and configuration."""
-    
-    def __init__(self, config: TelemetryConfig):
-        """Initialize tracer manager.
-        
-        Args:
-            config: Telemetry configuration
-        """
-        self.config = config
-        self._tracer_provider: Optional[TracerProvider] = None
-        self._instrumentors: List[Any] = []
-    
-    def setup(self) -> None:
-        """Set up the tracer with configured exporters and processors."""
-        if not self.config.enabled or not self.config.export_traces:
-            logger.info("Tracing is disabled")
-            return
-        
-        # Create resource
-        resource = self._create_resource()
-        
-        # Create sampler
-        sampler = self._create_sampler()
-        
-        # Create tracer provider
-        self._tracer_provider = TracerProvider(
-            resource=resource,
-            sampler=sampler
-        )
-        
-        # Add span processors
-        processors = self._create_span_processors()
-        for processor in processors:
-            self._tracer_provider.add_span_processor(processor)
-        
-        # Set as global tracer provider
-        trace.set_tracer_provider(self._tracer_provider)
-        
-        # Set up instrumentation
-        self._setup_instrumentation()
-        
-        logger.info(
-            f"Tracing initialized with {self.config.trace_exporter.format} exporter"
-        )
-    
-    def _create_resource(self) -> Resource:
-        """Create OpenTelemetry resource from config."""
-        attributes = {
-            "service.name": self.config.resource.service_name,
-            "service.version": self.config.resource.service_version,
-            "deployment.environment": self.config.resource.environment.value,
+class TracerConfig(BaseModel):
+    """Configuration for OpenTelemetry tracer."""
+
+    service_name: str = "agenticraft"
+    service_version: str = "0.2.0"
+    enabled: bool = True
+    exporter_type: str = "console"  # console, otlp, jaeger
+    otlp_endpoint: str | None = None
+    jaeger_agent_host: str = "localhost"
+    jaeger_agent_port: int = 6831
+    batch_export: bool = True
+    sample_rate: float = 1.0  # 1.0 = 100% sampling
+
+    # Performance settings
+    max_queue_size: int = 2048
+    max_export_batch_size: int = 512
+    export_timeout_millis: int = 30000
+
+
+# Global tracer instance
+_tracer_provider: TracerProvider | None = None
+_tracer: trace.Tracer | None = None
+_config: TracerConfig | None = None
+
+
+def initialize_tracer(config: TracerConfig | None = None) -> trace.Tracer:
+    """Initialize the OpenTelemetry tracer.
+
+    Args:
+        config: Tracer configuration
+
+    Returns:
+        Configured tracer instance
+    """
+    global _tracer_provider, _tracer, _config
+
+    if _tracer is not None and config is None:
+        return _tracer
+
+    _config = config or TracerConfig()
+
+    if not _config.enabled:
+        # Use no-op tracer when disabled
+        trace.set_tracer_provider(trace.NoOpTracerProvider())
+        _tracer = trace.get_tracer(__name__)
+        return _tracer
+
+    # Create resource
+    resource = Resource.create(
+        {
+            SERVICE_NAME: _config.service_name,
+            SERVICE_VERSION: _config.service_version,
+            "telemetry.sdk.language": "python",
+            "telemetry.sdk.name": "opentelemetry",
         }
-        
-        if self.config.resource.service_instance_id:
-            attributes["service.instance.id"] = self.config.resource.service_instance_id
-        
-        # Add custom attributes
-        attributes.update(self.config.resource.attributes)
-        
-        return Resource.create(attributes)
-    
-    def _create_sampler(self) -> Sampler:
-        """Create sampler from configuration."""
-        base_sampler = TraceIdRatioBased(self.config.sampling.sample_rate)
-        
-        if self.config.sampling.parent_based:
-            return ParentBased(root=base_sampler)
-        
-        return base_sampler
-    
-    def _create_span_processors(self) -> List[SpanProcessor]:
-        """Create span processors based on configuration."""
-        processors = []
-        
-        exporter = self._create_span_exporter()
-        if exporter:
-            if self.config.trace_exporter.format == ExportFormat.CONSOLE:
-                # Use simple processor for console output
-                processors.append(SimpleSpanProcessor(exporter))
-            else:
-                # Use batch processor for network exporters
-                processors.append(BatchSpanProcessor(
-                    exporter,
-                    max_queue_size=2048,
-                    max_export_batch_size=512,
-                    export_timeout_millis=self.config.trace_exporter.timeout_ms
-                ))
-        
-        return processors
-    
-    def _create_span_exporter(self):
-        """Create appropriate span exporter based on format."""
-        format_type = self.config.trace_exporter.format
-        
-        if format_type == ExportFormat.NONE:
-            return None
-        
-        if format_type == ExportFormat.CONSOLE:
-            return ConsoleSpanExporter()
-        
-        if format_type == ExportFormat.OTLP:
-            if OTLPSpanExporter is None:
-                logger.warning("OTLP exporter not available. Install opentelemetry-exporter-otlp")
-                return ConsoleSpanExporter()
-            return OTLPSpanExporter(
-                endpoint=self.config.trace_exporter.endpoint,
-                headers=self.config.trace_exporter.headers,
-                insecure=self.config.trace_exporter.insecure
+    )
+
+    # Create tracer provider
+    _tracer_provider = TracerProvider(
+        resource=resource, sampler=TraceIdRatioBased(_config.sample_rate)
+    )
+
+    # Configure exporter
+    if _config.exporter_type == "console":
+        exporter = ConsoleSpanExporter()
+    elif _config.exporter_type == "otlp":
+        if not HAS_OTLP:
+            raise ImportError(
+                "OTLP exporter not available. Install with: pip install opentelemetry-exporter-otlp"
             )
-        
-        if format_type == ExportFormat.JAEGER:
-            if JaegerExporter is None:
-                logger.warning("Jaeger exporter not available. Install opentelemetry-exporter-jaeger")
-                return ConsoleSpanExporter()
-            # Parse Jaeger endpoint
-            if self.config.trace_exporter.endpoint:
-                parts = self.config.trace_exporter.endpoint.split(":")
-                agent_host = parts[0] if parts else "localhost"
-                agent_port = int(parts[1]) if len(parts) > 1 else 6831
-            else:
-                agent_host = "localhost"
-                agent_port = 6831
-                
-            return JaegerExporter(
-                agent_host_name=agent_host,
-                agent_port=agent_port,
-                udp_split_oversized_batches=True
+        exporter = OTLPSpanExporter(
+            endpoint=_config.otlp_endpoint or "localhost:4317", insecure=True
+        )
+    elif _config.exporter_type == "jaeger":
+        if not HAS_JAEGER:
+            raise ImportError(
+                "Jaeger exporter not available. Install with: pip install opentelemetry-exporter-jaeger"
             )
-        
-        if format_type == ExportFormat.ZIPKIN:
-            if ZipkinExporter is None:
-                logger.warning("Zipkin exporter not available. Install opentelemetry-exporter-zipkin")
-                return ConsoleSpanExporter()
-            return ZipkinExporter(
-                endpoint=self.config.trace_exporter.endpoint
-            )
-        
-        raise ValueError(f"Unsupported trace exporter format: {format_type}")
-    
-    def _setup_instrumentation(self) -> None:
-        """Set up automatic instrumentation based on config."""
-        instrumentation = self.config.instrumentation
-        
-        if instrumentation.instrument_http:
-            if HTTPXClientInstrumentor is None:
-                logger.warning("HTTPX instrumentation not available")
-            else:
-                instrumentor = HTTPXClientInstrumentor()
-                instrumentor.instrument(
-                    tracer_provider=self._tracer_provider,
-                    excluded_urls=instrumentation.excluded_urls
-                )
-                self._instrumentors.append(instrumentor)
-        
-        if instrumentation.instrument_grpc:
-            if GrpcInstrumentorClient is None or GrpcInstrumentorServer is None:
-                logger.warning("gRPC instrumentation not available")
-            else:
-                # Client instrumentation
-                client_instrumentor = GrpcInstrumentorClient()
-                client_instrumentor.instrument(tracer_provider=self._tracer_provider)
-                self._instrumentors.append(client_instrumentor)
-                
-                # Server instrumentation
-                server_instrumentor = GrpcInstrumentorServer()
-                server_instrumentor.instrument(tracer_provider=self._tracer_provider)
-                self._instrumentors.append(server_instrumentor)
-    
-    def shutdown(self) -> None:
-        """Shutdown tracer and exporters."""
-        # Uninstrument all instrumentors
-        for instrumentor in self._instrumentors:
-            try:
-                instrumentor.uninstrument()
-            except Exception as e:
-                logger.warning(f"Failed to uninstrument: {e}")
-        
-        # Shutdown tracer provider
-        if self._tracer_provider:
-            self._tracer_provider.shutdown()
-            
-        logger.info("Tracing shutdown complete")
-    
-    def get_tracer(self, name: str, version: Optional[str] = None) -> trace.Tracer:
-        """Get a tracer instance.
-        
-        Args:
-            name: Name of the tracer (usually __name__)
-            version: Optional version string
-            
-        Returns:
-            Tracer instance
-        """
-        if self._tracer_provider:
-            return self._tracer_provider.get_tracer(name, version)
-        return trace.get_tracer(name, version)
+        exporter = JaegerExporter(
+            agent_host_name=_config.jaeger_agent_host,
+            agent_port=_config.jaeger_agent_port,
+        )
+    else:
+        raise ValueError(f"Unknown exporter type: {_config.exporter_type}")
+
+    # Configure processor
+    if _config.batch_export:
+        processor = BatchSpanProcessor(
+            exporter,
+            max_queue_size=_config.max_queue_size,
+            max_export_batch_size=_config.max_export_batch_size,
+            export_timeout_millis=_config.export_timeout_millis,
+        )
+    else:
+        processor = SimpleSpanProcessor(exporter)
+
+    _tracer_provider.add_span_processor(processor)
+
+    # Set as global provider
+    trace.set_tracer_provider(_tracer_provider)
+
+    # Get tracer
+    _tracer = trace.get_tracer(_config.service_name, _config.service_version)
+
+    return _tracer
 
 
-# Global tracer manager
-_tracer_manager: Optional[TracerManager] = None
+def get_tracer() -> trace.Tracer:
+    """Get the global tracer instance.
 
-
-def setup_tracing(
-    config: Optional[TelemetryConfig] = None,
-    service_name: Optional[str] = None,
-    endpoint: Optional[str] = None
-) -> TracerManager:
-    """Set up global tracing.
-    
-    Args:
-        config: Full telemetry configuration
-        service_name: Service name (if not using config)
-        endpoint: Exporter endpoint (if not using config)
-        
     Returns:
-        TracerManager instance
+        The tracer instance
     """
-    global _tracer_manager
-    
-    if config is None:
-        # Create config from environment or parameters
-        config = TelemetryConfig.from_env()
-        
-        if service_name:
-            config.resource.service_name = service_name
-        
-        if endpoint:
-            config.trace_exporter.endpoint = endpoint
-    
-    _tracer_manager = TracerManager(config)
-    _tracer_manager.setup()
-    
-    return _tracer_manager
+    if _tracer is None:
+        return initialize_tracer()
+    return _tracer
 
-
-def get_tracer(name: str, version: Optional[str] = None) -> trace.Tracer:
-    """Get a tracer instance.
-    
-    Args:
-        name: Name of the tracer (usually __name__)
-        version: Optional version string
-        
-    Returns:
-        Tracer instance
-    """
-    if _tracer_manager:
-        return _tracer_manager.get_tracer(name, version)
-    return trace.get_tracer(name, version)
-
-
-def shutdown_tracing() -> None:
-    """Shutdown global tracing."""
-    global _tracer_manager
-    
-    if _tracer_manager:
-        _tracer_manager.shutdown()
-        _tracer_manager = None
-
-
-# Utility functions for common tracing patterns
 
 @contextmanager
-def traced_operation(
+def create_span(
     name: str,
-    attributes: Optional[Dict[str, Any]] = None,
-    record_exception: bool = True
+    kind: trace.SpanKind = trace.SpanKind.INTERNAL,
+    attributes: dict[str, Any] | None = None,
+    links: list | None = None,
 ):
-    """Context manager for traced operations.
-    
+    """Create a new span.
+
     Args:
-        name: Operation name
-        attributes: Span attributes
-        record_exception: Whether to record exceptions
-        
+        name: Span name
+        kind: Span kind (INTERNAL, SERVER, CLIENT, PRODUCER, CONSUMER)
+        attributes: Initial span attributes
+        links: Links to other spans
+
+    Yields:
+        The created span
+
     Example:
-        with traced_operation("database_query", {"query.type": "select"}):
-            result = db.query("SELECT * FROM users")
+        with create_span("process_request") as span:
+            span.set_attribute("request.id", request_id)
+            # Process request
     """
-    tracer = get_tracer(__name__)
-    
-    with tracer.start_as_current_span(name) as span:
-        if attributes:
-            for key, value in attributes.items():
+    tracer = get_tracer()
+
+    with tracer.start_as_current_span(
+        name, kind=kind, attributes=attributes, links=links
+    ) as span:
+        yield span
+
+
+def set_span_attributes(attributes: dict[str, Any]) -> None:
+    """Set attributes on the current span.
+
+    Args:
+        attributes: Dictionary of attributes to set
+    """
+    span = trace.get_current_span()
+    if span and span.is_recording():
+        for key, value in attributes.items():
+            # Convert values to supported types
+            if isinstance(value, (str, bool, int, float)):
                 span.set_attribute(key, value)
-        
-        try:
-            yield span
-        except Exception as e:
-            if record_exception:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-            raise
+            elif isinstance(value, (list, tuple)):
+                # OpenTelemetry supports homogeneous sequences
+                if all(isinstance(v, (str, bool, int, float)) for v in value):
+                    span.set_attribute(key, value)
+                else:
+                    span.set_attribute(key, str(value))
+            else:
+                span.set_attribute(key, str(value))
 
 
-def trace_function(
-    name: Optional[str] = None,
-    attributes: Optional[Dict[str, Any]] = None
-) -> Callable:
-    """Decorator to trace function execution.
-    
+def record_exception(
+    exception: Exception,
+    attributes: dict[str, Any] | None = None,
+    escaped: bool = False,
+) -> None:
+    """Record an exception on the current span.
+
+    Args:
+        exception: The exception to record
+        attributes: Additional attributes
+        escaped: Whether the exception escaped
+    """
+    span = trace.get_current_span()
+    if span and span.is_recording():
+        span.record_exception(exception, attributes=attributes)
+        if escaped:
+            span.set_status(Status(StatusCode.ERROR, str(exception)))
+
+
+def trace_method(
+    name: str | None = None,
+    kind: trace.SpanKind = trace.SpanKind.INTERNAL,
+    attributes: dict[str, Any] | None = None,
+) -> Callable[[F], F]:
+    """Decorator to trace a method.
+
     Args:
         name: Span name (defaults to function name)
-        attributes: Additional span attributes
-        
+        kind: Span kind
+        attributes: Initial attributes
+
+    Returns:
+        Decorated function
+
     Example:
-        @trace_function(attributes={"handler.type": "api"})
-        async def handle_request(request):
-            return {"status": "ok"}
+        @trace_method("agent.run")
+        async def run(self, prompt: str):
+            # Method implementation
     """
-    def decorator(func: Callable) -> Callable:
+
+    def decorator(func: F) -> F:
         span_name = name or f"{func.__module__}.{func.__name__}"
-        
+
+        @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
-            with traced_operation(span_name, attributes):
-                return await func(*args, **kwargs)
-        
+            with create_span(span_name, kind=kind, attributes=attributes) as span:
+                try:
+                    # Add function arguments as attributes
+                    if args and hasattr(args[0], "__class__"):
+                        span.set_attribute("class", args[0].__class__.__name__)
+
+                    # Add selected kwargs as attributes
+                    for key in ["model", "provider", "agent_name", "tool_name"]:
+                        if key in kwargs:
+                            span.set_attribute(f"param.{key}", str(kwargs[key]))
+
+                    # Execute function
+                    start_time = time.time()
+                    result = await func(*args, **kwargs)
+
+                    # Record duration
+                    duration = time.time() - start_time
+                    span.set_attribute("duration_seconds", duration)
+
+                    return result
+
+                except Exception as e:
+                    record_exception(e, escaped=True)
+                    raise
+
+        @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
-            with traced_operation(span_name, attributes):
-                return func(*args, **kwargs)
-        
+            with create_span(span_name, kind=kind, attributes=attributes) as span:
+                try:
+                    # Add function arguments as attributes
+                    if args and hasattr(args[0], "__class__"):
+                        span.set_attribute("class", args[0].__class__.__name__)
+
+                    # Add selected kwargs as attributes
+                    for key in ["model", "provider", "agent_name", "tool_name"]:
+                        if key in kwargs:
+                            span.set_attribute(f"param.{key}", str(kwargs[key]))
+
+                    # Execute function
+                    start_time = time.time()
+                    result = func(*args, **kwargs)
+
+                    # Record duration
+                    duration = time.time() - start_time
+                    span.set_attribute("duration_seconds", duration)
+
+                    return result
+
+                except Exception as e:
+                    record_exception(e, escaped=True)
+                    raise
+
+        # Return appropriate wrapper based on function type
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
-        return sync_wrapper
-    
+        else:
+            return sync_wrapper
+
     return decorator
 
 
-def add_event(name: str, attributes: Optional[Dict[str, Any]] = None) -> None:
-    """Add an event to the current span.
-    
+# Semantic convention helpers
+
+
+def set_agent_attributes(
+    agent_name: str,
+    agent_type: str,
+    instructions: str | None = None,
+    model: str | None = None,
+    provider: str | None = None,
+) -> None:
+    """Set agent-specific attributes on current span.
+
     Args:
-        name: Event name
-        attributes: Event attributes
+        agent_name: Name of the agent
+        agent_type: Type of agent
+        instructions: Agent instructions
+        model: LLM model being used
+        provider: LLM provider
     """
-    span = trace.get_current_span()
-    if span and span.is_recording():
-        span.add_event(name, attributes or {})
+    attributes = {
+        "agent.name": agent_name,
+        "agent.type": agent_type,
+    }
+
+    if instructions:
+        attributes["agent.instructions"] = instructions[
+            :200
+        ]  # Truncate long instructions
+    if model:
+        attributes["llm.model"] = model
+    if provider:
+        attributes["llm.provider"] = provider
+
+    set_span_attributes(attributes)
 
 
-def set_attribute(key: str, value: Any) -> None:
-    """Set an attribute on the current span.
-    
+def set_tool_attributes(
+    tool_name: str, tool_type: str, parameters: dict[str, Any] | None = None
+) -> None:
+    """Set tool-specific attributes on current span.
+
     Args:
-        key: Attribute key
-        value: Attribute value
+        tool_name: Name of the tool
+        tool_type: Type of tool
+        parameters: Tool parameters
     """
-    span = trace.get_current_span()
-    if span and span.is_recording():
-        span.set_attribute(key, value)
+    attributes = {
+        "tool.name": tool_name,
+        "tool.type": tool_type,
+    }
+
+    if parameters:
+        # Add flattened parameters
+        for key, value in parameters.items():
+            if isinstance(value, (str, bool, int, float)):
+                attributes[f"tool.param.{key}"] = value
+
+    set_span_attributes(attributes)
 
 
-def get_current_trace_id() -> Optional[str]:
-    """Get the current trace ID if available.
-    
+def set_llm_attributes(
+    model: str,
+    provider: str,
+    prompt_tokens: int | None = None,
+    completion_tokens: int | None = None,
+    total_tokens: int | None = None,
+    temperature: float | None = None,
+    max_tokens: int | None = None,
+) -> None:
+    """Set LLM-specific attributes on current span.
+
+    Args:
+        model: Model name
+        provider: Provider name
+        prompt_tokens: Number of prompt tokens
+        completion_tokens: Number of completion tokens
+        total_tokens: Total token count
+        temperature: Temperature setting
+        max_tokens: Max tokens setting
+    """
+    attributes = {
+        "llm.model": model,
+        "llm.provider": provider,
+    }
+
+    if prompt_tokens is not None:
+        attributes["llm.prompt_tokens"] = prompt_tokens
+    if completion_tokens is not None:
+        attributes["llm.completion_tokens"] = completion_tokens
+    if total_tokens is not None:
+        attributes["llm.total_tokens"] = total_tokens
+    if temperature is not None:
+        attributes["llm.temperature"] = temperature
+    if max_tokens is not None:
+        attributes["llm.max_tokens"] = max_tokens
+
+    set_span_attributes(attributes)
+
+
+def set_memory_attributes(
+    operation: str,
+    memory_type: str,
+    key: str | None = None,
+    size: int | None = None,
+    hit: bool | None = None,
+) -> None:
+    """Set memory operation attributes on current span.
+
+    Args:
+        operation: Operation type (get, set, delete, search)
+        memory_type: Type of memory
+        key: Memory key
+        size: Size of data
+        hit: Whether it was a cache hit
+    """
+    attributes = {
+        "memory.operation": operation,
+        "memory.type": memory_type,
+    }
+
+    if key:
+        attributes["memory.key"] = key
+    if size is not None:
+        attributes["memory.size_bytes"] = size
+    if hit is not None:
+        attributes["memory.hit"] = hit
+
+    set_span_attributes(attributes)
+
+
+# Context propagation helpers
+
+
+def inject_context(carrier: dict[str, str]) -> None:
+    """Inject trace context into a carrier for propagation.
+
+    Args:
+        carrier: Dictionary to inject context into
+    """
+    propagator = TraceContextTextMapPropagator()
+    inject(carrier)
+
+
+def extract_context(carrier: dict[str, str]) -> Any:
+    """Extract trace context from a carrier.
+
+    Args:
+        carrier: Dictionary containing trace context
+
     Returns:
-        Trace ID as hex string or None
+        Context token
+    """
+    propagator = TraceContextTextMapPropagator()
+    return extract(carrier)
+
+
+@contextmanager
+def use_context(carrier: dict[str, str]):
+    """Use trace context from a carrier.
+
+    Args:
+        carrier: Dictionary containing trace context
+
+    Example:
+        with use_context(headers):
+            # Operations will be linked to parent trace
+    """
+    token = extract_context(carrier)
+    token = attach(token)
+    try:
+        yield
+    finally:
+        detach(token)
+
+
+# Convenience functions for common operations
+
+
+def trace_agent_execution(agent_name: str, agent_type: str = "base"):
+    """Decorator specifically for agent execution methods."""
+    return trace_method(
+        name=f"agent.{agent_name}.execute",
+        kind=trace.SpanKind.INTERNAL,
+        attributes={"agent.name": agent_name, "agent.type": agent_type},
+    )
+
+
+def trace_tool_execution(tool_name: str, tool_type: str = "function"):
+    """Decorator specifically for tool execution."""
+    return trace_method(
+        name=f"tool.{tool_name}.execute",
+        kind=trace.SpanKind.INTERNAL,
+        attributes={"tool.name": tool_name, "tool.type": tool_type},
+    )
+
+
+def trace_llm_call(provider: str, model: str):
+    """Decorator specifically for LLM API calls."""
+    return trace_method(
+        name=f"llm.{provider}.call",
+        kind=trace.SpanKind.CLIENT,
+        attributes={"llm.provider": provider, "llm.model": model},
+    )
+
+
+# Import asyncio for the decorator
+import asyncio
+
+# Utility functions
+
+
+def get_current_trace_id() -> str | None:
+    """Get the current trace ID.
+
+    Returns:
+        Trace ID as hex string or None if no active span
     """
     span = trace.get_current_span()
     if span and span.is_recording():
         context = span.get_span_context()
-        if context.trace_id:
+        if context and context.trace_id:
             return format(context.trace_id, "032x")
     return None
 
 
-import asyncio  # Add this import at the top
+# Shutdown function
+def shutdown_tracer() -> None:
+    """Shutdown the tracer and flush any pending spans."""
+    global _tracer_provider
+
+    if _tracer_provider:
+        _tracer_provider.shutdown()
+        _tracer_provider = None

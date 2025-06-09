@@ -8,7 +8,7 @@ AgentiCraft tools to MCP clients.
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Any
 
 from agenticraft import tool
 from agenticraft.protocols.mcp import MCPServer, mcp_tool
@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 @tool
 def calculate(expression: str) -> float:
     """Safely evaluate a mathematical expression.
-    
+
     Args:
         expression: Mathematical expression to evaluate
-        
+
     Returns:
         The result of the calculation
     """
@@ -40,10 +40,10 @@ def calculate(expression: str) -> float:
 @tool
 def get_time(timezone: str = "UTC") -> str:
     """Get the current time in the specified timezone.
-    
+
     Args:
         timezone: Timezone name (e.g., 'UTC', 'EST', 'PST')
-        
+
     Returns:
         Current time as ISO format string
     """
@@ -57,53 +57,46 @@ def get_time(timezone: str = "UTC") -> str:
         "properties": {
             "original": {"type": "string"},
             "reversed": {"type": "string"},
-            "length": {"type": "integer"}
-        }
+            "length": {"type": "integer"},
+        },
     },
     examples=[
         {
             "input": {"text": "hello"},
-            "output": {
-                "original": "hello",
-                "reversed": "olleh",
-                "length": 5
-            }
+            "output": {"original": "hello", "reversed": "olleh", "length": 5},
         }
-    ]
+    ],
 )
-def reverse_text(text: str) -> Dict[str, Any]:
+def reverse_text(text: str) -> dict[str, Any]:
     """Reverse a text string and provide information about it.
-    
+
     Args:
         text: Text to reverse
-        
+
     Returns:
         Dictionary with original, reversed text and length
     """
-    return {
-        "original": text,
-        "reversed": text[::-1],
-        "length": len(text)
-    }
+    return {"original": text, "reversed": text[::-1], "length": len(text)}
 
 
 @tool
-def list_files(directory: str = ".") -> List[str]:
+def list_files(directory: str = ".") -> list[str]:
     """List files in a directory.
-    
+
     Args:
         directory: Directory path (default: current directory)
-        
+
     Returns:
         List of file names
     """
     import os
+
     try:
         # Limit to safe directories for security
         safe_dirs = [".", "./examples", "./examples/mcp"]
         if directory not in safe_dirs:
             raise ValueError(f"Access to directory '{directory}' not allowed")
-        
+
         files = []
         for item in os.listdir(directory):
             if os.path.isfile(os.path.join(directory, item)):
@@ -117,26 +110,26 @@ async def run_websocket_server():
     """Run MCP server in WebSocket mode."""
     print("🚀 Starting MCP WebSocket Server")
     print("=" * 50)
-    
+
     # Create server
     server = MCPServer(
         name="AgentiCraft Example Server",
         version="1.0.0",
-        description="Example MCP server with basic tools"
+        description="Example MCP server with basic tools",
     )
-    
+
     # Register tools
     tools = [calculate, get_time, reverse_text, list_files]
     server.register_tools(tools)
-    
+
     print(f"📦 Registered {len(tools)} tools:")
     for t in tools:
         print(f"   - {t.name}: {t.description}")
-    
-    print(f"\n🌐 Starting WebSocket server on ws://localhost:3000")
+
+    print("\n🌐 Starting WebSocket server on ws://localhost:3000")
     print("📝 To test: python examples/mcp/basic_client.py")
     print("\nPress Ctrl+C to stop the server")
-    
+
     try:
         await server.start_websocket_server(host="localhost", port=3000)
     except KeyboardInterrupt:
@@ -146,42 +139,37 @@ async def run_websocket_server():
 async def run_http_server():
     """Run MCP server in HTTP mode."""
     import uvicorn
-    
+
     print("🚀 Starting MCP HTTP Server")
     print("=" * 50)
-    
+
     # Create server
     server = MCPServer(
         name="AgentiCraft Example HTTP Server",
         version="1.0.0",
-        description="Example MCP server with HTTP interface"
+        description="Example MCP server with HTTP interface",
     )
-    
+
     # Register tools
     tools = [calculate, get_time, reverse_text, list_files]
     server.register_tools(tools)
-    
+
     print(f"📦 Registered {len(tools)} tools:")
     for t in tools:
         print(f"   - {t.name}: {t.description}")
-    
+
     # Get FastAPI app
     app = server.create_fastapi_app()
-    
-    print(f"\n🌐 Starting HTTP server on http://localhost:8000")
+
+    print("\n🌐 Starting HTTP server on http://localhost:8000")
     print("📝 Endpoints:")
     print("   - POST /rpc - MCP RPC endpoint")
     print("   - GET /health - Health check")
     print("\nTo test: python examples/mcp/basic_client.py")
     print("\nPress Ctrl+C to stop the server")
-    
+
     # Run with uvicorn
-    config = uvicorn.Config(
-        app,
-        host="0.0.0.0",
-        port=8000,
-        log_level="info"
-    )
+    config = uvicorn.Config(app, host="0.0.0.0", port=8000, log_level="info")
     server = uvicorn.Server(config)
     await server.serve()
 
@@ -189,14 +177,15 @@ async def run_http_server():
 async def main():
     """Run the MCP server."""
     import sys
-    
+
     # Check for mode argument
     mode = sys.argv[1] if len(sys.argv) > 1 else "websocket"
-    
+
     if mode == "http":
         # Check if uvicorn is available
         try:
             import uvicorn
+
             await run_http_server()
         except ImportError:
             print("❌ HTTP mode requires uvicorn")
@@ -207,6 +196,7 @@ async def main():
         # Check if websockets is available
         try:
             import websockets
+
             await run_websocket_server()
         except ImportError:
             print("❌ WebSocket mode requires websockets")

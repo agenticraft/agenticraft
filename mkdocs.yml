@@ -103,6 +103,7 @@ nav:
   - Core Concepts:
     - Philosophy: philosophy.md
     - Agents: concepts/agents.md
+    - Handlers: concepts/handlers.md 
     - Tools: concepts/tools.md
     - Workflows: concepts/workflows.md
     - Memory: concepts/memory.md
@@ -111,7 +112,30 @@ nav:
   - Features:
     - Provider Switching: features/provider_switching.md
     - Advanced Agents: features/advanced_agents.md
+    - Reasoning Patterns: features/reasoning_patterns.md
+    - Enhanced Workflows: features/enhanced_workflows.md
     - MCP Integration: features/mcp_integration.md
+    - Streaming: features/streaming.md
+    - Telemetry & Observability:
+      - Overview: features/telemetry/index.md
+      - API Reference: features/telemetry/api-reference.md
+      - Configuration: features/telemetry/configuration.md
+      - Integration Guide: features/telemetry/integration.md
+      - Metrics Reference: features/telemetry/metrics-reference.md
+      - Performance Guide: features/telemetry/performance.md
+    - Memory Systems:
+      - Overview: features/memory/README.md
+      - Vector Memory: features/memory/vector-memory.md
+      - Knowledge Graph: features/memory/knowledge-graph.md
+      - Patterns: features/memory/patterns.md
+      - Performance: features/memory/performance.md
+      - API Reference: features/memory/api-reference.md
+    - Tool Marketplace:
+      - Overview: features/marketplace/README.md
+      - Plugin Development: features/marketplace/plugin-development.md
+      - Version Management: features/marketplace/version-management.md
+      - Registry Setup: features/marketplace/registry-setup.md
+      - API Reference: features/marketplace/api-reference.md
 
   - Examples:
     - Overview: examples/index.md
@@ -125,6 +149,20 @@ nav:
     - Agent: reference/agent.md
     - Tool: reference/tool.md
     - Workflow: reference/workflow.md
+    - Workflow (Advanced):
+      - Overview: api/workflows/index.md
+      - Visualization: api/workflows/visualization.md
+      - Patterns: api/workflows/patterns.md
+      - Templates: api/workflows/templates.md
+      - WorkflowAgent: api/workflows/workflow_agent.md
+    - Reasoning:
+      - Overview: api/reasoning/index.md
+      - Chain of Thought: api/reasoning/chain_of_thought.md
+      - Tree of Thoughts: api/reasoning/tree_of_thoughts.md
+      - ReAct Pattern: api/reasoning/react.md
+      - Base Pattern: api/reasoning/base.md
+      - Pattern Selector: api/reasoning/selector.md
+    - Streaming: api/streaming.md
     - Providers:
       - OpenAI: reference/providers/openai.md
       - Anthropic: reference/providers/anthropic.md
@@ -133,8 +171,22 @@ nav:
 
   - Guides:
     - Performance Tuning: guides/performance-tuning.md
+    - Reasoning Integration: guides/reasoning-integration.md
+
+  - Quick Reference:
+    - Streaming: quick-reference/streaming.md
+    - Reasoning Patterns: quick-reference/reasoning.md
+    - Workflows: quick-reference/workflows.md
+
+  - Migration Guides:
+    - Streaming Migration: migration/streaming.md
+    - Reasoning Migration: migration/reasoning.md
+    - Workflows Migration: migration/workflows.md
 
   - Plugins:
     - Creating Plugins: plugins/creating-plugins.md
 
   - Changelog: changelog.md
+  
+  - Development:
+    - Streaming Documentation: STREAMING_DOCS_COMPLETE.md

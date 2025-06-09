@@ -5,42 +5,38 @@ various LLM providers (OpenAI, Anthropic, Google, etc.) with AgentiCraft.
 
 Example:
     Using different providers::
-    
+
         from agenticraft import Agent
-        
+
         # OpenAI (default)
         agent = Agent(model="gpt-4")
-        
+
         # Anthropic
         agent = Agent(model="claude-3-opus", api_key="...")
-        
+
         # Local Ollama
         agent = Agent(model="ollama/llama2", base_url="http://localhost:11434")
 """
 
 from abc import ABC, abstractmethod
-import os
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any
 
-from pydantic import BaseModel
-
-from .config import settings
-from .exceptions import ProviderError, ProviderNotFoundError, ProviderAuthError
-from .types import CompletionResponse, Message, ToolCall, ToolDefinition
+from .exceptions import ProviderNotFoundError
+from .types import CompletionResponse, Message, ToolDefinition
 
 
 class BaseProvider(ABC):
     """Base class for LLM providers."""
-    
+
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
         timeout: int = 30,
-        max_retries: int = 3
+        max_retries: int = 3,
     ):
         """Initialize provider.
-        
+
         Args:
             api_key: API key for authentication
             base_url: Optional base URL override
@@ -51,20 +47,20 @@ class BaseProvider(ABC):
         self.base_url = base_url
         self.timeout = timeout
         self.max_retries = max_retries
-    
+
     @abstractmethod
     async def complete(
         self,
-        messages: Union[List[Message], List[Dict[str, Any]]],
-        model: Optional[str] = None,
-        tools: Optional[Union[List[ToolDefinition], List[Dict[str, Any]]]] = None,
-        tool_choice: Optional[Any] = None,
+        messages: list[Message] | list[dict[str, Any]],
+        model: str | None = None,
+        tools: list[ToolDefinition] | list[dict[str, Any]] | None = None,
+        tool_choice: Any | None = None,
         temperature: float = 0.7,
-        max_tokens: Optional[int] = None,
-        **kwargs: Any
+        max_tokens: int | None = None,
+        **kwargs: Any,
     ) -> CompletionResponse:
         """Get completion from the LLM.
-        
+
         Args:
             messages: Conversation messages
             model: Optional model override
@@ -73,65 +69,62 @@ class BaseProvider(ABC):
             temperature: Sampling temperature
             max_tokens: Maximum tokens to generate
             **kwargs: Provider-specific arguments
-            
+
         Returns:
             CompletionResponse with generated content
         """
         pass
-    
+
     @abstractmethod
     def validate_auth(self) -> None:
         """Validate authentication credentials.
-        
+
         Raises:
             ProviderAuthError: If authentication fails
         """
         pass
 
 
-
-
-
 class ProviderFactory:
     """Factory for creating LLM providers."""
-    
-    _providers: Dict[str, Type[BaseProvider]] = {}
-    
+
+    _providers: dict[str, type[BaseProvider]] = {}
+
     @classmethod
     def _lazy_load_providers(cls) -> None:
         """Lazily load provider implementations."""
         if not cls._providers:
-            from ..providers.openai import OpenAIProvider
             from ..providers.anthropic import AnthropicProvider
             from ..providers.ollama import OllamaProvider
-            
+            from ..providers.openai import OpenAIProvider
+
             cls._providers = {
                 "openai": OpenAIProvider,
                 "anthropic": AnthropicProvider,
                 "ollama": OllamaProvider,
             }
-    
+
     @classmethod
     def create(
         cls,
         model: str,
-        provider: Optional[str] = None,
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
-        **kwargs: Any
+        provider: str | None = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        **kwargs: Any,
     ) -> BaseProvider:
         """Create a provider based on model name.
-        
+
         Args:
             model: Model name (e.g., "gpt-4", "claude-3-opus", "ollama/llama2")
             provider: Optional explicit provider name (overrides auto-detection)
             api_key: Optional API key
             base_url: Optional base URL
             **kwargs: Additional provider arguments
-            
+
         Returns:
             Provider instance
-            
+
         Raises:
             ProviderNotFoundError: If no provider found for model
         """
@@ -139,25 +132,37 @@ class ProviderFactory:
         if provider:
             # Ensure providers are loaded
             cls._lazy_load_providers()
-            
+
             provider_class = cls._providers.get(provider)
             if not provider_class:
                 raise ProviderNotFoundError(f"Unknown provider: {provider}")
-            
+
             return provider_class(
-                api_key=api_key,
-                base_url=base_url,
-                model=model,
-                **kwargs
+                api_key=api_key, base_url=base_url, model=model, **kwargs
             )
-            
+
         # Otherwise, Common Ollama model prefixes
         ollama_models = (
-            "llama", "llama2", "llama3", "codellama", "mistral", "mixtral",
-            "gemma", "phi", "vicuna", "orca", "neural-chat", "starling",
-            "deepseek", "qwen", "dolphin", "yi", "solar", "command-r"
+            "llama",
+            "llama2",
+            "llama3",
+            "codellama",
+            "mistral",
+            "mixtral",
+            "gemma",
+            "phi",
+            "vicuna",
+            "orca",
+            "neural-chat",
+            "starling",
+            "deepseek",
+            "qwen",
+            "dolphin",
+            "yi",
+            "solar",
+            "command-r",
         )
-        
+
         # Handle explicit provider:model format first
         if ":" in model and not model.startswith("ollama/"):
             parts = model.split(":", 1)
@@ -177,7 +182,7 @@ class ProviderFactory:
         elif model.startswith(("gpt-", "o1-", "davinci", "curie", "babbage", "ada")):
             provider_name = "openai"
         elif model.startswith("claude"):
-            provider_name = "anthropic" 
+            provider_name = "anthropic"
         elif model.startswith("gemini"):
             provider_name = "google"
         elif model.startswith("ollama/"):
@@ -188,28 +193,23 @@ class ProviderFactory:
         else:
             # Unknown model
             raise ProviderNotFoundError(f"No provider found for model: {model}")
-        
+
         # Ensure providers are loaded (may have been called above already)
         if not cls._providers:
             cls._lazy_load_providers()
-        
+
         # Get provider class
         provider_class = cls._providers.get(provider_name)
         if not provider_class:
             raise ProviderNotFoundError(f"Unknown provider: {provider_name}")
-        
+
         # Create instance
-        return provider_class(
-            api_key=api_key,
-            base_url=base_url,
-            model=model,
-            **kwargs
-        )
-    
+        return provider_class(api_key=api_key, base_url=base_url, model=model, **kwargs)
+
     @classmethod
-    def register(cls, name: str, provider_class: Type[BaseProvider]) -> None:
+    def register(cls, name: str, provider_class: type[BaseProvider]) -> None:
         """Register a custom provider.
-        
+
         Args:
             name: Provider name
             provider_class: Provider class

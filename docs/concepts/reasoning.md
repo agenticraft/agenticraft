@@ -42,6 +42,13 @@ Conclusion: Based on these factors...
 Confidence: 0.85
 ```
 
+## Advanced Reasoning Patterns (v0.2.0)
+
+AgentiCraft now includes three sophisticated reasoning patterns. For detailed documentation, see:
+- [Feature Overview](../features/reasoning_patterns.md)
+- [API Reference](../api/reasoning/index.md)
+- [Integration Guide](../guides/reasoning-integration.md)
+
 ## Reasoning Features
 
 ### Chain of Thought
@@ -50,7 +57,7 @@ Break down complex problems into logical steps:
 ```python
 agent = ReasoningAgent(
     name="ProblemSolver",
-    reasoning_style="chain_of_thought"
+    reasoning_pattern="chain_of_thought"  # Updated in v0.2.0
 )
 ```
 
@@ -60,8 +67,11 @@ Explore multiple reasoning paths:
 ```python
 agent = ReasoningAgent(
     name="Explorer",
-    reasoning_style="tree_of_thought",
-    explore_branches=3
+    reasoning_pattern="tree_of_thoughts",  # Updated in v0.2.0
+    pattern_config={
+        "beam_width": 3,  # Number of branches to explore
+        "max_depth": 4
+    }
 )
 ```
 

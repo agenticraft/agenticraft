@@ -1,117 +1,133 @@
 # Tools
 
-Tools extend your agents' capabilities by allowing them to interact with external systems, APIs, and perform specialized tasks.
+!!! warning "Important: Use Handlers Instead"
+    The `@tool` decorator has compatibility issues with OpenAI and other providers due to message formatting requirements.
+    **We strongly recommend using handlers instead.** See [Handlers](handlers.md) for the recommended approach.
 
-## Creating Tools
+## Current Status
 
-The simplest way to create a tool is with the `@tool` decorator:
+The `@tool` decorator was designed to provide a simple way to extend agent capabilities. However, it currently has several limitations:
+
+1. **Message Ordering Issues** - Tool response messages must immediately follow tool calls
+2. **Missing Required Fields** - The `type` field is not properly set in tool calls  
+3. **Schema Generation Problems** - Array parameters don't generate correct OpenAI schemas
+
+These issues affect OpenAI and potentially other providers.
+
+## Recommended Solution: Handlers
+
+Handlers provide all the functionality of tools without the compatibility issues:
 
 ```python
-from agenticraft import tool
-
+# Instead of this (unreliable):
 @tool
-def weather(location: str) -> str:
-    """Get the current weather for a location."""
-    # Implementation here
-    return f"Sunny in {location}, 72°F"
+def calculate(expression: str) -> float:
+    """Calculate a math expression."""
+    return eval(expression)
 
-# Use the tool
-agent = Agent(name="WeatherBot", tools=[weather])
-response = agent.run("What's the weather in San Francisco?")
+agent = Agent(tools=[calculate])
+
+# Use this (reliable):
+def calculate_handler(agent, step, context):
+    """Calculate a math expression."""
+    expression = context.get("expression", "")
+    result = eval(expression, {"__builtins__": {}}, {})
+    context["result"] = result
+    return f"Calculated: {result}"
+
+agent = WorkflowAgent()
+agent.register_handler("calculate", calculate_handler)
 ```
 
-## Tool Parameters
+## Benefits of Handlers
 
-Tools support type hints and documentation:
+- ✅ **Work with all providers** - No compatibility issues
+- ✅ **Full control** - Direct access to context and workflow state
+- ✅ **Better error handling** - Explicit error management
+- ✅ **Composable** - Easy to combine and reuse
+- ✅ **Production ready** - Battle-tested pattern
 
+## Migration Guide
+
+### Simple Tool
 ```python
+# Old
 @tool
-def calculate(
-    expression: str,
-    precision: int = 2
-) -> float:
-    """
-    Evaluate a mathematical expression.
-    
-    Args:
-        expression: The math expression to evaluate
-        precision: Decimal places for the result
-        
-    Returns:
-        The calculated result
-    """
-    result = eval(expression)
-    return round(result, precision)
+def get_weather(city: str) -> dict:
+    return {"temp": 72, "conditions": "sunny"}
+
+# New  
+def weather_handler(agent, step, context):
+    city = context.get("city", "San Francisco")
+    weather = {"temp": 72, "conditions": "sunny"}
+    context["weather"] = weather
+    return f"Weather in {city}: {weather['temp']}°F"
 ```
 
-## Tool Best Practices
-
-1. **Clear Descriptions**: The docstring is used by the LLM to understand when to use the tool
-2. **Type Hints**: Always use type hints for better LLM understanding
-3. **Error Handling**: Tools should handle errors gracefully
-4. **Single Purpose**: Each tool should do one thing well
-
-## Advanced Tools
-
-For more complex tools, use the `Tool` class:
-
+### Tool with Multiple Parameters
 ```python
-from agenticraft import Tool
+# Old
+@tool
+def search(query: str, limit: int = 10) -> list:
+    return perform_search(query, limit)
 
-class DatabaseTool(Tool):
-    def __init__(self, connection_string: str):
-        super().__init__(
-            name="database_query",
-            description="Query the database",
-            parameters={
-                "query": {
-                    "type": "string",
-                    "description": "SQL query to execute"
-                }
-            }
-        )
-        self.conn = connect(connection_string)
-    
-    def execute(self, query: str) -> str:
-        # Execute query and return results
-        pass
+# New
+def search_handler(agent, step, context):
+    query = context.get("query", "")
+    limit = context.get("limit", 10)
+    results = perform_search(query, limit)
+    context["search_results"] = results
+    return f"Found {len(results)} results"
 ```
 
-## Built-in Tools
+### Async Tool
+```python
+# Old
+@tool
+async def fetch_data(url: str) -> dict:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
 
-AgentiCraft provides common tools out of the box:
-- Web search
-- File operations
-- API calls
-- Data processing
+# New
+async def fetch_handler(agent, step, context):
+    url = context.get("url")
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            data = await response.json()
+            context["fetched_data"] = data
+            return f"Fetched {len(data)} items"
+```
 
-## Tool Composition
-
-Combine multiple tools for complex workflows:
+## Using Handlers in Workflows
 
 ```python
-@tool
-def search(query: str) -> str:
-    """Search the web."""
-    # Implementation
-    
-@tool
-def summarize(text: str) -> str:
-    """Summarize text."""
-    # Implementation
+# Create agent
+agent = WorkflowAgent(name="Assistant")
 
-# Agent can use both tools together
-agent = Agent(
-    name="ResearchBot",
-    tools=[search, summarize]
-)
+# Register handlers
+agent.register_handler("weather", weather_handler)
+agent.register_handler("search", search_handler)
 
-response = agent.run("Research and summarize recent AI developments")
-# Agent will search, then summarize the results
+# Create workflow
+workflow = agent.create_workflow("research")
+workflow.add_step(name="get_weather", handler="weather")
+workflow.add_step(name="search_info", handler="search", depends_on=["get_weather"])
+
+# Execute with context
+context = {
+    "city": "New York",
+    "query": "tourist attractions"
+}
+result = await agent.execute_workflow(workflow, context=context)
 ```
 
 ## Next Steps
 
-- [Create your first tool](../getting-started/first-agent.md)
-- [Learn about workflows](workflows.md)
-- [Explore MCP tools](../features/mcp_integration.md)
+- **[Read the Handlers Guide](handlers.md)** - Complete documentation on handlers
+- **[See Examples](../examples/)** - Working examples using handlers
+- **[Workflow Patterns](workflows.md)** - How handlers integrate with workflows
+
+## Future Plans
+
+We're working on fixing the underlying issues with the `@tool` decorator. Once resolved, both patterns will be supported. For now, handlers are the recommended approach for production use.

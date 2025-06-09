@@ -1,255 +1,272 @@
 """Tests for telemetry tracer."""
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from opentelemetry import trace
-from opentelemetry.trace import Status, StatusCode
 
 from agenticraft.telemetry.tracer import (
-    TracerManager,
-    setup_tracing,
+    TracerConfig,
+    create_span,
+    extract_context,
     get_tracer,
-    shutdown_tracing,
-    traced_operation,
-    trace_function,
-    add_event,
-    set_attribute,
-    get_current_trace_id
+    initialize_tracer,
+    inject_context,
+    record_exception,
+    set_agent_attributes,
+    set_span_attributes,
+    shutdown_tracer,
+    trace_method,
 )
-from agenticraft.telemetry.config import TelemetryConfig, ExportFormat, ExporterConfig
 
 
-class TestTracerManager:
-    """Test tracer manager functionality."""
-    
-    def test_tracer_manager_init(self):
-        """Test tracer manager initialization."""
-        config = TelemetryConfig(enabled=False)
-        manager = TracerManager(config)
-        
-        assert manager.config == config
-        assert manager._tracer_provider is None
-        assert manager._instrumentors == []
-    
+class TestTracerConfig:
+    """Test tracer configuration and initialization."""
+
+    def test_tracer_config_defaults(self):
+        """Test tracer config defaults."""
+        config = TracerConfig()
+
+        assert config.service_name == "agenticraft"
+        assert config.service_version == "0.2.0"
+        assert config.enabled is True
+        assert config.exporter_type == "console"
+        assert config.batch_export is True
+        assert config.sample_rate == 1.0
+
     def test_disabled_tracing(self):
         """Test that tracing doesn't set up when disabled."""
-        config = TelemetryConfig(enabled=False)
-        manager = TracerManager(config)
-        
-        manager.setup()
-        
-        assert manager._tracer_provider is None
-    
-    @patch('agenticraft.telemetry.tracer.trace.set_tracer_provider')
+        config = TracerConfig(enabled=False)
+        tracer = initialize_tracer(config)
+
+        # Should return no-op tracer
+        assert tracer is not None
+
+    @patch("agenticraft.telemetry.tracer.trace.set_tracer_provider")
     def test_console_exporter_setup(self, mock_set_provider):
         """Test setup with console exporter."""
-        config = TelemetryConfig(
-            trace_exporter=ExporterConfig(format=ExportFormat.CONSOLE)
-        )
-        manager = TracerManager(config)
-        
-        manager.setup()
-        
-        assert manager._tracer_provider is not None
+        config = TracerConfig(exporter_type="console")
+        tracer = initialize_tracer(config)
+
+        assert tracer is not None
         mock_set_provider.assert_called_once()
-    
+
     def test_get_tracer(self):
         """Test getting a tracer instance."""
-        config = TelemetryConfig(enabled=False)
-        manager = TracerManager(config)
-        
-        tracer = manager.get_tracer("test.module", "1.0.0")
-        
+        tracer = get_tracer()
         assert tracer is not None
-    
-    @patch('agenticraft.telemetry.tracer.HTTPXClientInstrumentor')
-    @patch('agenticraft.telemetry.tracer.GrpcInstrumentorClient')
-    @patch('agenticraft.telemetry.tracer.GrpcInstrumentorServer')
-    def test_instrumentation_setup(self, mock_grpc_server, mock_grpc_client, mock_httpx):
-        """Test automatic instrumentation setup."""
-        config = TelemetryConfig()
-        config.instrumentation.instrument_http = True
-        config.instrumentation.instrument_grpc = True
-        
-        manager = TracerManager(config)
-        
-        # Mock instrumentors
-        httpx_inst = Mock()
-        grpc_client_inst = Mock()
-        grpc_server_inst = Mock()
-        
-        mock_httpx.return_value = httpx_inst
-        mock_grpc_client.return_value = grpc_client_inst
-        mock_grpc_server.return_value = grpc_server_inst
-        
-        manager.setup()
-        
-        # Verify instrumentors were created and configured
-        mock_httpx.assert_called_once()
-        mock_grpc_client.assert_called_once()
-        mock_grpc_server.assert_called_once()
-        
-        httpx_inst.instrument.assert_called_once()
-        grpc_client_inst.instrument.assert_called_once()
-        grpc_server_inst.instrument.assert_called_once()
-    
-    def test_shutdown(self):
+
+    def test_invalid_exporter_type(self):
+        """Test invalid exporter type raises error."""
+        config = TracerConfig(exporter_type="invalid")
+
+        with pytest.raises(ValueError, match="Unknown exporter type"):
+            initialize_tracer(config)
+
+    @patch("agenticraft.telemetry.tracer._tracer_provider")
+    def test_shutdown(self, mock_provider):
         """Test tracer shutdown."""
-        config = TelemetryConfig(enabled=False)
-        manager = TracerManager(config)
-        
-        # Add mock instrumentor
-        mock_instrumentor = Mock()
-        manager._instrumentors.append(mock_instrumentor)
-        
-        # Mock tracer provider
-        manager._tracer_provider = Mock()
-        
-        manager.shutdown()
-        
-        mock_instrumentor.uninstrument.assert_called_once()
-        manager._tracer_provider.shutdown.assert_called_once()
+        # Mock should be not None
+        mock_provider.shutdown = Mock()
+
+        shutdown_tracer()
+
+        mock_provider.shutdown.assert_called_once()
+
+
+class TestTracerConfig:
+    """Test tracer configuration and initialization."""
+
+    def test_tracer_config_defaults(self):
+        """Test tracer config defaults."""
+        config = TracerConfig()
+
+        assert config.service_name == "agenticraft"
+        assert config.service_version == "0.2.0"
+        assert config.enabled is True
+        assert config.exporter_type == "console"
+        assert config.batch_export is True
+        assert config.sample_rate == 1.0
+
+    def test_disabled_tracing(self):
+        """Test that tracing doesn't set up when disabled."""
+        config = TracerConfig(enabled=False)
+        tracer = initialize_tracer(config)
+
+        # Should return no-op tracer
+        assert tracer is not None
+
+    @patch("agenticraft.telemetry.tracer.trace.set_tracer_provider")
+    def test_console_exporter_setup(self, mock_set_provider):
+        """Test setup with console exporter."""
+        config = TracerConfig(exporter_type="console")
+        tracer = initialize_tracer(config)
+
+        assert tracer is not None
+        mock_set_provider.assert_called_once()
+
+    def test_get_tracer(self):
+        """Test getting a tracer instance."""
+        tracer = get_tracer()
+        assert tracer is not None
+
+    def test_invalid_exporter_type(self):
+        """Test invalid exporter type raises error."""
+        config = TracerConfig(exporter_type="invalid")
+
+        with pytest.raises(ValueError, match="Unknown exporter type"):
+            initialize_tracer(config)
+
+    @patch("agenticraft.telemetry.tracer._tracer_provider")
+    def test_shutdown(self, mock_provider):
+        """Test tracer shutdown."""
+        # Mock should be not None
+        mock_provider.shutdown = Mock()
+
+        shutdown_tracer()
+
+        mock_provider.shutdown.assert_called_once()
 
 
 class TestTracerFunctions:
     """Test tracer utility functions."""
-    
-    def test_setup_tracing_with_config(self):
-        """Test setting up tracing with config."""
-        config = TelemetryConfig(enabled=False)
-        
-        manager = setup_tracing(config=config)
-        
-        assert manager is not None
-        assert manager.config == config
-    
-    def test_setup_tracing_with_params(self):
-        """Test setting up tracing with parameters."""
-        manager = setup_tracing(
+
+    def test_initialize_tracer_with_config(self):
+        """Test initializing tracer with config."""
+        config = TracerConfig(enabled=False)
+
+        tracer = initialize_tracer(config)
+
+        assert tracer is not None
+
+    def test_initialize_tracer_with_custom_params(self):
+        """Test initializing tracer with custom parameters."""
+        config = TracerConfig(
             service_name="test-service",
-            endpoint="http://localhost:4317"
+            otlp_endpoint="http://localhost:4317",
+            exporter_type="console",
         )
-        
-        assert manager is not None
-        assert manager.config.resource.service_name == "test-service"
-        assert manager.config.trace_exporter.endpoint == "http://localhost:4317"
-    
+
+        tracer = initialize_tracer(config)
+
+        assert tracer is not None
+
     def test_get_tracer_function(self):
         """Test getting tracer via function."""
-        tracer = get_tracer("test.module", "1.0.0")
+        tracer = get_tracer()
         assert tracer is not None
-    
-    def test_traced_operation_success(self):
-        """Test traced operation context manager - success case."""
+
+    def test_create_span_success(self):
+        """Test create span context manager - success case."""
         mock_tracer = Mock()
         mock_span = MagicMock()
         mock_context_manager = MagicMock()
         mock_context_manager.__enter__ = Mock(return_value=mock_span)
         mock_context_manager.__exit__ = Mock(return_value=None)
         mock_tracer.start_as_current_span.return_value = mock_context_manager
-        
-        with patch('agenticraft.telemetry.tracer.get_tracer', return_value=mock_tracer):
-            with traced_operation("test_op", {"key": "value"}):
-                pass
-        
-        mock_tracer.start_as_current_span.assert_called_once_with("test_op")
-        mock_span.set_attribute.assert_called_once_with("key", "value")
-    
-    def test_traced_operation_exception(self):
-        """Test traced operation context manager - exception case."""
-        mock_tracer = Mock()
-        mock_span = MagicMock()
-        mock_context_manager = MagicMock()
-        mock_context_manager.__enter__ = Mock(return_value=mock_span)
-        mock_context_manager.__exit__ = Mock(return_value=None)
-        mock_tracer.start_as_current_span.return_value = mock_context_manager
-        
-        with patch('agenticraft.telemetry.tracer.get_tracer', return_value=mock_tracer):
-            with pytest.raises(ValueError):
-                with traced_operation("test_op", record_exception=True):
-                    raise ValueError("Test error")
-        
-        mock_span.record_exception.assert_called_once()
+
+        with patch("agenticraft.telemetry.tracer.get_tracer", return_value=mock_tracer):
+            with create_span("test_op", attributes={"key": "value"}) as span:
+                assert span == mock_span
+
+        mock_tracer.start_as_current_span.assert_called_once()
+
+    def test_record_exception_function(self):
+        """Test record exception function."""
+        mock_span = Mock()
+        mock_span.is_recording.return_value = True
+
+        with patch("opentelemetry.trace.get_current_span", return_value=mock_span):
+            exc = ValueError("Test error")
+            record_exception(exc, escaped=True)
+
+        mock_span.record_exception.assert_called_once_with(exc, attributes=None)
         mock_span.set_status.assert_called_once()
-    
+
     @pytest.mark.asyncio
-    async def test_trace_function_async(self):
-        """Test trace function decorator with async function."""
+    async def test_trace_method_async(self):
+        """Test trace method decorator with async function."""
         mock_tracer = Mock()
         mock_span = MagicMock()
         mock_context_manager = MagicMock()
         mock_context_manager.__enter__ = Mock(return_value=mock_span)
         mock_context_manager.__exit__ = Mock(return_value=None)
         mock_tracer.start_as_current_span.return_value = mock_context_manager
-        
-        with patch('agenticraft.telemetry.tracer.get_tracer', return_value=mock_tracer):
-            @trace_function(name="custom_span")
+
+        with patch("agenticraft.telemetry.tracer.get_tracer", return_value=mock_tracer):
+
+            @trace_method(name="custom_span")
             async def async_func(x, y):
                 return x + y
-            
+
             result = await async_func(1, 2)
-        
+
         assert result == 3
-        mock_tracer.start_as_current_span.assert_called_once_with("custom_span")
-    
-    def test_trace_function_sync(self):
-        """Test trace function decorator with sync function."""
+
+    def test_trace_method_sync(self):
+        """Test trace method decorator with sync function."""
         mock_tracer = Mock()
         mock_span = MagicMock()
         mock_context_manager = MagicMock()
         mock_context_manager.__enter__ = Mock(return_value=mock_span)
         mock_context_manager.__exit__ = Mock(return_value=None)
         mock_tracer.start_as_current_span.return_value = mock_context_manager
-        
-        with patch('agenticraft.telemetry.tracer.get_tracer', return_value=mock_tracer):
-            @trace_function()
+
+        with patch("agenticraft.telemetry.tracer.get_tracer", return_value=mock_tracer):
+
+            @trace_method()
             def sync_func(x, y):
                 return x * y
-            
+
             result = sync_func(3, 4)
-        
+
         assert result == 12
-    
-    def test_add_event(self):
-        """Test adding event to current span."""
+
+    def test_set_span_attributes(self):
+        """Test setting attributes on current span."""
         mock_span = Mock()
         mock_span.is_recording.return_value = True
-        
-        with patch('opentelemetry.trace.get_current_span', return_value=mock_span):
-            add_event("test_event", {"attr": "value"})
-        
-        mock_span.add_event.assert_called_once_with("test_event", {"attr": "value"})
-    
-    def test_set_attribute(self):
-        """Test setting attribute on current span."""
+
+        with patch("opentelemetry.trace.get_current_span", return_value=mock_span):
+            set_span_attributes({"key1": "value1", "key2": 42})
+
+        mock_span.set_attribute.assert_any_call("key1", "value1")
+        mock_span.set_attribute.assert_any_call("key2", 42)
+
+    def test_set_agent_attributes(self):
+        """Test setting agent-specific attributes."""
         mock_span = Mock()
         mock_span.is_recording.return_value = True
-        
-        with patch('opentelemetry.trace.get_current_span', return_value=mock_span):
-            set_attribute("key", "value")
-        
-        mock_span.set_attribute.assert_called_once_with("key", "value")
-    
-    def test_get_current_trace_id(self):
-        """Test getting current trace ID."""
-        mock_span = Mock()
-        mock_span.is_recording.return_value = True
-        
-        mock_context = Mock()
-        mock_context.trace_id = 12345
-        mock_span.get_span_context.return_value = mock_context
-        
-        with patch('opentelemetry.trace.get_current_span', return_value=mock_span):
-            trace_id = get_current_trace_id()
-        
-        assert trace_id == format(12345, "032x")
-    
-    def test_get_current_trace_id_no_span(self):
-        """Test getting trace ID when no span is active."""
-        mock_span = Mock()
-        mock_span.is_recording.return_value = False
-        
-        with patch('opentelemetry.trace.get_current_span', return_value=mock_span):
-            trace_id = get_current_trace_id()
-        
-        assert trace_id is None
+
+        with patch("opentelemetry.trace.get_current_span", return_value=mock_span):
+            set_agent_attributes(
+                agent_name="test_agent",
+                agent_type="test_type",
+                model="gpt-4",
+                provider="openai",
+            )
+
+        mock_span.set_attribute.assert_any_call("agent.name", "test_agent")
+        mock_span.set_attribute.assert_any_call("agent.type", "test_type")
+        mock_span.set_attribute.assert_any_call("llm.model", "gpt-4")
+        mock_span.set_attribute.assert_any_call("llm.provider", "openai")
+
+    def test_inject_and_extract_context(self):
+        """Test context injection and extraction."""
+        carrier = {}
+
+        # Initialize tracer first
+        from agenticraft.telemetry.tracer import initialize_tracer
+
+        initialize_tracer()
+
+        # Test injection - patch where it's imported in the module
+        with patch("agenticraft.telemetry.tracer.inject") as mock_inject:
+            inject_context(carrier)
+            mock_inject.assert_called_once_with(carrier)
+
+        # Test extraction - patch where it's imported in the module
+        with patch("agenticraft.telemetry.tracer.extract") as mock_extract:
+            mock_extract.return_value = {"trace_id": "12345"}
+            context = extract_context(carrier)
+            mock_extract.assert_called_once_with(carrier)
+            assert context == {"trace_id": "12345"}

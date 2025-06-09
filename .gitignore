@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+MANIFEST.in
 
 # PyInstaller
 *.manifest
@@ -147,6 +148,7 @@ cython_debug/
 # Project specific
 *.log
 *.sqlite
+*.sqlite3
 *.db
 .secrets/
 temp/
@@ -164,3 +166,11 @@ docs/site/
 test_output/
 test_results/
 .benchmarks/
+
+demo
+checkpoints
+vector_memory_demo
+docs/planning
+
+# Ruff cache
+.ruff_cache/

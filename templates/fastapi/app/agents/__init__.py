@@ -1,38 +1,45 @@
 """Agent endpoints for the API."""
 
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
 
 from agenticraft import Agent, ReasoningAgent, WorkflowAgent
 from agenticraft.providers import get_provider
-from agenticraft.tools.core import search_tool, calculator_tool
+from agenticraft.tools.core import calculator_tool, search_tool
 
 
 # Request/Response models
 class AgentRequest(BaseModel):
     """Base request model for agent interactions."""
+
     prompt: str = Field(..., description="The prompt for the agent")
-    context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
-    options: Optional[Dict[str, Any]] = Field(None, description="Agent-specific options")
+    context: dict[str, Any] | None = Field(None, description="Additional context")
+    options: dict[str, Any] | None = Field(None, description="Agent-specific options")
 
 
 class AgentResponse(BaseModel):
     """Base response model for agent interactions."""
+
     result: str = Field(..., description="The agent's response")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Response metadata")
+    metadata: dict[str, Any] | None = Field(None, description="Response metadata")
 
 
 class ReasoningResponse(AgentResponse):
     """Response model with reasoning trace."""
-    reasoning: Dict[str, Any] = Field(..., description="The agent's reasoning trace")
-    thinking_time_ms: int = Field(..., description="Time spent thinking in milliseconds")
+
+    reasoning: dict[str, Any] = Field(..., description="The agent's reasoning trace")
+    thinking_time_ms: int = Field(
+        ..., description="Time spent thinking in milliseconds"
+    )
 
 
 class WorkflowResponse(BaseModel):
     """Response model for workflow execution."""
+
     final_result: str = Field(..., description="Final workflow result")
-    steps: List[Dict[str, Any]] = Field(..., description="Workflow steps executed")
+    steps: list[dict[str, Any]] = Field(..., description="Workflow steps executed")
     total_time_ms: int = Field(..., description="Total execution time in milliseconds")
 
 
@@ -53,23 +60,21 @@ simple_agent.add_tool(calculator_tool)
 async def simple_agent_endpoint(request: AgentRequest):
     """
     Simple agent endpoint for basic conversations.
-    
+
     This agent has access to search and calculator tools.
     """
     try:
         result = await simple_agent.run(
-            request.prompt,
-            context=request.context,
-            **(request.options or {})
+            request.prompt, context=request.context, **(request.options or {})
         )
-        
+
         return AgentResponse(
             result=result.answer,
             metadata={
                 "agent_name": simple_agent.name,
                 "tools_used": [tool.name for tool in result.tools_used],
                 "token_count": result.metrics.get("tokens", 0),
-            }
+            },
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -85,16 +90,14 @@ reasoning_agent.add_tool(calculator_tool)
 async def reasoning_agent_endpoint(request: AgentRequest):
     """
     Reasoning agent endpoint that exposes thinking process.
-    
+
     This agent provides full transparency into its reasoning.
     """
     try:
         result = await reasoning_agent.think_and_act(
-            request.prompt,
-            context=request.context,
-            **(request.options or {})
+            request.prompt, context=request.context, **(request.options or {})
         )
-        
+
         # Extract reasoning trace
         reasoning_trace = {
             "goal_analysis": result.reasoning.goal_analysis,
@@ -110,7 +113,7 @@ async def reasoning_agent_endpoint(request: AgentRequest):
             ],
             "final_synthesis": result.reasoning.synthesis,
         }
-        
+
         return ReasoningResponse(
             result=result.answer,
             reasoning=reasoning_trace,
@@ -119,7 +122,7 @@ async def reasoning_agent_endpoint(request: AgentRequest):
                 "agent_name": reasoning_agent.name,
                 "total_steps": len(result.reasoning.steps),
                 "confidence_score": result.reasoning.confidence,
-            }
+            },
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -130,7 +133,7 @@ async def reasoning_agent_endpoint(request: AgentRequest):
 async def workflow_endpoint(request: AgentRequest):
     """
     Execute a multi-step workflow.
-    
+
     This demonstrates how to use WorkflowAgent for complex tasks.
     """
     try:
@@ -138,26 +141,27 @@ async def workflow_endpoint(request: AgentRequest):
         workflow_agent = WorkflowAgent(
             "Workflow Executor",
             provider=provider,
-            workflow_config=request.options.get("workflow_config", {})
+            workflow_config=request.options.get("workflow_config", {}),
         )
-        
+
         # Execute workflow
         result = await workflow_agent.execute_workflow(
-            request.prompt,
-            context=request.context
+            request.prompt, context=request.context
         )
-        
+
         # Format steps for response
         steps = [
             {
                 "name": step.name,
                 "status": step.status,
                 "duration_ms": step.duration_ms,
-                "output": step.output[:200] + "..." if len(step.output) > 200 else step.output,
+                "output": (
+                    step.output[:200] + "..." if len(step.output) > 200 else step.output
+                ),
             }
             for step in result.steps
         ]
-        
+
         return WorkflowResponse(
             final_result=result.final_output,
             steps=steps,
@@ -207,8 +211,8 @@ async def agent_health():
         "provider": provider.__class__.__name__,
         "tools_available": ["search", "calculator"],
     }
-    
+
     # You could add actual health checks here
     # For example, testing if the provider is accessible
-    
+
     return health_status

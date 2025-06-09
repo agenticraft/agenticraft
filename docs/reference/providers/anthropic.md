@@ -15,11 +15,11 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 ```python
 from agenticraft import Agent
 
-# Explicit provider required for Anthropic
+# IMPORTANT: Always specify model when using Anthropic provider
 agent = Agent(
     name="Claude",
     provider="anthropic",
-    model="claude-3-opus-20240229"
+    model="claude-3-opus-20240229"  # Required!
 )
 ```
 
@@ -30,8 +30,43 @@ agent = Agent(
 | `claude-3-opus-20240229` | Most capable | 200K tokens | Complex analysis, reasoning |
 | `claude-3-sonnet-20240229` | Balanced performance | 200K tokens | General tasks |
 | `claude-3-haiku-20240307` | Fast and efficient | 200K tokens | High-volume, simple tasks |
-| `claude-2.1` | Previous generation | 100K tokens | Legacy support |
-| `claude-instant-1.2` | Fastest | 100K tokens | Real-time applications |
+
+## ⚠️ Important: Parameter Configuration
+
+**AgentiCraft currently does not support passing parameters in `run()` or `arun()` calls.** All parameters must be set during Agent initialization:
+
+```python
+# ❌ This will NOT work - causes "multiple values" error
+agent = Agent(provider="anthropic", model="claude-3-opus-20240229")
+response = await agent.arun("Hello", temperature=0.5)  # Error!
+
+# ✅ This works - set parameters during initialization
+agent = Agent(
+    provider="anthropic",
+    model="claude-3-opus-20240229",
+    temperature=0.5,
+    max_tokens=100
+)
+response = await agent.arun("Hello")  # Success!
+```
+
+## ⚠️ Model Specification Required
+
+Unlike OpenAI, the Anthropic provider requires explicit model specification:
+
+```python
+# ❌ This will fail with "model: gpt-4" error
+agent = Agent(
+    provider="anthropic"
+    # No model specified - defaults to gpt-4!
+)
+
+# ✅ Always specify a Claude model
+agent = Agent(
+    provider="anthropic",
+    model="claude-3-haiku-20240307"
+)
+```
 
 ## Provider-Specific Features
 
@@ -44,31 +79,32 @@ agent = Agent(
     name="SafeAssistant",
     provider="anthropic",
     model="claude-3-opus-20240229",
-    system_prompt="You are a helpful, harmless, and honest assistant."
+    instructions="You are a helpful, harmless, and honest assistant."
 )
 ```
 
 ### Large Context Window
 
-Claude excels at processing long documents:
+Claude excels at processing long documents (up to 200K tokens):
 
 ```python
 agent = Agent(
     name="DocumentAnalyzer",
     provider="anthropic", 
-    model="claude-3-opus-20240229"
+    model="claude-3-opus-20240229",
+    timeout=120  # Increase timeout for long documents
 )
 
-# Process a long document (up to 200K tokens)
+# Process a long document
 with open("long_document.txt", "r") as f:
     document = f.read()
 
-response = agent.run(f"Analyze this document:\n\n{document}")
+response = await agent.arun(f"Analyze this document:\n\n{document}")
 ```
 
 ### XML Tags Support
 
-Claude works well with structured prompts using XML tags:
+Claude works exceptionally well with structured prompts using XML tags:
 
 ```python
 prompt = """
@@ -85,81 +121,70 @@ prompt = """
 Please analyze the document according to the instructions.
 """
 
-response = agent.run(prompt)
+response = await agent.arun(prompt)
 ```
 
-### Vision Capabilities
+### Tool Usage with WorkflowAgent
 
-Claude 3 models support image analysis:
+For reliable tool usage, use the WorkflowAgent pattern:
 
 ```python
-agent = Agent(
-    name="VisionClaude",
+from agenticraft.agents import WorkflowAgent
+
+# Create workflow agent
+agent = WorkflowAgent(
+    name="ClaudeTools",
     provider="anthropic",
-    model="claude-3-opus-20240229"
+    model="claude-3-haiku-20240307",  # Fast model for tools
+    temperature=0.3
 )
 
-response = agent.run(
-    prompt="Describe this image in detail",
-    images=["path/to/image.jpg"]
-)
+# Define handlers
+def calculate_handler(agent, step, context):
+    expr = context.get("expression", "")
+    try:
+        result = eval(expr, {"__builtins__": {}})
+        context["result"] = result
+        return f"Calculated: {result}"
+    except Exception as e:
+        return f"Error: {e}"
+
+agent.register_handler("calc", calculate_handler)
+
+# Use in workflow
+workflow = agent.create_workflow("math")
+workflow.add_step(name="calculate", handler="calc")
+context = {"expression": "850 * 0.15"}
+result = await agent.execute_workflow(workflow, context=context)
 ```
 
 ## Configuration Options
 
 ```python
+# All parameters must be set during initialization
 agent = Agent(
     name="ConfiguredClaude",
     provider="anthropic",
-    model="claude-3-opus-20240229",
+    model="claude-3-opus-20240229",  # Always required
     
     # Anthropic-specific options
     temperature=0.7,        # 0.0-1.0
     max_tokens=4000,       # Max response length
     top_p=0.9,            # Nucleus sampling
     top_k=0,              # Top-k sampling (0 = disabled)
+    stop=["\n\nHuman:"],  # Stop sequences
     
-    # Safety settings
-    stop_sequences=["\n\nHuman:"],
-    
-    # Retry configuration
-    max_retries=3,
-    timeout=60  # Claude can take longer for complex tasks
+    # Connection settings
+    timeout=60,           # Increase for complex tasks
+    max_retries=3        # Retry attempts
 )
-```
-
-## Tool Usage
-
-Claude supports tool use through a specific format:
-
-```python
-from agenticraft import Agent, tool
-
-@tool
-def calculate(expression: str) -> str:
-    """Evaluate a mathematical expression."""
-    return str(eval(expression, {"__builtins__": {}}))
-
-@tool 
-def search(query: str) -> str:
-    """Search for information."""
-    return f"Search results for: {query}"
-
-agent = Agent(
-    name="ClaudeWithTools",
-    provider="anthropic",
-    model="claude-3-opus-20240229",
-    tools=[calculate, search]
-)
-
-# Claude will use tools when appropriate
-response = agent.run("What's 15% of 2500? Also search for tax rates.")
 ```
 
 ## Error Handling
 
 ```python
-from agenticraft import Agent, ProviderError
+from agenticraft import Agent
+from agenticraft.core.exceptions import ProviderError
 
 try:
     agent = Agent(
@@ -167,14 +192,71 @@ try:
         provider="anthropic",
         model="claude-3-opus-20240229"
     )
-    response = agent.run("Hello")
+    response = await agent.arun("Hello")
 except ProviderError as e:
-    if "rate_limit" in str(e):
+    error_msg = str(e)
+    if "rate_limit" in error_msg:
         print("Rate limit reached")
-    elif "invalid_api_key" in str(e):
+    elif "not_found_error" in error_msg and "model" in error_msg:
+        print("Model specification error - check model name")
+    elif "invalid_api_key" in error_msg:
         print("Check your Anthropic API key")
+    elif "Request timed out" in error_msg:
+        print("Timeout - try increasing timeout parameter")
     else:
         print(f"Anthropic error: {e}")
+```
+
+## Common Issues and Solutions
+
+### Issue: "model: gpt-4" error
+
+**Problem**: Not specifying a model defaults to GPT-4
+```python
+agent = Agent(provider="anthropic")  # Uses gpt-4 by default!
+```
+
+**Solution**: Always specify a Claude model
+```python
+agent = Agent(
+    provider="anthropic",
+    model="claude-3-haiku-20240307"
+)
+```
+
+### Issue: Request timeouts
+
+**Problem**: Default timeout too short for complex requests
+
+**Solution**: Increase timeout and/or use faster model
+```python
+# For simple tasks - use Haiku with shorter timeout
+simple_agent = Agent(
+    provider="anthropic",
+    model="claude-3-haiku-20240307",
+    timeout=30
+)
+
+# For complex tasks - use Opus with longer timeout
+complex_agent = Agent(
+    provider="anthropic",
+    model="claude-3-opus-20240229",
+    timeout=120
+)
+```
+
+### Issue: "multiple values for keyword argument"
+
+**Problem**: Trying to pass parameters in `arun()` call
+
+**Solution**: Set all parameters during initialization
+```python
+agent = Agent(
+    provider="anthropic",
+    model="claude-3-sonnet-20240229",
+    temperature=0.5,
+    max_tokens=1000
+)
 ```
 
 ## Cost Optimization
@@ -182,176 +264,171 @@ except ProviderError as e:
 ### Model Selection Strategy
 
 ```python
-class AnthropicOptimizer:
+# Use different models for different tasks
+class ClaudeOptimizer:
     def __init__(self):
-        self.agent = Agent(
-            name="Optimizer",
+        # Haiku for simple/fast tasks
+        self.fast_agent = Agent(
             provider="anthropic",
-            model="claude-3-haiku-20240307"  # Start with cheapest
+            model="claude-3-haiku-20240307",
+            temperature=0.3,
+            max_tokens=200,
+            timeout=30
         )
-    
-    def process(self, task: str, requirements: dict):
-        # Determine model based on requirements
-        if requirements.get("complexity") == "high":
-            model = "claude-3-opus-20240229"
-        elif requirements.get("speed") == "fast":
-            model = "claude-3-haiku-20240307"
-        else:
-            model = "claude-3-sonnet-20240229"
         
-        self.agent.model = model
-        return self.agent.run(task)
-```
-
-### Token Estimation
-
-```python
-def estimate_tokens(text: str) -> int:
-    """Rough estimation of Claude tokens."""
-    # Claude uses a similar tokenization to ~4 chars per token
-    return len(text) // 4
-
-def check_context_fit(text: str, model: str) -> bool:
-    """Check if text fits in model context."""
-    limits = {
-        "claude-3-opus-20240229": 200000,
-        "claude-3-sonnet-20240229": 200000,
-        "claude-3-haiku-20240307": 200000,
-        "claude-2.1": 100000
-    }
-    return estimate_tokens(text) < limits.get(model, 100000)
-```
-
-## Best Practices
-
-1. **Prompt Engineering**: Use clear, structured prompts with Claude
-2. **XML Tags**: Leverage XML tags for better organization
-3. **Context Management**: Take advantage of large context windows
-4. **Safety**: Claude is designed to be helpful, harmless, and honest
-5. **Rate Limits**: Anthropic has strict rate limits - implement backoff
-
-## Complete Example
-
-```python
-import os
-from agenticraft import Agent, tool
-from typing import Dict, List
-
-class ClaudeAssistant:
-    def __init__(self):
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            raise ValueError("ANTHROPIC_API_KEY not set")
+        # Sonnet for balanced tasks
+        self.balanced_agent = Agent(
+            provider="anthropic",
+            model="claude-3-sonnet-20240229",
+            temperature=0.7,
+            max_tokens=1000,
+            timeout=60
+        )
         
-        self.agent = Agent(
-            name="ClaudeAssistant",
+        # Opus for complex tasks
+        self.smart_agent = Agent(
             provider="anthropic",
             model="claude-3-opus-20240229",
             temperature=0.7,
             max_tokens=4000,
-            system_prompt="""You are Claude, a helpful AI assistant.
-            You excel at analysis, writing, and reasoning.
-            Always strive to be helpful, harmless, and honest."""
+            timeout=120
+        )
+    
+    async def process(self, task: str, complexity: str):
+        if complexity == "simple":
+            return await self.fast_agent.arun(task)
+        elif complexity == "medium":
+            return await self.balanced_agent.arun(task)
+        else:
+            return await self.smart_agent.arun(task)
+```
+
+## Best Practices
+
+1. **Always specify model**: Never rely on defaults with Anthropic provider
+2. **Model selection**: Use Haiku for speed, Opus for quality, Sonnet for balance
+3. **Timeout configuration**: Set appropriate timeouts (30-120 seconds)
+4. **Parameter configuration**: Set all parameters during initialization
+5. **XML tags**: Use XML tags for structured prompts with Claude
+6. **Error handling**: Handle timeout and model specification errors
+
+## Complete Working Example
+
+```python
+import os
+import asyncio
+from agenticraft import Agent
+from agenticraft.agents import WorkflowAgent
+
+class ClaudeAssistant:
+    def __init__(self):
+        # Ensure API key is set
+        if not os.getenv("ANTHROPIC_API_KEY"):
+            raise ValueError("ANTHROPIC_API_KEY not set")
+        
+        # Create agents for different purposes
+        self.chat_agent = Agent(
+            name="ChatClaude",
+            provider="anthropic",
+            model="claude-3-sonnet-20240229",
+            temperature=0.7,
+            max_tokens=1000,
+            timeout=60
         )
         
-        self._setup_tools()
+        self.analyst_agent = Agent(
+            name="AnalystClaude",
+            provider="anthropic",
+            model="claude-3-opus-20240229",
+            temperature=0.3,
+            max_tokens=4000,
+            timeout=120,
+            instructions="You are an expert analyst. Think step by step."
+        )
+        
+        self.quick_agent = Agent(
+            name="QuickClaude",
+            provider="anthropic",
+            model="claude-3-haiku-20240307",
+            temperature=0.1,
+            max_tokens=200,
+            timeout=30
+        )
     
-    def _setup_tools(self):
-        @tool
-        def analyze_data(data: str) -> str:
-            """Analyze provided data."""
-            # Simulate data analysis
-            return f"Analysis of data: {len(data)} characters processed"
-        
-        @tool
-        def generate_report(topic: str, sections: List[str]) -> str:
-            """Generate a structured report."""
-            outline = "\n".join(f"- {s}" for s in sections)
-            return f"Report outline for {topic}:\n{outline}"
-        
-        self.agent.tools = [analyze_data, generate_report]
+    async def chat(self, message: str) -> str:
+        """General conversation"""
+        try:
+            response = await self.chat_agent.arun(message)
+            return response.content
+        except Exception as e:
+            return f"Chat error: {e}"
     
-    def analyze_document(self, document: str) -> Dict:
-        """Analyze a document with structured output."""
-        
+    async def analyze(self, document: str, instructions: str) -> str:
+        """Complex document analysis"""
         prompt = f"""
         <document>
         {document}
         </document>
         
-        <task>
-        Please analyze this document and provide:
-        1. A brief summary (2-3 sentences)
-        2. Key points (bullet list)
-        3. Potential concerns or risks
-        4. Recommended actions
-        5. Confidence level in your analysis
-        </task>
+        <analysis_instructions>
+        {instructions}
+        </analysis_instructions>
         
-        Format your response with clear sections.
+        Please provide a thorough analysis following the instructions.
         """
         
-        response = self.agent.run(prompt)
-        
-        # Parse structured response
-        return {
-            "analysis": response.content,
-            "model": "claude-3-opus-20240229",
-            "tokens": estimate_tokens(document + response.content)
-        }
+        try:
+            response = await self.analyst_agent.arun(prompt)
+            return response.content
+        except Exception as e:
+            return f"Analysis error: {e}"
     
-    def creative_writing(self, prompt: str, style: str = "professional"):
-        """Generate creative content."""
-        
-        style_prompts = {
-            "professional": "Write in a clear, professional tone",
-            "casual": "Write in a friendly, conversational tone",
-            "academic": "Write in a formal, academic style with citations",
-            "creative": "Write creatively with vivid descriptions"
-        }
-        
-        full_prompt = f"""
-        {style_prompts.get(style, style_prompts['professional'])}
-        
-        Task: {prompt}
-        
-        Please create high-quality content that engages the reader.
-        """
-        
-        # Use Sonnet for creative tasks (good balance)
-        self.agent.model = "claude-3-sonnet-20240229"
-        response = self.agent.run(full_prompt)
-        
-        # Switch back to Opus
-        self.agent.model = "claude-3-opus-20240229"
-        
-        return response.content
+    async def quick_task(self, task: str) -> str:
+        """Quick, simple tasks"""
+        try:
+            response = await self.quick_agent.arun(task)
+            return response.content
+        except Exception as e:
+            return f"Quick task error: {e}"
 
-# Usage
-assistant = ClaudeAssistant()
+# Usage example
+async def main():
+    assistant = ClaudeAssistant()
+    
+    # Quick task
+    print("Quick task...")
+    result = await assistant.quick_task("List 3 primary colors")
+    print(f"Result: {result}\n")
+    
+    # Chat
+    print("Chatting...")
+    response = await assistant.chat("What's the weather like on Mars?")
+    print(f"Chat: {response[:100]}...\n")
+    
+    # Analysis
+    print("Analyzing...")
+    doc = "AI technology is rapidly advancing..."
+    analysis = await assistant.analyze(
+        doc, 
+        "Identify key trends and potential impacts"
+    )
+    print(f"Analysis: {analysis[:200]}...")
 
-# Document analysis
-doc = "Your long document text here..."
-analysis = assistant.analyze_document(doc)
-print(analysis["analysis"])
-
-# Creative writing
-story = assistant.creative_writing(
-    "Write a short story about AI and humanity",
-    style="creative"
-)
-print(story)
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-## Anthropic-Specific Tips
+## Performance Tips
 
-1. **Prompt Structure**: Claude responds well to clear structure and formatting
-2. **Chain of Thought**: Ask Claude to think step-by-step for complex problems  
-3. **Constitutional AI**: Claude will refuse harmful requests by design
-4. **Context Usage**: Don't hesitate to use the full 200K context when needed
-5. **Model Selection**: Opus for complex tasks, Haiku for speed, Sonnet for balance
+1. **First request warm-up**: The first request might be slower
+2. **Use appropriate timeouts**: 30s for Haiku, 60s for Sonnet, 120s for Opus
+3. **Batch processing**: Process multiple items in one request when possible
+4. **Model selection**: Use Haiku for high-volume simple tasks
+5. **Prompt optimization**: Keep prompts concise but clear
 
 ## See Also
 
 - [Agent API](../agent.md) - Core agent functionality
+- [WorkflowAgent Guide](../../concepts/workflows.md) - Reliable tool usage
 - [Provider Switching](../../features/provider_switching.md) - Dynamic provider changes
 - [Anthropic Docs](https://docs.anthropic.com) - Official Anthropic documentation

@@ -1,134 +1,124 @@
-# 🤖 Welcome to AgentiCraft
+# AgentiCraft Documentation
 
-**Build AI agents as simple as writing Python**
+Welcome to the AgentiCraft documentation! AgentiCraft is a production-ready framework for building AI agents with transparent reasoning, streaming capabilities, and comprehensive observability.
 
-[![PyPI version](https://badge.fury.io/py/agenticraft.svg)](https://badge.fury.io/py/agenticraft)
-[![Documentation](https://img.shields.io/badge/docs-blue.svg)](https://agenticraft.github.io/agenticraft/)
-[![License](https://img.shields.io/github/license/agenticraft/agenticraft.svg)](https://github.com/agenticraft/agenticraft/blob/main/LICENSE)
+## 🎯 What's New in v0.2.0
 
-
-## Why AgentiCraft?
-
-Building AI agents should be as simple as writing Python. We focus on intuitive design and clear abstractions that scale with your needs.
-
-!!! tip "5-Minute Quickstart"
-    
-    Get your first agent running faster than making coffee. [Start here →](quickstart.md)
-
-## Core Principles
-
-
-
-- **🚀 Simple First**  
-  If it's not simple, it's not in core. Every API designed for developer joy.
-
-- **🧠 Transparent Reasoning**  
-  See how your agents think, not just what they output. No black boxes.
-
-- **🔌 MCP-Native**  
-  First-class Model Context Protocol support. Use any MCP tool seamlessly.
-
-- **📈 Production Ready**  
-  Built-in observability, templates, and best practices from day one.
-
-## Quick Example
+### Advanced Reasoning Patterns
+Three sophisticated reasoning patterns that make agent thinking transparent and structured:
+- **Chain of Thought**: Step-by-step reasoning with confidence tracking
+- **Tree of Thoughts**: Multi-path exploration for creative solutions
+- **ReAct**: Combines reasoning with tool actions
 
 ```python
-from agenticraft import Agent, tool
+from agenticraft.agents.reasoning import ReasoningAgent
 
-@tool
-def calculate(expression: str) -> float:
-    """Evaluate a mathematical expression."""
-    return eval(expression, {"__builtins__": {}}, {})
-
-agent = Agent(
-    name="MathAssistant",
-    instructions="You are a helpful math assistant.",
-    tools=[calculate]
-)
-
-response = agent.run("What's 42 * 17 + 238?")
-print(response.content)
-# Output: "Let me calculate that for you: 42 * 17 + 238 = 952"
+agent = ReasoningAgent(reasoning_pattern="chain_of_thought")
+response = await agent.think_and_act("Solve this complex problem")
 
 # See the reasoning process
-print(response.reasoning)
-# Output: "I need to calculate the expression 42 * 17 + 238..."
+for step in response.reasoning_steps:
+    print(f"{step.number}. {step.description} (confidence: {step.confidence:.0%})")
 ```
 
-## What Makes AgentiCraft Different?
+[Learn more →](./features/reasoning_patterns.md)
 
-| Feature | AgentiCraft | Others |
-|---------|-------------|---------|
-| **Setup Time** | 1 minute | 5-30 minutes |
-| **Core Size** | <2,000 lines | 50,000+ lines |
-| **Time to First Agent** | 5 minutes | 30+ minutes |
-| **Documentation** | 100% coverage | Variable |
-| **Reasoning Visibility** | Built-in | Often hidden |
-| **Production Templates** | Included | DIY |
+## 📚 Documentation Structure
 
-## Features at a Glance
+### Getting Started
+- [Installation](./getting-started/installation.md)
+- [Quick Start](./quickstart.md)
+- [Core Concepts](./concepts/agents.md)
 
-### 🎯 Simple Agent Creation
+### Features
+- [🔄 Provider Switching](./features/provider_switching.md) - Switch LLMs at runtime
+- [👥 Advanced Agents](./features/advanced_agents.md) - ReasoningAgent and WorkflowAgent
+- [🧠 Reasoning Patterns](./features/reasoning_patterns.md) - CoT, ToT, and ReAct patterns
+- [🌊 Streaming Responses](./features/streaming.md) - Real-time token output
+- [🔌 MCP Integration](./features/mcp_integration.md) - Model Context Protocol support
+
+### API Reference
+- [Agent](./reference/agent.md)
+- [Tool](./reference/tool.md)
+- [Workflow](./reference/workflow.md)
+- [Reasoning Patterns](./api/reasoning/index.md)
+  - [Chain of Thought](./api/reasoning/chain_of_thought.md)
+  - [Tree of Thoughts](./api/reasoning/tree_of_thoughts.md)
+  - [ReAct](./api/reasoning/react.md)
+- [Streaming](./api/streaming.md)
+- [Providers](./reference/providers/openai.md)
+
+### Migration Guides
+- [Reasoning Patterns](./migration/reasoning.md)
+- [Streaming](./migration/streaming.md)
+
+### Quick Reference
+- [Reasoning Patterns](./quick-reference/reasoning.md)
+- [Streaming](./quick-reference/streaming.md)
+
+### Examples
+- [Hello World](./examples/hello-world.md)
+- [Provider Switching](./examples/provider-switching.md)
+- [Advanced Agents](./examples/advanced-agents.md)
+- [Real-World Apps](./examples/real-world.md)
+- [All Examples](./examples/index.md)
+
+### Guides
+- [Performance Tuning](./guides/performance-tuning.md)
+- [Reasoning Integration](./guides/reasoning-integration.md)
+
+## 🚀 Key Features
+
+### Dynamic Provider Switching (v0.1.1)
+Switch between OpenAI, Anthropic, and Ollama at runtime:
+
 ```python
-agent = Agent(name="assistant")
-```
-That's it. No configuration files, no complex setup.
+agent.set_provider("anthropic", model="claude-3-opus-20240229")
+response = await agent.run("Complex task requiring powerful model")
 
-### 🧠 Transparent Reasoning
-```python
-response = agent.run("Complex question")
-print(response.reasoning)  # See the thought process
+agent.set_provider("ollama", model="llama2")
+response = await agent.run("Simple task that can use local model")
 ```
 
-### 🔧 Easy Tool Integration
-```python
-@tool
-def my_tool(param: str) -> str:
-    return f"Processed: {param}"
-    
-agent = Agent(tools=[my_tool])
-```
+[Learn more →](./features/provider_switching.md)
 
-### 🔄 Simple Workflows
-```python
-workflow = Workflow(name="pipeline")
-workflow.add_steps([
-    Step("research", agent=researcher),
-    Step("write", agent=writer, depends_on=["research"])
-])
-```
+### Advanced Reasoning (v0.2.0)
+Make agent thinking transparent with structured reasoning patterns.
 
-### 📊 Built-in Observability
-```python
-from agenticraft import Telemetry
+[Learn more →](./features/reasoning_patterns.md)
 
-telemetry = Telemetry(export_to="http://localhost:4317")
-agent = Agent(telemetry=telemetry)
-```
+### Coming Soon
+- Streaming responses for real-time output
+- MCP protocol for standardized tool interactions
+- Enhanced workflows with visual builders
+- Production telemetry and observability
 
-## Getting Started
+## 📖 Start Here
 
-- **[5-Minute Quickstart](quickstart.md)**  
-  Build your first agent faster than making coffee
+New to AgentiCraft? Start with these resources:
 
-- **[Core Concepts](concepts/agents.md)**  
-  Understand the fundamentals
+1. [Quick Start Guide](./quickstart.md) - Get up and running in 5 minutes
+2. [Reasoning Patterns Guide](./features/reasoning_patterns.md) - Learn about transparent reasoning
+3. [Examples](./examples/index.md) - See AgentiCraft in action
 
-- **[API Reference](reference/index.md)**  
-  Detailed documentation for every feature
+## 🔍 How to Use This Documentation
 
-- **[Examples](examples/index.md)**  
-  Learn from real-world implementations
+- **Feature Guides**: In-depth explanations of each feature with examples
+- **API Reference**: Detailed technical documentation of all classes and methods
+- **Migration Guides**: Step-by-step instructions for upgrading
+- **Quick Reference**: Concise syntax and common patterns
+- **Examples**: Working code you can run and modify
 
-## Community
+## 💡 Getting Help
 
-Join our growing community of developers building with AgentiCraft:
+- **Discord**: Join our [community Discord](https://discord.gg/agenticraft)
+- **GitHub Issues**: Report bugs or request features
+- **Stack Overflow**: Tag questions with `agenticraft`
 
-- **[Discord](https://discord.gg/agenticraft)** - Get help and share ideas
-- **[GitHub](https://github.com/agenticraft/agenticraft)** - Contribute and star the project
-- **[Blog](https://blog.agenticraft.ai)** - Latest updates and tutorials
+## 🤝 Contributing
 
-## Ready to Build?
+We welcome contributions! See our [Contributing Guide](../CONTRIBUTING.md) to get started.
 
-**[Get Started →](quickstart.md)** | **[View Examples →](examples/index.md)**
+---
+
+*AgentiCraft - Dead simple AI agents with reasoning traces*

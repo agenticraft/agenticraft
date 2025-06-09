@@ -7,7 +7,7 @@ It includes middleware for auth, rate limiting, CORS, and monitoring endpoints.
 
 import os
 from contextlib import asynccontextmanager
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,9 +17,8 @@ from agenticraft import __version__ as agenticraft_version
 from agenticraft.telemetry import setup_telemetry
 
 from .agents import agent_router
-from .middleware import RateLimitMiddleware, AuthMiddleware
+from .middleware import AuthMiddleware, RateLimitMiddleware
 from .monitoring import monitoring_router
-
 
 # Environment configuration
 SERVICE_NAME = os.getenv("SERVICE_NAME", "agenticraft-api")
@@ -39,11 +38,11 @@ async def lifespan(app: FastAPI):
             otlp_endpoint=OTLP_ENDPOINT,
         )
         print(f"✅ Telemetry initialized for {SERVICE_NAME}")
-    
+
     print(f"✅ AgentiCraft API v{agenticraft_version} started")
-    
+
     yield
-    
+
     # Shutdown
     print("👋 AgentiCraft API shutting down")
 
@@ -69,14 +68,16 @@ app.add_middleware(
 
 # Add custom middleware
 app.add_middleware(RateLimitMiddleware, calls=100, period=60)  # 100 calls per minute
-app.add_middleware(AuthMiddleware, skip_paths=["/health", "/metrics", "/docs", "/redoc"])
+app.add_middleware(
+    AuthMiddleware, skip_paths=["/health", "/metrics", "/docs", "/redoc"]
+)
 
 # Include routers
 app.include_router(agent_router, prefix="/agents", tags=["agents"])
 app.include_router(monitoring_router, prefix="", tags=["monitoring"])
 
 
-@app.get("/", response_model=Dict[str, Any])
+@app.get("/", response_model=dict[str, Any])
 async def root():
     """Root endpoint with API information."""
     return {
@@ -111,7 +112,9 @@ async def general_exception_handler(request, exc):
         status_code=500,
         content={
             "error": "Internal server error",
-            "message": str(exc) if ENVIRONMENT == "development" else "An error occurred",
+            "message": (
+                str(exc) if ENVIRONMENT == "development" else "An error occurred"
+            ),
             "path": str(request.url),
         },
     )
@@ -119,7 +122,7 @@ async def general_exception_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "main:app",
         host="0.0.0.0",

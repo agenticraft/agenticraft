@@ -21,20 +21,20 @@ curl -fsSL https://ollama.ai/install.sh | sh
 ### Start Ollama Service
 
 ```bash
-# Start Ollama
+# Start Ollama (required before using AgentiCraft)
 ollama serve
 
 # Pull models you want to use
-ollama pull llama2
-ollama pull mistral
-ollama pull codellama
+ollama pull llama2        # 7B model (3.8GB)
+ollama pull llama2:13b    # 13B model (7.3GB)
+ollama pull mistral       # Fast alternative
+ollama pull codellama     # For code generation
 ```
 
 ### Environment Variables
 
 ```bash
 export OLLAMA_HOST="http://localhost:11434"  # Default
-export OLLAMA_TIMEOUT="300"  # Timeout in seconds
 ```
 
 ### Initialization
@@ -42,11 +42,12 @@ export OLLAMA_TIMEOUT="300"  # Timeout in seconds
 ```python
 from agenticraft import Agent
 
-# Explicit provider required for Ollama
+# IMPORTANT: Always set appropriate timeout for Ollama
 agent = Agent(
     name="LocalBot",
     provider="ollama",
-    model="llama2"
+    model="llama2",      # or "llama2:latest"
+    timeout=120          # 2 minutes - essential for CPU inference!
 )
 
 # Custom host
@@ -54,388 +55,418 @@ agent = Agent(
     name="RemoteBot",
     provider="ollama",
     model="mistral",
-    base_url="http://192.168.1.100:11434"
+    base_url="http://192.168.1.100:11434",
+    timeout=180
 )
 ```
+
+## ⚠️ Critical: Timeout Configuration
+
+**Ollama requires longer timeouts than cloud providers**, especially on CPU:
+
+```python
+# ❌ This will likely timeout on CPU
+agent = Agent(provider="ollama", model="llama2")  # Default timeout too short
+
+# ✅ Always set explicit timeout
+agent = Agent(
+    provider="ollama",
+    model="llama2",
+    timeout=120,  # Minimum 2 minutes recommended
+    max_tokens=100  # Limit response length for faster generation
+)
+```
+
+### Timeout Guidelines
+
+| Scenario | Recommended Timeout | Notes |
+|----------|-------------------|-------|
+| First run (model loading) | 300s (5 min) | Model loads into memory |
+| Simple queries | 60-120s | Short prompts, limited tokens |
+| Complex queries | 180-300s | Longer responses |
+| GPU available | 30-60s | Much faster than CPU |
 
 ## Supported Models
 
-| Model | Size | Description | Best For |
-|-------|------|-------------|----------|
-| `llama2` | 7B | Meta's Llama 2 | General purpose |
-| `llama2:13b` | 13B | Larger Llama 2 | Better quality |
-| `llama2:70b` | 70B | Largest Llama 2 | Best quality |
-| `mistral` | 7B | Mistral AI model | Fast, efficient |
-| `mixtral` | 8x7B | MoE model | High quality |
-| `codellama` | 7B | Code-focused | Programming tasks |
-| `phi-2` | 2.7B | Microsoft's small model | Resource-constrained |
-| `neural-chat` | 7B | Intel's fine-tuned | Conversational |
-| `starling-lm` | 7B | Berkeley's model | Instruction following |
+| Model | Size | Command | Use Case |
+|-------|------|---------|----------|
+| `llama2` | 3.8GB | `ollama pull llama2` | General purpose |
+| `llama2:13b` | 7.3GB | `ollama pull llama2:13b` | Better quality |
+| `llama2:70b` | 40GB | `ollama pull llama2:70b` | Best quality |
+| `mistral` | 4.1GB | `ollama pull mistral` | Fast, efficient |
+| `codellama` | 3.8GB | `ollama pull codellama` | Code generation |
+| `phi` | 1.6GB | `ollama pull phi` | Tiny, very fast |
 
-## Provider-Specific Features
+## Performance Characteristics
 
-### Model Management
+### Expected Generation Times (CPU)
 
 ```python
-from agenticraft.providers.ollama import OllamaProvider
+# First request (model loading)
+# Llama2 7B: 15-30 seconds to load
+# Then: 1-5 tokens/second generation
 
-# List available models
-provider = OllamaProvider()
-models = provider.list_models()
-for model in models:
-    print(f"{model['name']}: {model['size']}")
+# Subsequent requests (model in memory)
+# Simple prompt (10-50 tokens): 5-15 seconds
+# Medium prompt (100-200 tokens): 20-60 seconds
+# Long prompt (500+ tokens): 2-5 minutes
 
-# Pull a new model
-provider.pull_model("llama2:13b")
-
-# Delete a model
-provider.delete_model("old-model")
+# With GPU acceleration
+# 5-10x faster than CPU
 ```
 
-### Custom Models
+## ⚠️ Common Issues and Solutions
 
-Load custom GGUF models:
+### Issue: Timeouts during normal operation
 
+**Problem**: Default timeout too short for local inference
 ```python
-# Create custom modelfile
-modelfile = """
-FROM ./my-model.gguf
-PARAMETER temperature 0.8
-PARAMETER top_p 0.9
-SYSTEM You are a helpful assistant.
-"""
-
-# Create model
-provider.create_model("my-custom-model", modelfile)
-
-# Use it
-agent = Agent(
-    name="CustomBot",
-    provider="ollama",
-    model="my-custom-model"
-)
+# This often fails with timeout
+agent = Agent(provider="ollama", model="llama2")
+response = await agent.arun("Explain quantum computing")  # Timeout!
 ```
 
-### Embedding Models
-
-```python
-# Use embedding models
-agent = Agent(
-    name="EmbeddingBot",
-    provider="ollama",
-    model="nomic-embed-text",
-    task="embedding"
-)
-
-embeddings = agent.embed(["text1", "text2", "text3"])
-```
-
-### Streaming
-
+**Solution**: Set appropriate timeout and limit response length
 ```python
 agent = Agent(
-    name="StreamBot",
     provider="ollama",
     model="llama2",
-    stream=True
+    timeout=180,      # 3 minutes
+    max_tokens=100    # Limit response length
 )
+```
 
-# Stream responses
-for chunk in agent.run_stream("Tell me a story"):
-    print(chunk, end="", flush=True)
+### Issue: First request very slow
+
+**Problem**: Model needs to load into memory (15-30 seconds)
+
+**Solution**: Warm up the model
+```python
+async def warm_up_model():
+    """Load model into memory with simple query"""
+    agent = Agent(provider="ollama", model="llama2", timeout=300)
+    await agent.arun("Hi")  # Simple query to load model
+    print("Model loaded and ready!")
+
+# Run warmup before main tasks
+await warm_up_model()
+```
+
+### Issue: Inconsistent performance
+
+**Problem**: System resources, model state affect performance
+
+**Solution**: Add delays between requests
+```python
+import asyncio
+
+# Process multiple queries with delays
+queries = ["Question 1", "Question 2", "Question 3"]
+for query in queries:
+    response = await agent.arun(query)
+    print(response.content)
+    await asyncio.sleep(2)  # Give Ollama time to stabilize
 ```
 
 ## Configuration Options
 
 ```python
+# Optimized configuration for local inference
 agent = Agent(
-    name="ConfiguredOllama",
+    name="OptimizedOllama",
     provider="ollama",
     model="llama2",
     
-    # Ollama-specific options
-    temperature=0.8,        # 0.0-1.0
-    top_p=0.9,             # Nucleus sampling
-    top_k=40,              # Top-k sampling
-    repeat_penalty=1.1,    # Penalize repetition
-    seed=42,               # Reproducible outputs
-    num_predict=2048,      # Max tokens to generate
-    num_ctx=4096,          # Context window size
-    num_batch=512,         # Batch size for prompt eval
-    num_gpu=1,             # GPUs to use
-    main_gpu=0,            # Main GPU
-    low_vram=False,        # Low VRAM mode
-    f16_kv=True,           # Use f16 for K,V cache
-    vocab_only=False,      # Only load vocabulary
-    use_mmap=True,         # Use memory mapping
-    use_mlock=False,       # Lock model in memory
+    # Essential settings
+    timeout=180,           # 3 minutes - adjust based on your hardware
+    max_tokens=150,        # Limit response length for speed
     
-    # Connection settings
-    timeout=300,           # Request timeout
-    keep_alive="5m"        # Keep model loaded
+    # Ollama-specific options
+    temperature=0.7,       # 0.0-1.0
+    top_p=0.9,            # Nucleus sampling
+    top_k=40,             # Top-k sampling  
+    repeat_penalty=1.1,   # Penalize repetition
+    seed=42,              # Reproducible outputs
+    
+    # Advanced options (if needed)
+    num_ctx=2048,         # Context window (default: 2048)
+    num_gpu=1,            # GPU layers (if available)
+    num_thread=8,         # CPU threads
 )
 ```
 
 ## Performance Optimization
 
-### GPU Acceleration
+### Quick Responses Configuration
 
 ```python
-# Use GPU acceleration
-agent = Agent(
-    name="GPUBot",
+# Optimized for speed
+fast_agent = Agent(
     provider="ollama",
     model="llama2",
-    num_gpu=1  # Number of GPU layers
+    timeout=60,
+    temperature=0.1,    # Lower = faster
+    max_tokens=50,      # Short responses
+    top_k=10           # Restrict vocabulary
 )
 
-# Check GPU usage
-info = agent.get_model_info()
-print(f"GPU layers: {info.get('gpu_layers')}")
+# Use for simple queries
+response = await fast_agent.arun("What is 2+2?")
 ```
 
-### Memory Management
+### Quality Responses Configuration
 
 ```python
-# Low memory configuration
-agent = Agent(
-    name="LowMemBot",
+# Optimized for quality (slower)
+quality_agent = Agent(
     provider="ollama",
-    model="phi-2",  # Smaller model
-    num_ctx=2048,   # Smaller context
-    num_batch=256,  # Smaller batch
-    low_vram=True   # Enable low VRAM mode
+    model="llama2:13b",  # Larger model
+    timeout=300,         # 5 minutes
+    temperature=0.7,
+    max_tokens=500,
+    num_ctx=4096        # Larger context
 )
 ```
 
-### Model Preloading
+### Batch Processing
 
 ```python
-# Keep model loaded in memory
-agent = Agent(
-    name="FastBot",
-    provider="ollama",
-    model="mistral",
-    keep_alive="30m"  # Keep loaded for 30 minutes
-)
-
-# Preload model
-agent.preload()
-```
-
-## Privacy Features
-
-### Fully Offline Operation
-
-```python
-class PrivateAssistant:
-    def __init__(self):
-        # Ensure Ollama is running locally
-        self.agent = Agent(
-            name="PrivateBot",
-            provider="ollama",
-            model="llama2",
-            base_url="http://localhost:11434"
-        )
-        
-        # Verify no external connections
-        self.agent.verify_local_only = True
+async def batch_process(queries: list, delay: float = 2.0):
+    """Process multiple queries with delays"""
+    agent = Agent(
+        provider="ollama",
+        model="llama2",
+        timeout=120,
+        max_tokens=100
+    )
     
-    def process_sensitive_data(self, data: str):
-        """Process data with complete privacy."""
-        # Data never leaves your machine
-        return self.agent.run(f"Analyze this confidential data: {data}")
-```
-
-### Custom Privacy Models
-
-```python
-# Create a privacy-focused model
-modelfile = """
-FROM llama2
-PARAMETER temperature 0.7
-SYSTEM You are a privacy-focused assistant. Never ask for or store personal information.
-"""
-
-provider = OllamaProvider()
-provider.create_model("privacy-llama", modelfile)
+    results = []
+    for i, query in enumerate(queries):
+        print(f"Processing {i+1}/{len(queries)}...")
+        try:
+            response = await agent.arun(query)
+            results.append(response.content)
+        except Exception as e:
+            results.append(f"Error: {e}")
+        
+        # Delay between requests
+        if i < len(queries) - 1:
+            await asyncio.sleep(delay)
+    
+    return results
 ```
 
 ## Best Practices
 
-1. **Model Selection**: Choose model size based on available resources
-2. **Resource Management**: Monitor CPU/GPU usage and memory
-3. **Context Length**: Adjust context size to fit your hardware
-4. **Batch Processing**: Use appropriate batch sizes for your system
-5. **Model Caching**: Keep frequently used models loaded
+1. **Always set explicit timeout**: Minimum 120 seconds for CPU
+2. **Limit response length**: Use `max_tokens` to control generation time
+3. **Warm up models**: First request loads model into memory
+4. **Add delays**: Space out requests to prevent overwhelming Ollama
+5. **Monitor resources**: Check CPU/RAM usage during inference
+6. **Use appropriate models**: Smaller models for speed, larger for quality
 
-## Complete Example
+## Complete Working Example
 
 ```python
-import psutil
-from agenticraft import Agent, tool
-from typing import Dict
+import asyncio
+import time
+from agenticraft import Agent
 
 class LocalAssistant:
     def __init__(self):
-        # Check system resources
-        self._check_resources()
+        # Check if Ollama is running
+        self._check_ollama()
         
-        # Select model based on available resources
-        model = self._select_model()
-        
-        self.agent = Agent(
-            name="LocalAssistant",
+        # Create agents for different purposes
+        self.fast_agent = Agent(
+            name="FastLocal",
             provider="ollama",
-            model=model,
-            temperature=0.7,
-            num_ctx=4096,
-            num_gpu=1 if self._has_gpu() else 0,
-            tools=self._create_tools()
+            model="llama2",
+            timeout=90,
+            temperature=0.1,
+            max_tokens=50
         )
-    
-    def _check_resources(self):
-        """Check available system resources."""
-        ram = psutil.virtual_memory().total / (1024**3)  # GB
-        print(f"Available RAM: {ram:.1f} GB")
         
+        self.balanced_agent = Agent(
+            name="BalancedLocal",
+            provider="ollama",
+            model="llama2",
+            timeout=180,
+            temperature=0.7,
+            max_tokens=200
+        )
+        
+        # Warm up models
+        print("Warming up models...")
+        asyncio.run(self._warmup())
+    
+    def _check_ollama(self):
+        """Verify Ollama is accessible"""
+        import httpx
         try:
-            import torch
-            if torch.cuda.is_available():
-                print(f"GPU available: {torch.cuda.get_device_name()}")
-        except ImportError:
-            print("No GPU detected")
-    
-    def _has_gpu(self) -> bool:
-        """Check if GPU is available."""
-        try:
-            import torch
-            return torch.cuda.is_available()
-        except ImportError:
-            return False
-    
-    def _select_model(self) -> str:
-        """Select model based on resources."""
-        ram = psutil.virtual_memory().total / (1024**3)
-        
-        if ram >= 32:
-            return "llama2:13b"  # 13B model
-        elif ram >= 16:
-            return "llama2"      # 7B model
-        else:
-            return "phi-2"       # 2.7B model
-    
-    def _create_tools(self):
-        @tool
-        def system_info() -> str:
-            """Get current system information."""
-            cpu = psutil.cpu_percent()
-            ram = psutil.virtual_memory().percent
-            return f"CPU: {cpu}%, RAM: {ram}%"
-        
-        @tool
-        def read_local_file(path: str) -> str:
-            """Read a local file."""
-            try:
-                with open(path, 'r') as f:
-                    return f.read()
-            except Exception as e:
-                return f"Error reading file: {e}"
-        
-        return [system_info, read_local_file]
-    
-    def chat(self, message: str) -> str:
-        """Process a chat message locally."""
-        response = self.agent.run(message)
-        return response.content
-    
-    def analyze_file(self, file_path: str, analysis_type: str = "summary"):
-        """Analyze a local file privately."""
-        prompt = f"""
-        Please {analysis_type} the following file content:
-        
-        {self.agent.run(f"Read file: {file_path}").content}
-        
-        Provide a detailed {analysis_type}.
-        """
-        
-        return self.agent.run(prompt).content
-    
-    def switch_model(self, model: str):
-        """Switch to a different local model."""
-        try:
-            # Test if model is available
-            test_agent = Agent(
-                name="Test",
-                provider="ollama",
-                model=model
+            response = httpx.get("http://localhost:11434/api/tags")
+            print("✅ Ollama is running")
+        except:
+            raise Exception(
+                "❌ Ollama not running. Start with: ollama serve"
             )
-            test_agent.run("test")
-            
-            # Switch main agent
-            self.agent.model = model
-            print(f"Switched to {model}")
+    
+    async def _warmup(self):
+        """Load models into memory"""
+        try:
+            await self.fast_agent.arun("Hi")
+            print("✅ Models loaded")
         except Exception as e:
-            print(f"Model {model} not available: {e}")
-            print("Run: ollama pull {model}")
+            print(f"⚠️  Warmup failed: {e}")
+    
+    async def quick_answer(self, question: str) -> str:
+        """Fast responses for simple questions"""
+        start = time.time()
+        try:
+            response = await self.fast_agent.arun(question)
+            elapsed = time.time() - start
+            print(f"⏱️  Response time: {elapsed:.1f}s")
+            return response.content
+        except Exception as e:
+            return f"Error: {e}"
+    
+    async def detailed_response(self, prompt: str) -> str:
+        """Detailed responses (slower)"""
+        start = time.time()
+        try:
+            response = await self.balanced_agent.arun(prompt)
+            elapsed = time.time() - start
+            print(f"⏱️  Response time: {elapsed:.1f}s")
+            return response.content
+        except Exception as e:
+            return f"Error: {e}"
+    
+    async def batch_queries(self, queries: list) -> list:
+        """Process multiple queries efficiently"""
+        results = []
+        
+        for i, query in enumerate(queries):
+            print(f"\nProcessing {i+1}/{len(queries)}: {query[:50]}...")
+            
+            # Use fast agent for simple queries
+            if len(query) < 50 and "?" in query:
+                result = await self.quick_answer(query)
+            else:
+                result = await self.detailed_response(query)
+            
+            results.append(result)
+            
+            # Delay between requests
+            if i < len(queries) - 1:
+                await asyncio.sleep(2)
+        
+        return results
 
-# Usage
-assistant = LocalAssistant()
+# Usage example
+async def main():
+    print("🦙 Local LLM Assistant")
+    print("=" * 50)
+    
+    # Initialize assistant
+    assistant = LocalAssistant()
+    
+    # Quick questions
+    print("\n📌 Quick Answers:")
+    quick_q = [
+        "What is 2+2?",
+        "Capital of France?",
+        "Define CPU"
+    ]
+    
+    for q in quick_q:
+        answer = await assistant.quick_answer(q)
+        print(f"Q: {q}")
+        print(f"A: {answer}\n")
+        await asyncio.sleep(1)
+    
+    # Detailed response
+    print("\n📌 Detailed Response:")
+    detailed = await assistant.detailed_response(
+        "Explain the benefits of running AI models locally"
+    )
+    print(f"Response: {detailed[:200]}...")
+    
+    # Batch processing
+    print("\n📌 Batch Processing:")
+    batch = [
+        "What is RAM?",
+        "Explain how neural networks work",
+        "List 3 programming languages"
+    ]
+    results = await assistant.batch_queries(batch)
+    
+    for q, r in zip(batch, results):
+        print(f"\nQ: {q}")
+        print(f"A: {r[:100]}...")
 
-# Private conversation
-response = assistant.chat("Help me analyze my personal finances")
-print(response)
-
-# Analyze local files
-analysis = assistant.analyze_file(
-    "/path/to/document.txt",
-    analysis_type="detailed summary"
-)
-
-# Switch models based on task
-assistant.switch_model("codellama")  # For coding tasks
-code = assistant.chat("Write a Python function to sort a list")
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-## Troubleshooting
+## Troubleshooting Guide
 
-### Common Issues
+### Debugging Timeout Issues
 
-1. **Connection Refused**
-   ```bash
-   # Ensure Ollama is running
-   ollama serve
-   ```
+```python
+async def debug_ollama():
+    """Diagnose Ollama performance issues"""
+    import httpx
+    
+    print("🔍 Ollama Diagnostics")
+    print("=" * 40)
+    
+    # Check connection
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://localhost:11434/api/tags")
+            models = response.json().get("models", [])
+            print(f"✅ Connected. Models: {len(models)}")
+            for model in models:
+                print(f"   - {model['name']} ({model['size'] / 1e9:.1f}GB)")
+    except:
+        print("❌ Cannot connect to Ollama")
+        return
+    
+    # Test performance
+    timeouts = [30, 60, 120, 180]
+    for timeout in timeouts:
+        print(f"\n⏱️  Testing {timeout}s timeout...")
+        agent = Agent(
+            provider="ollama",
+            model="llama2",
+            timeout=timeout,
+            max_tokens=10
+        )
+        
+        try:
+            start = time.time()
+            await agent.arun("Say hello")
+            elapsed = time.time() - start
+            print(f"   ✅ Success in {elapsed:.1f}s")
+        except Exception as e:
+            print(f"   ❌ Failed: {type(e).__name__}")
 
-2. **Model Not Found**
-   ```bash
-   # Pull the model first
-   ollama pull llama2
-   ```
+# Run diagnostics if having issues
+await debug_ollama()
+```
 
-3. **Out of Memory**
-   - Use smaller models (phi-2, tinyllama)
-   - Reduce context size
-   - Enable low_vram mode
+## Hardware Recommendations
 
-4. **Slow Generation**
-   - Enable GPU acceleration
-   - Use smaller models
-   - Reduce context window
-
-## Model Recommendations
-
-| Use Case | Recommended Model | Min RAM |
-|----------|------------------|---------|
-| General chat | llama2 (7B) | 8GB |
-| Code generation | codellama | 8GB |
-| Fast responses | mistral | 8GB |
-| Resource-constrained | phi-2 | 4GB |
-| High quality | llama2:13b | 16GB |
-| Best quality | llama2:70b | 64GB |
+| Model Size | Minimum RAM | Recommended RAM | GPU Recommended |
+|------------|-------------|-----------------|-----------------|
+| 2-3B (phi) | 4GB | 8GB | No |
+| 7B (llama2) | 8GB | 16GB | Yes |
+| 13B | 16GB | 32GB | Yes |
+| 70B | 64GB | 128GB | Required |
 
 ## See Also
 
 - [Agent API](../agent.md) - Core agent functionality
-- [Provider Switching](../../features/provider_switching.md) - Dynamic provider changes
+- [WorkflowAgent Guide](../../concepts/workflows.md) - Tool usage patterns
+- [Performance Tuning](../../guides/performance-tuning.md) - Optimization tips
 - [Ollama Docs](https://github.com/ollama/ollama) - Official Ollama documentation

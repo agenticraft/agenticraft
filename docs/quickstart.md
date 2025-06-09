@@ -49,35 +49,50 @@ python hello_agent.py
 
 **Congratulations!** 🎉 You've just created your first AI agent.
 
-## Adding Tools
+## Adding Capabilities with Handlers
 
-Let's make your agent more capable by adding tools:
+Let's make your agent more capable by adding handler functions:
 
 ```python
-from agenticraft import Agent, tool
+from agenticraft import Agent, WorkflowAgent
 
-# Define a simple tool
-@tool
-def calculate(expression: str) -> float:
-    """Safely evaluate a mathematical expression."""
-    return eval(expression, {"__builtins__": {}}, {})
+# Define handler functions for capabilities
+def calculate_handler(agent, step, context):
+    """Handler for mathematical calculations."""
+    expression = context.get("expression", "")
+    try:
+        result = eval(expression, {"__builtins__": {}}, {})
+        context["result"] = result
+        return f"Calculated: {expression} = {result}"
+    except Exception as e:
+        return f"Calculation error: {e}"
 
-@tool
-def get_time() -> str:
-    """Get the current time."""
+def get_time_handler(agent, step, context):
+    """Handler to get current time."""
     from datetime import datetime
-    return datetime.now().strftime("%I:%M %p")
+    current_time = datetime.now().strftime("%I:%M %p")
+    context["time"] = current_time
+    return f"Current time: {current_time}"
 
-# Create an agent with tools
-agent = Agent(
+# Create a workflow agent with handlers
+agent = WorkflowAgent(
     name="SmartAssistant",
-    instructions="You are a helpful assistant with calculation and time abilities.",
-    tools=[calculate, get_time]
+    instructions="You are a helpful assistant that can calculate and tell time."
 )
 
-# The agent will automatically use tools when needed
-response = agent.run("What's 15% of 847? Also, what time is it?")
-print(response.content)
+# Register handlers
+agent.register_handler("calculate", calculate_handler)
+agent.register_handler("get_time", get_time_handler)
+
+# Create and run a workflow
+workflow = agent.create_workflow("assist")
+workflow.add_step(name="calc", handler="calculate")
+workflow.add_step(name="time", handler="get_time")
+
+# Execute with context
+context = {"expression": "15 * 0.847"}
+result = await agent.execute_workflow(workflow, context=context)
+print(result)
 ```
 
 ## Understanding Agent Reasoning
@@ -173,7 +188,7 @@ You've learned the basics! Here's what to explore next:
 
 ### Learn More
 - [Core Concepts](concepts/agents.md) - Understand how agents work
-- [Building Tools](concepts/tools.md) - Create powerful agent capabilities  
+- [Working with Handlers](concepts/handlers.md) - Create powerful agent capabilities  
 - [Designing Workflows](concepts/workflows.md) - Build complex systems
 
 ### See Examples

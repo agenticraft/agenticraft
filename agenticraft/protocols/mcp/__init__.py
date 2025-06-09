@@ -11,44 +11,54 @@ Key components:
 
 Example:
     Using MCP tools with an agent::
-    
+
         from agenticraft import Agent
         from agenticraft.protocols.mcp import MCPClient
-        
+
         # Connect to MCP server
         mcp_client = MCPClient("ws://localhost:3000")
         await mcp_client.connect()
-        
+
         # Create agent with MCP tools
         agent = Agent(
             name="MCPAgent",
             tools=mcp_client.get_tools()
         )
-        
+
         # Use MCP tools transparently
         response = agent.run("Search for Python tutorials")
 """
 
+from .adapters import MCPToolWrapper, wrap_function_as_mcp_tool
 from .client import MCPClient
+from .decorators import mcp_tool
+from .registry import MCPRegistry, get_global_registry
 from .server import MCPServer
-from .registry import MCPRegistry
 from .types import (
+    MCPCapability,
+    MCPError,
+    MCPMethod,
     MCPRequest,
     MCPResponse,
+    MCPServerInfo,
     MCPTool,
-    MCPError,
-    MCPCapability,
+    MCPToolParameter,
 )
-from .decorators import mcp_tool
 
 __all__ = [
     "MCPClient",
     "MCPServer",
     "MCPRegistry",
+    "get_global_registry",
     "MCPRequest",
     "MCPResponse",
     "MCPTool",
+    "MCPToolParameter",
     "MCPError",
     "MCPCapability",
+    "MCPMethod",
+    "MCPServerInfo",
     "mcp_tool",
+    "MCPToolWrapper",
+    "wrap_function_as_mcp_tool",
 ]

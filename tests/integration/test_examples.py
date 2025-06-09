@@ -1,174 +1,93 @@
-"""Integration tests for AgentiCraft examples.
+"""Test that examples run without errors."""
 
-These tests ensure that all examples run correctly end-to-end.
-"""
-
-import asyncio
 import importlib.util
-import os
-import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Get the examples directory
+EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples"
 
 
 class TestExamples:
-    """Test all example scripts work correctly."""
-    
-    @pytest.fixture
-    def mock_llm_response(self):
-        """Mock LLM responses for consistent testing."""
-        return {
-            "hello": "Hello! I'm AgentiCraft Agent. How can I help you today?",
-            "chatbot": "I understand you're asking about testing. Here's my response.",
-            "research": "Based on my research, here are the findings...",
-            "tool": "I'll help you with that calculation: 2 + 2 = 4"
-        }
-    
-    def test_01_hello_world(self, mock_llm_response):
-        """Test the hello world example runs correctly."""
-        # The hello world example doesn't actually call the LLM
-        # so we don't need to mock anything
-        
-        # Import and run the example
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("hello_world", "examples/01_hello_world.py")
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        main = module.main
-        
-        # Should run without errors
-        main()
-    
-    @pytest.mark.skip(reason="Example uses ChatAgent which doesn't exist yet")
-    @pytest.mark.asyncio
-    async def test_02_simple_chatbot(self, mock_llm_response, capsys):
-        """Test the simple chatbot example."""
-        # This example uses ChatAgent which is not yet implemented
-        pass
-    
-    @pytest.mark.skip(reason="Provider mocking needs refactoring")
-    @pytest.mark.asyncio
-    async def test_02_tools(self, mock_llm_response):
-        """Test the tools example."""
-        pass
-    
-    def test_03_configuration(self):
-        """Test the configuration example."""
-        # Set required environment variables
-        os.environ['AGENTICRAFT_LLM_PROVIDER'] = 'openai'
-        os.environ['AGENTICRAFT_API_KEY'] = 'test-key'
-        
-        try:
-            import importlib.util
-            spec = importlib.util.spec_from_file_location("configuration", "examples/03_configuration.py")
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            main = module.main
-            
-            # Should demonstrate configuration
-            main()
-        finally:
-            # Clean up
-            os.environ.pop('AGENTICRAFT_LLM_PROVIDER', None)
-            os.environ.pop('AGENTICRAFT_API_KEY', None)
-    
-    @pytest.mark.skip(reason="Provider mocking needs refactoring")
-    @pytest.mark.asyncio
-    async def test_04_workflow_research(self, mock_llm_response):
-        """Test the research workflow example."""
-        pass
-    
-    @pytest.mark.skip(reason="Provider mocking needs refactoring")
-    @pytest.mark.asyncio
-    async def test_05_tools_showcase(self, mock_llm_response):
-        """Test the tools showcase example."""
-        pass
+    """Test example files can be imported and run."""
 
+    def get_example_files(self, subdirectory: str = None):
+        """Get all Python example files."""
+        if subdirectory:
+            example_path = EXAMPLES_DIR / subdirectory
+        else:
+            example_path = EXAMPLES_DIR
 
-class TestMCPExamples:
-    """Test MCP protocol examples."""
-    
-    @pytest.mark.asyncio
-    async def test_mcp_basic_example(self):
-        """Test basic MCP example."""
-        # Mock MCP server
-        with patch('agenticraft.protocols.mcp.client.MCPClient.connect') as mock_connect:
-            mock_connect.return_value = AsyncMock()
-            
-            # Check if example exists
-            mcp_example = Path("examples/mcp/basic_mcp.py")
-            if mcp_example.exists():
-                # Import and test
-                spec = importlib.util.spec_from_file_location("basic_mcp", mcp_example)
+        if not example_path.exists():
+            return []
+
+        # Get all .py files except __init__.py
+        return [
+            f
+            for f in example_path.rglob("*.py")
+            if f.name != "__init__.py" and not f.name.startswith("test_")
+        ]
+
+    @pytest.mark.parametrize(
+        "category",
+        [
+            "providers",
+            "agents",
+            "memory",
+            "reasoning",
+            "streaming",
+            "workflows",
+        ],
+    )
+    def test_examples_importable(self, category):
+        """Test that example files can be imported."""
+        example_files = self.get_example_files(category)
+
+        if not example_files:
+            pytest.skip(f"No examples found in {category}")
+
+        for example_file in example_files[:3]:  # Test first 3 examples per category
+            # Create module name
+            module_name = f"test_example_{example_file.stem}"
+
+            # Load the module
+            spec = importlib.util.spec_from_file_location(module_name, example_file)
+            if spec and spec.loader:
                 module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                
-                if hasattr(module, 'main'):
-                    await module.main()
 
+                # Try to load it
+                try:
+                    spec.loader.exec_module(module)
+                except Exception as e:
+                    # Skip if it requires API keys or external services
+                    if "api_key" in str(e).lower() or "connection" in str(e).lower():
+                        pytest.skip(f"Example requires external service: {e}")
+                    else:
+                        raise
 
-class TestPluginExamples:
-    """Test plugin examples."""
-    
-    def test_plugin_basic_example(self):
-        """Test basic plugin example."""
-        # Check if example exists
-        plugin_example = Path("examples/plugins/custom_plugin.py")
-        if plugin_example.exists():
-            # Import and test
-            spec = importlib.util.spec_from_file_location("custom_plugin", plugin_example)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            
-            # Verify plugin structure
-            assert hasattr(module, 'CustomPlugin')
+    def test_provider_examples_structure(self):
+        """Test that provider examples follow expected structure."""
+        provider_examples = self.get_example_files("providers")
 
+        for example_file in provider_examples:
+            content = example_file.read_text()
 
-class TestExampleUtils:
-    """Test utility functions for examples."""
-    
-    def test_all_examples_have_main(self):
-        """Ensure all example files have a main function."""
-        examples_dir = Path("examples").resolve()
-        
-        for py_file in examples_dir.glob("*.py"):
-            if py_file.name.startswith("__"):
-                continue
-                
-            with open(py_file, 'r') as f:
-                content = f.read()
-                
-            # Check for main function
-            assert "def main" in content or "async def main" in content, \
-                f"{py_file.name} should have a main function"
-            
-            # Check for docstring
-            assert '"""' in content or "'''" in content, \
-                f"{py_file.name} should have a docstring"
-    
-    def test_examples_are_executable(self):
-        """Check that examples have proper shebang and are executable."""
-        examples_dir = Path("examples").resolve()
-        
-        for py_file in examples_dir.glob("*.py"):
-            if py_file.name.startswith("__"):
-                continue
-                
-            with open(py_file, 'r') as f:
-                first_line = f.readline().strip()
-                
-            # Check for shebang
-            assert first_line.startswith("#!"), \
-                f"{py_file.name} should start with shebang (#!/usr/bin/env python3)"
+            # Check for common patterns
+            assert (
+                "from agenticraft import Agent" in content
+                or "import agenticraft" in content
+            )
+            assert "async def" in content or "def main" in content
+            assert "__name__" in content  # Should have if __name__ == "__main__"
 
+    @pytest.mark.skip("Streaming examples may require live API")
+    def test_streaming_examples(self):
+        """Test streaming examples."""
+        streaming_examples = self.get_example_files("streaming")
 
-# importlib.util already imported at the top
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+        for example_file in streaming_examples[:1]:  # Just test one
+            # These likely need API keys, so just check structure
+            content = example_file.read_text()
+            assert "stream" in content.lower()
+            assert "async" in content

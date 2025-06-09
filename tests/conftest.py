@@ -5,9 +5,8 @@ This module provides common fixtures and utilities used across all tests.
 """
 
 import asyncio
-from typing import AsyncGenerator, Generator
 import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 import pytest_asyncio
@@ -18,15 +17,17 @@ try:
     from agenticraft.core.types import CompletionResponse
 except Exception:
     # If import fails due to settings initialization, create a mock
+    from typing import Any
+
     from pydantic import BaseModel
-    from typing import Dict, List, Any, Optional
-    
+
     class CompletionResponse(BaseModel):
         content: str
-        tool_calls: List[Any] = []
-        finish_reason: Optional[str] = None
-        metadata: Dict[str, Any] = {}
-        usage: Optional[Dict[str, int]] = None
+        tool_calls: list[Any] = []
+        finish_reason: str | None = None
+        metadata: dict[str, Any] = {}
+        usage: dict[str, int] | None = None
+
 
 # Configure asyncio for tests
 pytest_asyncio.fixture_scope = "function"
@@ -56,6 +57,7 @@ def mock_llm_provider():
 @pytest.fixture
 def sample_config():
     """Sample configuration for testing."""
+
     class TestConfig(BaseModel):
         api_key: str = "test-key"
         model: str = "test-model"
@@ -77,16 +79,16 @@ def mock_provider():
     """Mock LLM provider that returns predefined responses."""
     provider = AsyncMock()
     provider.complete = AsyncMock()
-    
+
     # Default response
     default_response = CompletionResponse(
         content="This is a test response",
         tool_calls=[],
         finish_reason="stop",
         usage={"prompt_tokens": 10, "completion_tokens": 20},
-        metadata={}
+        metadata={},
     )
-    
+
     provider.complete.return_value = default_response
     return provider
 
@@ -131,28 +133,28 @@ def clean_settings():
     # Store original environment variables
     original_env = {}
     env_prefix = "AGENTICRAFT_"
-    
+
     # Save current AGENTICRAFT_* environment variables
     for key in list(os.environ.keys()):
         if key.startswith(env_prefix):
             original_env[key] = os.environ.get(key)
             del os.environ[key]
-    
+
     # Reset settings singleton if it exists
     from agenticraft.core.config import reload_settings
-    
+
     yield
-    
+
     # Clean up any AGENTICRAFT_* variables set during test
     for key in list(os.environ.keys()):
         if key.startswith(env_prefix):
             del os.environ[key]
-    
+
     # Restore original environment variables
     for key, value in original_env.items():
         if value is not None:
             os.environ[key] = value
-    
+
     # Force reload settings to clean state
     reload_settings()
 
@@ -167,17 +169,17 @@ def temp_dir(tmp_path):
 def capture_reasoning():
     """Fixture to capture reasoning traces during tests."""
     traces = []
-    
+
     class ReasoningCapture:
         def add(self, step: str, details: dict = None):
             traces.append({"step": step, "details": details or {}})
-        
+
         def get_traces(self):
             return traces.copy()
-        
+
         def clear(self):
             traces.clear()
-    
+
     return ReasoningCapture()
 
 
@@ -188,18 +190,19 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "integration: Integration tests")
     config.addinivalue_line("markers", "slow: Slow tests")
     config.addinivalue_line("markers", "mcp: MCP protocol tests")
+    config.addinivalue_line("markers", "benchmark: Performance benchmark tests")
 
 
 def pytest_collection_modifyitems(config, items):
     """Modify collected items to exclude tool instances."""
     # Filter out items that are tool instances mistakenly collected
     from agenticraft.core.tool import BaseTool, FunctionTool
-    
+
     filtered_items = []
     for item in items:
         # Skip if the item is a tool instance
-        if hasattr(item, 'obj') and isinstance(item.obj, (BaseTool, FunctionTool)):
+        if hasattr(item, "obj") and isinstance(item.obj, (BaseTool, FunctionTool)):
             continue
         filtered_items.append(item)
-    
+
     items[:] = filtered_items

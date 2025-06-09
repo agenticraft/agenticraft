@@ -4,9 +4,9 @@ This module contains implementations of various LLM providers.
 Each provider is in its own file for better organization and maintainability.
 """
 
-from .openai import OpenAIProvider
 from .anthropic import AnthropicProvider
 from .ollama import OllamaProvider
+from .openai import OpenAIProvider
 
 
 def list_providers():
@@ -16,17 +16,17 @@ def list_providers():
 
 def get_provider(provider_name: str, **kwargs):
     """Get a provider instance by name.
-    
+
     This is a convenience function that creates a provider instance
     based on the provider name.
-    
+
     Args:
         provider_name: Name of the provider ("openai", "anthropic", "ollama")
         **kwargs: Additional arguments passed to the provider constructor
-        
+
     Returns:
         Provider instance
-        
+
     Raises:
         ValueError: If provider name is invalid
     """
@@ -35,13 +35,13 @@ def get_provider(provider_name: str, **kwargs):
         "anthropic": AnthropicProvider,
         "ollama": OllamaProvider,
     }
-    
+
     if provider_name not in providers:
         raise ValueError(
             f"Unknown provider: {provider_name}. "
             f"Valid providers are: {', '.join(providers.keys())}"
         )
-    
+
     return providers[provider_name](**kwargs)
 
 
