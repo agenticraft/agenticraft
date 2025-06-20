@@ -220,8 +220,4 @@ class ProviderFactory:
 __all__ = [
     "BaseProvider",
     "ProviderFactory",
-    "Provider",  # Alias
 ]
-
-# Alias for backward compatibility
-Provider = BaseProvider

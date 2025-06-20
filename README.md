@@ -62,8 +62,6 @@ Building AI agents should be as simple as writing Python. We focus on intuitive 
 | **Built-in Reasoning Traces** | ✅ Full | ❌ No | ❌ No | ⚠️ Limited |
 | **Streaming Support** | ✅ Native | ⚠️ Partial | ❌ No | ❌ No |
 | **MCP Protocol** | ✅ Native | ❌ No | ❌ No | ❌ No |
-| **Multi-Protocol Support** | ✅ 4 Protocols | ❌ No | ❌ No | ❌ No |
-| **Mesh Networking** | ✅ Built-in | ❌ No | ❌ No | ❌ No |
 | **Production Telemetry** | ✅ Built-in | 🔧 External | ❌ No | ❌ No |
 | **Memory Systems** | ✅ Vector + Graph | ✅ Vector | ⚠️ Basic | ⚠️ Basic |
 | **Learning Curve** | 📚 Minutes | 📚📚📚 Days | 📚📚 Hours | 📚📚 Hours |
@@ -82,12 +80,10 @@ Building AI agents should be as simple as writing Python. We focus on intuitive 
 - 🌊 **Streaming Responses** - Real-time token streaming for all providers
 - 🧠 **Advanced Reasoning Patterns** - Chain of Thought, Tree of Thoughts, and ReAct
 - 🔌 **MCP Protocol** - Native Model Context Protocol support for tool interoperability
-- 🌐 **Unified Protocol Fabric** - Support for MCP, A2A, ACP, and ANP protocols with one interface
 - 📊 **Production Telemetry** - OpenTelemetry integration with <1% overhead
 - 🔧 **Enhanced Workflows** - Visual workflow design with Mermaid diagrams
 - 💾 **Advanced Memory** - Vector memory with ChromaDB and knowledge graphs
 - 🛍️ **Plugin Marketplace** - Foundation for sharing and discovering tools
-- 🎓 **AgentiCraft Extensions** - Mesh networking, consensus, and reasoning traces
 
 ## 🚀 Quick Start
 
@@ -300,45 +296,6 @@ See MCP examples:
 - [🔌 MCP Examples & Guide](examples/mcp/README.md)
 - [📡 Simple MCP Client](examples/mcp/simple_mcp_client.py)
 - [🌐 MCP Server Setup](examples/mcp/basic_server.py)
-
-### Unified Protocol Fabric 🌐 (NEW!)
-
-```python
-from agenticraft.fabric import agent
-
-# Connect to ALL protocols with one decorator
-@agent(
-    "universal_agent",
-    servers=[
-        "http://localhost:3000/mcp",      # MCP protocol
-        "http://localhost:8080/a2a",      # Google A2A
-        "http://localhost:9000/acp",      # IBM ACP
-        "did:anp:discovery"               # ANP (decentralized)
-    ]
-)
-async def my_agent(self, task: str):
-    # Use tools from ANY protocol seamlessly
-    mcp_result = await self.tools.web_search(query=task)
-    a2a_result = await self.tools.expert_analyze(data=mcp_result)
-    return await self.tools.synthesize(results=[mcp_result, a2a_result])
-```
-
-**AgentiCraft Extensions** - Unique features preserved:
-```python
-# Enable mesh networking (AgentiCraft exclusive)
-await fabric.create_mesh_network(["agent1", "agent2", "agent3"])
-
-# Byzantine consensus for decisions
-await fabric.enable_consensus(min_agents=3)
-
-# Transparent reasoning traces
-await fabric.enable_reasoning_traces()
-```
-
-See Protocol Fabric examples:
-- [🌐 Enhanced Fabric Guide](examples/fabric/)
-- [🔌 Multi-Protocol Agents](examples/fabric/enhanced_fabric.py)
-- [🚀 Migration Guide](agenticraft/fabric/MIGRATION.md)
 
 ### Production Telemetry 📊
 

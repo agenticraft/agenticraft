@@ -25,14 +25,8 @@ class TestWebSocketMinimal:
 
     def test_tool_decorator(self):
         """Test tool decorator."""
-        # The @tool decorator returns a FunctionTool instance
-        from agenticraft.core.tool import FunctionTool
-        assert isinstance(simple_echo, FunctionTool)
-        assert simple_echo.name == "simple_echo"
-        # Test that it has the expected methods
-        assert hasattr(simple_echo, "get_definition")
-        definition = simple_echo.get_definition()
-        assert definition.name == "simple_echo"
+        assert hasattr(simple_echo, "_tool_definition")
+        assert simple_echo._tool_definition.name == "simple_echo"
 
     def test_server_creation(self):
         """Test server can be created."""

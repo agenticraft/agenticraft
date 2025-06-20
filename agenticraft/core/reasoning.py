@@ -26,17 +26,6 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 
-__all__ = [
-    "ReasoningStep",
-    "ReasoningTrace", 
-    "BaseReasoning",
-    "SimpleReasoning",
-    "ChainOfThought",
-    "ReflectiveReasoning",
-    "ReasoningEngine"  # Alias
-]
-
-
 class ReasoningStep(BaseModel):
     """A single step in the reasoning process."""
 
@@ -316,7 +305,3 @@ class ReflectiveReasoning(BaseReasoning):
             lines.append(f"\nSynthesis: {trace.result.get('response', 'No response')}")
 
         return "\n".join(lines)
-
-
-# Alias for backward compatibility
-ReasoningEngine = BaseReasoning
