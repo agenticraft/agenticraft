@@ -88,7 +88,7 @@ class ChainOfThoughtReasoning(BaseReasoning):
         Returns:
             ReasoningTrace containing the complete reasoning process
         """
-        trace = ReasoningTrace()
+        trace = ReasoningTrace(prompt=problem)
         self.steps = []  # Reset steps for new problem
 
         # Step 1: Analyze the problem

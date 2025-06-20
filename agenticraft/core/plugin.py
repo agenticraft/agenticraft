@@ -429,6 +429,9 @@ class PluginRegistry:
         self._plugins.clear()
 
 
+# Alias for backward compatibility
+Plugin = BasePlugin
+
 # Global plugin registry
 _global_registry = PluginRegistry()
 

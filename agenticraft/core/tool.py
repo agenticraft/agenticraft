@@ -327,7 +327,30 @@ class ToolRegistry:
         # Use provided name or tool's own name
         tool_name = name or tool.name
         self._tools[tool_name] = tool
+    
+    def register_function(self, func: Callable, name: str | None = None) -> None:
+        """Register a function as a tool.
+        
+        Args:
+            func: Function to register
+            name: Optional name override
+        """
+        self.register(func, name=name)
 
+    def get_tool(self, name: str) -> BaseTool:
+        """Get a tool by name (alias for get).
+        
+        Args:
+            name: Tool name
+            
+        Returns:
+            The tool instance
+            
+        Raises:
+            ToolNotFoundError: If tool not found
+        """
+        return self.get(name)
+    
     def get(self, name: str) -> BaseTool:
         """Get a tool by name.
 
@@ -412,3 +435,7 @@ class Calculator(BaseTool):
                 )
             ],
         )
+
+
+# Aliases for backward compatibility
+Tool = BaseTool

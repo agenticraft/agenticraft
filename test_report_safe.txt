@@ -1,0 +1,86 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.6, pytest-8.4.0, pluggy-1.6.0 -- /Users/zahere/Desktop/TLV/agenticraft/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/zahere/Desktop/TLV/agenticraft
+configfile: pytest.ini
+plugins: xdist-3.7.0, anyio-4.9.0, timeout-2.4.0, mock-3.14.1, cov-6.1.1, asyncio-1.0.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 1050 items
+
+tests/examples/test_all_providers.py::test_all_providers PASSED          [  0%]
+tests/examples/test_all_providers.py::test_provider_specific_features PASSED [  0%]
+tests/examples/test_examples_pytest.py::TestExamples::test_reasoning_examples_structure PASSED [  0%]
+tests/examples/test_websocket_minimal.py::TestWebSocketMinimal::test_imports PASSED [  0%]
+tests/examples/test_websocket_minimal.py::TestWebSocketMinimal::test_tool_decorator PASSED [  0%]
+tests/examples/test_websocket_minimal.py::TestWebSocketMinimal::test_server_creation PASSED [  0%]
+tests/examples/test_websocket_minimal.py::TestWebSocketMinimal::test_tool_registration PASSED [  0%]
+tests/examples/test_websocket_mocked.py::test_basic_connection_mocked PASSED [  0%]
+tests/examples/test_websocket_mocked.py::test_tool_execution_mocked PASSED [  0%]
+tests/examples/test_websocket_mocked.py::test_concurrent_connections_mocked PASSED [  0%]
+tests/examples/test_websocket_mocked.py::test_error_handling_mocked PASSED [  1%]
+tests/examples/test_websocket_pytest.py::test_basic_connection SKIPPED   [  1%]
+tests/examples/test_websocket_pytest.py::test_tool_execution SKIPPED     [  1%]
+tests/examples/test_websocket_pytest.py::test_concurrent_connections SKIPPED [  1%]
+tests/examples/test_websocket_pytest.py::test_error_handling SKIPPED     [  1%]
+tests/examples/test_websocket_pytest.py::test_large_payload SKIPPED      [  1%]
+tests/examples/test_websocket_pytest.py::test_websocket_performance SKIPPED [  1%]
+tests/examples/test_websocket_transport.py::test_websocket_transport PASSED [  1%]
+tests/examples/test_websocket_transport.py::test_performance PASSED      [  1%]
+tests/fabric/test_decorators.py::TestAgentDecorator::test_basic_agent_decorator PASSED [  1%]
+tests/fabric/test_decorators.py::TestAgentDecorator::test_agent_with_all_options PASSED [  2%]
+tests/fabric/test_decorators.py::TestAgentDecorator::test_reasoning_agent_selection PASSED [  2%]
+tests/fabric/test_decorators.py::TestAgentDecorator::test_decorated_agent_execution PASSED [  2%]
+tests/fabric/test_decorators.py::TestAgentDecorator::test_sync_function_wrapper PASSED [  2%]
+tests/fabric/test_decorators.py::TestToolProxy::test_tool_access_by_name PASSED [  2%]
+tests/fabric/test_decorators.py::TestToolProxy::test_tool_not_found PASSED [  2%]
+tests/fabric/test_decorators.py::TestToolProxy::test_tool_execution PASSED [  2%]
+tests/fabric/test_decorators.py::TestToolProxy::test_tool_dir PASSED     [  2%]
+tests/fabric/test_decorators.py::TestConfigurationLoading::test_load_agent_config PASSED [  2%]
+tests/fabric/test_decorators.py::TestConfigurationLoading::test_load_nonexistent_config PASSED [  2%]
+tests/fabric/test_decorators.py::TestConfigurationLoading::test_from_config_decorator PASSED [  2%]
+tests/fabric/test_decorators.py::TestWorkflowDecorators::test_workflow_decorator PASSED [  3%]
+tests/fabric/test_decorators.py::TestWorkflowDecorators::test_step_decorator PASSED [  3%]
+tests/fabric/test_decorators.py::TestAgentRegistry::test_register_and_get_agent PASSED [  3%]
+tests/fabric/test_decorators.py::TestAgentRegistry::test_registry_list PASSED [  3%]
+tests/fabric/test_decorators.py::TestChainAndParallel::test_chain_decorator PASSED [  3%]
+tests/fabric/test_decorators.py::TestChainAndParallel::test_parallel_decorator PASSED [  3%]
+tests/fabric/test_decorators.py::TestDecoratedAgentIntegration::test_agent_initialization_flow PASSED [  3%]
+tests/fabric/test_decorators.py::TestDecoratedAgentIntegration::test_arun_compatibility PASSED [  3%]
+tests/fabric/test_enhanced_fabric.py::TestACPAdapter::test_protocol_type PASSED [  3%]
+tests/fabric/test_enhanced_fabric.py::TestACPAdapter::test_connect PASSED [  3%]
+tests/fabric/test_enhanced_fabric.py::TestACPAdapter::test_discover_tools PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestACPAdapter::test_execute_tool PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestACPAdapter::test_execute_tool_invalid_format PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestACPAdapter::test_session_management PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestACPAdapter::test_get_capabilities PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_protocol_type PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_connect PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_connect_unsupported_did_method PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_discover_tools PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_execute_tool PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_execute_tool_agent_not_found PASSED [  4%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_create_agent_did PASSED [  5%]
+tests/fabric/test_enhanced_fabric.py::TestANPAdapter::test_get_capabilities PASSED [  5%]
+tests/fabric/test_enhanced_fabric.py::TestEnhancedUnifiedProtocolFabric::test_all_adapters_registered PASSED [  5%]
+tests/fabric/test_enhanced_fabric.py::TestEnhancedUnifiedProtocolFabric::test_extensions_registered PASSED [  5%]
+tests/fabric/test_enhanced_fabric.py::TestEnhancedUnifiedProtocolFabric::test_create_mesh_network FAILED [  5%]
+
+=================================== FAILURES ===================================
+__________ TestEnhancedUnifiedProtocolFabric.test_create_mesh_network __________
+tests/fabric/test_enhanced_fabric.py:327: in test_create_mesh_network
+    assert "mesh_id" in result
+E   AssertionError: assert 'mesh_id' in {'status': 'active', 'agents': ['agent1', 'agent2', 'agent3'], 'topology': 'ring', 'connections': 3}
+=============================== warnings summary ===============================
+agenticraft/core/tool.py:198
+  /Users/zahere/Desktop/TLV/agenticraft/agenticraft/core/tool.py:198: PytestCollectionWarning: cannot collect 'test_calculate' because it is not a function.
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+
+agenticraft/core/tool.py:198
+  /Users/zahere/Desktop/TLV/agenticraft/agenticraft/core/tool.py:198: PytestCollectionWarning: cannot collect 'test_echo' because it is not a function.
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/fabric/test_enhanced_fabric.py::TestEnhancedUnifiedProtocolFabric::test_create_mesh_network - AssertionError: assert 'mesh_id' in {'status': 'active', 'agents': ['agent1', 'agent2', 'agent3'], 'topology': 'ring', 'connections': 3}
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+======== 1 failed, 50 passed, 6 skipped, 2 warnings in 69.78s (0:01:09) ========

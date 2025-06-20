@@ -1,0 +1,28 @@
+# Development Environment Overlay
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: agenticraft-dev
+
+bases:
+  - ../../base
+
+namePrefix: dev-
+
+patchesStrategicMerge:
+  - deployment-patch.yaml
+  - configmap-patch.yaml
+
+configMapGenerator:
+  - name: agenticraft-config
+    behavior: merge
+    literals:
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - CORS_ORIGINS='["*"]'
+
+replicas:
+  - name: agenticraft-codereview-api
+    count: 1
+  - name: agenticraft-webhook-receiver
+    count: 1

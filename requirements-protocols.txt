@@ -1,0 +1,27 @@
+# External Protocol SDK Requirements
+# These are optional dependencies for connecting to external AI ecosystems
+
+# Model Context Protocol (Anthropic)
+mcp[cli]>=1.9.0
+
+# Google A2A Protocol (when available)
+# a2a-protocol>=1.0.0
+# google-a2a-sdk>=1.0.0
+
+# Additional protocol support
+# openai-agents>=0.1.0  # OpenAI Agent Protocol (future)
+# langchain-hub>=0.1.0  # LangChain Hub integration (future)
+
+# Server dependencies for protocol hosting
+uvicorn[standard]>=0.30.0
+fastapi==0.115.9  # Pinned for ChromaDB compatibility
+aiohttp>=3.9.0
+sse-starlette>=2.0.0
+
+# Authentication and security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+
+# Development tools for protocol debugging
+httpx[cli]>=0.25.0
+websocket-client>=1.6.0

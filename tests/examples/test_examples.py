@@ -159,4 +159,5 @@ async def run_tests():
 
 if __name__ == "__main__":
     success = asyncio.run(run_tests())
+
     sys.exit(0 if success else 1)

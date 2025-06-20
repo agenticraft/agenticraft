@@ -10,43 +10,51 @@ Available patterns:
 - ReAct: Reasoning + Acting in interleaved fashion
 """
 
-# Import only what exists
+# Import base classes directly
+try:
+    from .patterns.base import ReasoningPattern, ReasoningResult, ReasoningStep, StepType
+except ImportError:
+    ReasoningPattern = None
+    ReasoningResult = None
+    ReasoningStep = None
+    StepType = None
+
+# Import patterns individually
+try:
+    from .patterns.chain_of_thought import ChainOfThoughtReasoning
+except ImportError:
+    ChainOfThoughtReasoning = None
+
+try:
+    from .patterns.tree_of_thoughts import TreeOfThoughtsReasoning
+except ImportError:
+    TreeOfThoughtsReasoning = None
+
+try:
+    from .patterns.react import ReActReasoning
+except ImportError:
+    ReActReasoning = None
+
+try:
+    from .patterns.selector import PatternSelector, select_best_pattern
+except ImportError:
+    PatternSelector = None
+    select_best_pattern = None
+
+# Build __all__ based on what's available
 __all__ = []
 
-# Try to import base classes
-try:
-    from .base import ReasoningPattern, ReasoningResult, ReasoningStep
+if ReasoningPattern is not None:
+    __all__.extend(["ReasoningPattern", "ReasoningResult", "ReasoningStep", "StepType"])
 
-    __all__.extend(["ReasoningPattern", "ReasoningStep", "ReasoningResult"])
-except ImportError:
-    pass
-
-# Try to import patterns
-try:
-    from .chain_of_thought import ChainOfThoughtReasoning
-
+if ChainOfThoughtReasoning is not None:
     __all__.append("ChainOfThoughtReasoning")
-except ImportError:
-    pass
 
-try:
-    from .tree_of_thoughts import TreeOfThoughtsReasoning
-
+if TreeOfThoughtsReasoning is not None:
     __all__.append("TreeOfThoughtsReasoning")
-except ImportError:
-    pass
 
-try:
-    from .react import ReActReasoning
-
+if ReActReasoning is not None:
     __all__.append("ReActReasoning")
-except ImportError:
-    pass
 
-# Try to import utilities
-try:
-    from .selector import PatternSelector, select_best_pattern
-
+if PatternSelector is not None:
     __all__.extend(["PatternSelector", "select_best_pattern"])
-except ImportError:
-    pass

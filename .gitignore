@@ -175,3 +175,22 @@ docs/planning
 
 # Ruff cache
 .ruff_cache/
+
+# Prevent development scripts in root
+# All development scripts should go in tools/
+/check_*.py
+/test_*.py
+/run_*.py
+/run_*.sh
+/verify_*.py
+/debug_*.py
+/cleanup_*.py
+/fix_*.py
+/fix_*.sh
+/*_test.py
+/*_check.py
+/*_verify.py
+/*_debug.py
+
+# Temporary cleanup script
+/cleanup_root.sh

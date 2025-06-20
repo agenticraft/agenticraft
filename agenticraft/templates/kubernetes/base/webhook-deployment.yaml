@@ -1,0 +1,86 @@
+# GitHub Webhook Receiver Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agenticraft-webhook-receiver
+  namespace: agenticraft
+  labels:
+    app: agenticraft
+    component: webhook-receiver
+    workflow: codereview
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: agenticraft
+      component: webhook-receiver
+  template:
+    metadata:
+      labels:
+        app: agenticraft
+        component: webhook-receiver
+        workflow: codereview
+    spec:
+      serviceAccountName: agenticraft-webhook
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: webhook
+        image: agenticraft/webhook-receiver:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: agenticraft-config
+        - secretRef:
+            name: agenticraft-secrets
+        env:
+        - name: WEBHOOK_TYPE
+          value: "github"
+        - name: CODEREVIEW_API_URL
+          value: "http://agenticraft-codereview-api"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+---
+# Service for Webhook Receiver
+apiVersion: v1
+kind: Service
+metadata:
+  name: agenticraft-webhook-receiver
+  namespace: agenticraft
+  labels:
+    app: agenticraft
+    component: webhook-receiver
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: agenticraft
+    component: webhook-receiver

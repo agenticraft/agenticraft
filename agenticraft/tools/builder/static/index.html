@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentiCraft Visual Workflow Builder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎨 AgentiCraft Visual Builder</h1>
+            <div class="header-actions">
+                <button id="saveBtn" class="btn btn-secondary">💾 Save</button>
+                <button id="loadBtn" class="btn btn-secondary">📂 Load</button>
+                <button id="exportBtn" class="btn btn-primary">🚀 Export to Python</button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <h2>Templates</h2>
+                <div class="templates">
+                    <div class="template-card" data-template="research_team">
+                        <h3>🔬 Research Team</h3>
+                        <p>Multi-agent research workflow</p>
+                    </div>
+                    <div class="template-card" data-template="customer_service">
+                        <h3>💬 Customer Service</h3>
+                        <p>Support desk workflow</p>
+                    </div>
+                    <div class="template-card" data-template="code_review">
+                        <h3>👨‍💻 Code Review</h3>
+                        <p>Automated code review</p>
+                    </div>
+                </div>
+
+                <h2>Components</h2>
+                <div class="component-palette">
+                    <div class="component-item" draggable="true" data-type="input">
+                        <span class="icon">📥</span> Input
+                    </div>
+                    <div class="component-item" draggable="true" data-type="agent">
+                        <span class="icon">🤖</span> Agent
+                    </div>
+                    <div class="component-item" draggable="true" data-type="workflow">
+                        <span class="icon">🔄</span> Workflow
+                    </div>
+                    <div class="component-item" draggable="true" data-type="output">
+                        <span class="icon">📤</span> Output
+                    </div>
+                    <div class="component-item" draggable="true" data-type="config">
+                        <span class="icon">⚙️</span> Config
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Canvas -->
+            <main class="canvas-container">
+                <div id="canvas" class="canvas">
+                    <svg id="connections" class="connections-layer"></svg>
+                    <div id="components" class="components-layer"></div>
+                </div>
+            </main>
+
+            <!-- Properties Panel -->
+            <aside class="properties-panel">
+                <h2>Properties</h2>
+                <div id="properties-content" class="properties-content">
+                    <p class="placeholder">Select a component to edit properties</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <h2>Export to Python</h2>
+            <pre id="exportedCode" class="code-preview"></pre>
+            <div class="modal-actions">
+                <button id="copyCodeBtn" class="btn btn-primary">📋 Copy Code</button>
+                <button id="downloadCodeBtn" class="btn btn-secondary">💾 Download</button>
+                <button id="closeModalBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadModal" class="modal">
+        <div class="modal-content">
+            <h2>Load Workflow</h2>
+            <div id="savedWorkflows" class="saved-workflows-list"></div>
+            <div class="modal-actions">
+                <button id="closeLoadModalBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="builder.js"></script>
+</body>
+</html>

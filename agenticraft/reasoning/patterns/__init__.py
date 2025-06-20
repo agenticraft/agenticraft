@@ -4,27 +4,36 @@ This module contains implementations of various reasoning patterns
 that can be used by agents to solve complex problems.
 """
 
-# Import only what exists
-__all__ = []
+# Export base classes
+from .base import ReasoningPattern, ReasoningResult, ReasoningStep, StepType
 
-# Try to import patterns
+# Export patterns (with error handling)
+patterns = []
+
 try:
     from .chain_of_thought import ChainOfThoughtReasoning
-
-    __all__.append("ChainOfThoughtReasoning")
+    patterns.append("ChainOfThoughtReasoning")
 except ImportError:
-    pass
+    ChainOfThoughtReasoning = None
 
 try:
     from .tree_of_thoughts import TreeOfThoughtsReasoning
-
-    __all__.append("TreeOfThoughtsReasoning")
+    patterns.append("TreeOfThoughtsReasoning")
 except ImportError:
-    pass
+    TreeOfThoughtsReasoning = None
 
 try:
     from .react import ReActReasoning
-
-    __all__.append("ReActReasoning")
+    patterns.append("ReActReasoning")
 except ImportError:
-    pass
+    ReActReasoning = None
+
+try:
+    from .selector import PatternSelector, select_best_pattern
+    patterns.extend(["PatternSelector", "select_best_pattern"])
+except ImportError:
+    PatternSelector = None
+    select_best_pattern = None
+
+# Build __all__ dynamically based on what's available
+__all__ = ["ReasoningPattern", "ReasoningResult", "ReasoningStep", "StepType"] + patterns

@@ -306,6 +306,10 @@ class KnowledgeMemory(BaseMemory):
         pass
 
 
+# Alias for backward compatibility
+Memory = BaseMemory
+
+
 class MemoryStore:
     """Manages multiple memory types for an agent."""
 
