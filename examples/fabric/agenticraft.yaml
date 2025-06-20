@@ -1,0 +1,73 @@
+# AgentiCraft Configuration Example
+# 
+# This file demonstrates how to configure agents using YAML
+
+agents:
+  # Research agent with MCP tools
+  researcher:
+    servers:
+      - http://localhost:3000/mcp          # Local MCP server
+      - https://api.brave.com/mcp          # Brave search MCP
+      - https://arxiv.org/mcp              # ArXiv MCP server
+    model: gpt-4
+    temperature: 0.7
+    max_tokens: 2000
+    
+  # Analysis agent with reasoning
+  analyst:
+    servers:
+      - http://localhost:3000/mcp
+    model: gpt-4
+    reasoning: chain_of_thought            # Enable reasoning traces
+    temperature: 0.3                       # Lower temp for analysis
+    sandbox: true                          # Run in sandbox
+    
+  # Writer agent with specific tools
+  writer:
+    servers:
+      - http://localhost:3001/mcp          # Writing tools server
+    model: claude-3-opus
+    temperature: 0.8                       # Higher creativity
+    tools:                                 # Specific tools to load
+      - generate_outline
+      - write_section
+      - edit_content
+      
+  # Multi-protocol agent
+  coordinator:
+    servers:
+      - http://localhost:3000/mcp          # MCP tools
+      - ws://localhost:8080/a2a            # A2A agents
+      - http://localhost:9000/anp          # ANP discovery
+    model: gpt-4
+    reasoning: tree_of_thoughts            # Advanced reasoning
+    memory: true                           # Enable memory
+    
+# Global settings
+settings:
+  default_model: gpt-4
+  default_temperature: 0.7
+  retry_count: 3
+  timeout: 30
+  
+# Protocol-specific settings  
+protocols:
+  mcp:
+    default_timeout: 30
+    retry_on_error: true
+    max_retries: 3
+    
+  a2a:
+    discovery_interval: 60                 # Seconds
+    trust_threshold: 0.8
+    enable_bidirectional: true
+    
+  anp:
+    enable_did: true
+    ipfs_gateway: https://ipfs.io
+    
+# Logging configuration
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: agenticraft.log

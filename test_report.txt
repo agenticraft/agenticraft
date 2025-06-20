@@ -1,0 +1,118 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.6, pytest-8.4.0, pluggy-1.6.0 -- /Users/zahere/Desktop/TLV/agenticraft/venv/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /Users/zahere/Desktop/TLV/agenticraft
+configfile: pytest.ini
+plugins: xdist-3.7.0, anyio-4.9.0, timeout-2.4.0, mock-3.14.1, cov-6.1.1, asyncio-1.0.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... Testing security module imports...
+✓ Basic security imports successful
+✓ SandboxManager created
+✓ SecurityContext created
+✓ Available sandbox types: ['process', 'docker', 'pyodide', 'restricted']
+
+✅ All security module imports working correctly!
+collected 418 items
+INTERNALERROR> Traceback (most recent call last):
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/main.py", line 289, in wrap_session
+INTERNALERROR>     session.exitstatus = doit(config, session) or 0
+INTERNALERROR>                          ^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/main.py", line 342, in _main
+INTERNALERROR>     config.hook.pytest_collection(session=session)
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_hooks.py", line 512, in __call__
+INTERNALERROR>     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+INTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_manager.py", line 120, in _hookexec
+INTERNALERROR>     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+INTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 167, in _multicall
+INTERNALERROR>     raise exception
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 139, in _multicall
+INTERNALERROR>     teardown.throw(exception)
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/logging.py", line 788, in pytest_collection
+INTERNALERROR>     return (yield)
+INTERNALERROR>             ^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 139, in _multicall
+INTERNALERROR>     teardown.throw(exception)
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/warnings.py", line 99, in pytest_collection
+INTERNALERROR>     return (yield)
+INTERNALERROR>             ^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 139, in _multicall
+INTERNALERROR>     teardown.throw(exception)
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/config/__init__.py", line 1450, in pytest_collection
+INTERNALERROR>     return (yield)
+INTERNALERROR>             ^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 121, in _multicall
+INTERNALERROR>     res = hook_impl.function(*args)
+INTERNALERROR>           ^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/main.py", line 353, in pytest_collection
+INTERNALERROR>     session.perform_collect()
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/main.py", line 813, in perform_collect
+INTERNALERROR>     self.items.extend(self.genitems(node))
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/main.py", line 979, in genitems
+INTERNALERROR>     yield from self.genitems(subnode)
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/main.py", line 974, in genitems
+INTERNALERROR>     rep, duplicate = self._collect_one_node(node, handle_dupes)
+INTERNALERROR>                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/main.py", line 839, in _collect_one_node
+INTERNALERROR>     rep = collect_one_node(node)
+INTERNALERROR>           ^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/runner.py", line 567, in collect_one_node
+INTERNALERROR>     rep: CollectReport = ihook.pytest_make_collect_report(collector=collector)
+INTERNALERROR>                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_hooks.py", line 512, in __call__
+INTERNALERROR>     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+INTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_manager.py", line 120, in _hookexec
+INTERNALERROR>     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+INTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 167, in _multicall
+INTERNALERROR>     raise exception
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 139, in _multicall
+INTERNALERROR>     teardown.throw(exception)
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/capture.py", line 880, in pytest_make_collect_report
+INTERNALERROR>     rep = yield
+INTERNALERROR>           ^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/pluggy/_callers.py", line 121, in _multicall
+INTERNALERROR>     res = hook_impl.function(*args)
+INTERNALERROR>           ^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/runner.py", line 391, in pytest_make_collect_report
+INTERNALERROR>     call = CallInfo.from_call(
+INTERNALERROR>            ^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/runner.py", line 344, in from_call
+INTERNALERROR>     result: TResult | None = func()
+INTERNALERROR>                              ^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/runner.py", line 389, in collect
+INTERNALERROR>     return list(collector.collect())
+INTERNALERROR>                 ^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/python.py", line 553, in collect
+INTERNALERROR>     self._register_setup_module_fixture()
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/python.py", line 566, in _register_setup_module_fixture
+INTERNALERROR>     self.obj, ("setUpModule", "setup_module")
+INTERNALERROR>     ^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/python.py", line 279, in obj
+INTERNALERROR>     self._obj = obj = self._getobj()
+INTERNALERROR>                       ^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/python.py", line 550, in _getobj
+INTERNALERROR>     return importtestmodule(self.path, self.config)
+INTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/python.py", line 497, in importtestmodule
+INTERNALERROR>     mod = import_path(
+INTERNALERROR>           ^^^^^^^^^^^^
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/pathlib.py", line 587, in import_path
+INTERNALERROR>     importlib.import_module(module_name)
+INTERNALERROR>   File "/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/importlib/__init__.py", line 126, in import_module
+INTERNALERROR>     return _bootstrap._gcd_import(name[level:], package, level)
+INTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+INTERNALERROR>   File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+mainloop: caught unexpected SystemExit!
+INTERNALERROR>   File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+INTERNALERROR>   File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+INTERNALERROR>   File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/venv/lib/python3.11/site-packages/_pytest/assertion/rewrite.py", line 186, in exec_module
+INTERNALERROR>     exec(co, module.__dict__)
+INTERNALERROR>   File "/Users/zahere/Desktop/TLV/agenticraft/tests/test_security_quick.py", line 34, in <module>
+INTERNALERROR>     sys.exit(0)
+INTERNALERROR> SystemExit: 0
+
+============================= 2 warnings in 1.58s ==============================

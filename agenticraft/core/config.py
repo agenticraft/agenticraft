@@ -275,6 +275,9 @@ def get_settings() -> AgentiCraftSettings:
 # Global settings instance
 settings = get_settings()
 
+# Alias for backward compatibility
+Config = AgentiCraftSettings
+
 
 def reload_settings() -> AgentiCraftSettings:
     """Reload settings from environment.

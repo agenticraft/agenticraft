@@ -6,7 +6,7 @@ including environment setup, validation, and initialization.
 Example:
     Setting up configuration::
 
-        from agenticraft.utils.config import setup_environment, validate_config
+        from agenticraft.core.config import setup_environment, validate_config
 
         # Set up from .env file
         setup_environment()

@@ -33,6 +33,25 @@ from pydantic import BaseModel, Field, model_validator
 from .agent import Agent, AgentResponse
 from .exceptions import StepExecutionError, WorkflowError
 
+# Security imports - optional
+try:
+    from ..security import SecurityContext
+    from ..security.exceptions import PermissionDenied
+    SECURITY_AVAILABLE = True
+except ImportError:
+    SECURITY_AVAILABLE = False
+    SecurityContext = None
+
+
+class WorkflowConfig(BaseModel):
+    """Configuration for a Workflow.
+    
+    Simple configuration class to standardize workflow initialization.
+    """
+    name: str
+    description: str = ""
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
 
 class StepResult(BaseModel):
     """Result from a workflow step execution."""
@@ -189,11 +208,24 @@ class Workflow:
             result = await workflow.run(file="sales.csv")
     """
 
-    def __init__(self, name: str, description: str | None = None):
-        """Initialize workflow."""
+    def __init__(self, name: str | WorkflowConfig, description: str | None = None):
+        """Initialize workflow.
+        
+        Args:
+            name: Workflow name or WorkflowConfig object
+            description: Optional description (ignored if name is WorkflowConfig)
+        """
         self.id = str(uuid4())
-        self.name = name
-        self.description = description or f"Workflow: {name}"
+        
+        if isinstance(name, WorkflowConfig):
+            self.config = name
+            self.name = name.name
+            self.description = name.description or f"Workflow: {name.name}"
+        else:
+            self.name = name
+            self.description = description or f"Workflow: {name}"
+            self.config = WorkflowConfig(name=name, description=self.description)
+        
         self._steps: dict[str, Step] = {}
         self._execution_order: list[str] | None = None
 
@@ -262,15 +294,19 @@ class Workflow:
 
         return order
 
-    async def run(self, **inputs: Any) -> WorkflowResult:
+    async def run(self, user_context: dict[str, Any] | None = None, **inputs: Any) -> WorkflowResult:
         """Run the workflow.
 
         Args:
+            user_context: Optional security context with user info
             **inputs: Initial inputs for the workflow
 
         Returns:
             WorkflowResult with outputs from all steps
         """
+        # Validate permissions if security is available
+        if SECURITY_AVAILABLE and user_context:
+            await self._validate_permissions(user_context, "execute_workflow")
         # Calculate execution order if needed
         if self._execution_order is None:
             self._execution_order = self._calculate_execution_order()
@@ -287,6 +323,9 @@ class Workflow:
 
         # Context for passing data between steps
         context: dict[str, Any] = inputs.copy()
+        # Add user context if provided
+        if user_context:
+            context["_user_context"] = user_context
 
         # Execute steps in order
         for step_name in self._execution_order:
@@ -419,6 +458,46 @@ class Workflow:
         else:
             return await tool.arun(**inputs)
 
+    async def _validate_permissions(self, user_context: dict[str, Any], action: str) -> None:
+        """Validate user permissions for an action.
+        
+        Args:
+            user_context: User security context
+            action: Action to validate
+            
+        Raises:
+            PermissionDenied: If user lacks permission
+        """
+        if not SECURITY_AVAILABLE:
+            return
+            
+        permissions = user_context.get("permissions", [])
+        if action not in permissions and "admin" not in permissions:
+            raise PermissionDenied(
+                f"User {user_context.get('user_id', 'unknown')} lacks permission for {action} on {self.name}"
+            )
+    
+    def _create_security_context(self, user_context: dict[str, Any] | None) -> SecurityContext | None:
+        """Create security context from user context.
+        
+        Args:
+            user_context: User context dictionary
+            
+        Returns:
+            SecurityContext or None if not available
+        """
+        if not SECURITY_AVAILABLE or not user_context:
+            return None
+            
+        from ..security import SecurityContext
+        
+        return SecurityContext(
+            user_id=user_context.get("user_id", "anonymous"),
+            permissions=user_context.get("permissions", []),
+            resource_limits=user_context.get("resource_limits", {}),
+            metadata=user_context
+        )
+    
     def visualize(self) -> str:
         """Get a text visualization of the workflow."""
         if not self._steps:

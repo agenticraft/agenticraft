@@ -1,4 +1,8 @@
-"""Base classes for reasoning patterns."""
+"""Base classes for reasoning patterns.
+
+This module provides the base classes and interfaces for implementing
+reasoning patterns in AgentiCraft.
+"""
 
 import time
 from abc import ABC, abstractmethod
@@ -7,7 +11,21 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from ..core.reasoning import ReasoningTrace
+# Define ReasoningTrace locally to avoid circular imports
+@dataclass
+class ReasoningTrace:
+    """Trace of the reasoning process."""
+    prompt: str = ""
+    steps: list = field(default_factory=list)
+    result: Any = None
+    
+    def add_step(self, step_type: str, data: dict):
+        """Add a step to the trace."""
+        self.steps.append({"type": step_type, "data": data})
+    
+    def complete(self, result: Any):
+        """Mark the trace as complete."""
+        self.result = result
 
 
 class StepType(Enum):
@@ -158,10 +176,7 @@ class ReasoningPattern(ABC):
 
     def start_trace(self, problem: str) -> ReasoningTrace:
         """Start a reasoning trace."""
-        from ..core.reasoning import SimpleReasoning
-
-        reasoning = SimpleReasoning()
-        self._trace = reasoning.start_trace(problem)
+        self._trace = ReasoningTrace(prompt=problem)
         return self._trace
 
     def add_trace_step(self, step_type: str, data: dict[str, Any]) -> None:

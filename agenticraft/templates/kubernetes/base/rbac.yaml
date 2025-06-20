@@ -1,0 +1,73 @@
+# Service Account for API
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agenticraft-api
+  namespace: agenticraft
+
+---
+# Service Account for Webhook
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agenticraft-webhook
+  namespace: agenticraft
+
+---
+# Role for API
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: agenticraft-api
+  namespace: agenticraft
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+
+---
+# RoleBinding for API
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: agenticraft-api
+  namespace: agenticraft
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: agenticraft-api
+subjects:
+- kind: ServiceAccount
+  name: agenticraft-api
+  namespace: agenticraft
+
+---
+# Role for Webhook
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: agenticraft-webhook
+  namespace: agenticraft
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+
+---
+# RoleBinding for Webhook
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: agenticraft-webhook
+  namespace: agenticraft
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: agenticraft-webhook
+subjects:
+- kind: ServiceAccount
+  name: agenticraft-webhook
+  namespace: agenticraft

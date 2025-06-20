@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""Test auth provider registration."""
+
+import sys
+print("Python path:", sys.path)
+
+try:
+    from agenticraft.core.auth import get_auth_manager, AuthType
+    print("Successfully imported get_auth_manager and AuthType")
+    
+    manager = get_auth_manager()
+    print(f"Auth manager: {manager}")
+    print(f"Registered providers: {list(manager._providers.keys())}")
+    print(f"Provider values: {[t.value for t in manager._providers.keys()]}")
+    
+except Exception as e:
+    print(f"Error: {e}")
+    import traceback
+    traceback.print_exc()

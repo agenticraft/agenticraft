@@ -1,0 +1,10 @@
+# Production Ingress Patches
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agenticraft-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rate-limit: "1000"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.agenticraft.io,https://agenticraft.io"

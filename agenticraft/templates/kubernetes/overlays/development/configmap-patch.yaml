@@ -1,0 +1,11 @@
+# Development ConfigMap Patches
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agenticraft-config
+data:
+  # Development-specific overrides
+  TELEMETRY_ENABLED: "false"
+  METRICS_ENABLED: "false"
+  TRACING_ENABLED: "false"
+  MAX_CONCURRENT_WORKFLOWS: "3"

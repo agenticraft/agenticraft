@@ -241,17 +241,30 @@ class MCPServer:
 
         logger.info(f"Starting MCP WebSocket server on {host}:{port}")
 
+        # Create a wrapper to handle different websockets library versions
+        async def connection_handler(*args):
+            # Handle both (websocket) and (websocket, path) signatures
+            if len(args) == 1:
+                await self._handle_websocket_connection(args[0])
+            else:
+                await self._handle_websocket_connection(args[0], args[1])
+
         async with websockets.serve(
-            self._handle_websocket_connection,
+            connection_handler,
             host,
             port,
         ):
             await asyncio.Future()  # Run forever
 
     async def _handle_websocket_connection(
-        self, websocket: WebSocketServerProtocol, path: str
+        self, websocket: WebSocketServerProtocol, path: str | None = None
     ) -> None:
-        """Handle WebSocket connection."""
+        """Handle WebSocket connection.
+        
+        Args:
+            websocket: The WebSocket connection
+            path: Optional path (for compatibility with different websockets versions)
+        """
         logger.info(f"New WebSocket connection from {websocket.remote_address}")
 
         try:

@@ -1,5 +1,7 @@
 """
-AgentiCraft templates module.
+AgentiCraft Kubernetes Templates
 
-Pre-built agent templates for common use cases.
+Production-ready Kubernetes manifests for deploying AgentiCraft workflows.
 """
+
+__all__ = ["kubernetes"]

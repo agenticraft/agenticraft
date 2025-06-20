@@ -1,0 +1,8 @@
+# Dependency constraints to resolve conflicts
+# Use with: pip install -r requirements.txt -c constraints.txt
+
+# ChromaDB compatibility
+fastapi==0.115.9
+chromadb==1.0.12
+
+# Other potentially conflicting packages can be pinned here
