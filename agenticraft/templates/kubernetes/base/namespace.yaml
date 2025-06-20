@@ -1,8 +1,0 @@
-# AgentiCraft Namespace
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: agenticraft
-  labels:
-    app: agenticraft
-    component: infrastructure

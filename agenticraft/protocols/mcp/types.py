@@ -6,7 +6,7 @@ including requests, responses, tools, and errors.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -58,15 +58,13 @@ class MCPRequest:
     """MCP request message."""
 
     jsonrpc: str = "2.0"
-    method: Union[MCPMethod, str] = MCPMethod.LIST_TOOLS
+    method: MCPMethod = MCPMethod.LIST_TOOLS
     params: dict[str, Any] | None = None
     id: str | int = field(default_factory=lambda: str(uuid4()))
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
-        # Handle method as either enum or string
-        method_value = self.method.value if hasattr(self.method, 'value') else self.method
-        data = {"jsonrpc": self.jsonrpc, "method": method_value, "id": self.id}
+        data = {"jsonrpc": self.jsonrpc, "method": self.method.value, "id": self.id}
         if self.params is not None:
             data["params"] = self.params
         return data
@@ -231,66 +229,6 @@ class MCPToolResult:
     def is_error(self) -> bool:
         """Check if result is an error."""
         return self.error is not None
-
-
-@dataclass
-class MCPResource:
-    """MCP resource definition."""
-    
-    uri: str
-    name: str
-    description: str | None = None
-    mime_type: str | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
-    
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        data = {
-            "uri": self.uri,
-            "name": self.name
-        }
-        if self.description:
-            data["description"] = self.description
-        if self.mime_type:
-            data["mimeType"] = self.mime_type
-        if self.metadata:
-            data["metadata"] = self.metadata
-        return data
-
-
-@dataclass
-class MCPPrompt:
-    """MCP prompt definition."""
-    
-    name: str
-    description: str | None = None
-    arguments: list[MCPToolParameter] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
-    
-    def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
-        data = {
-            "name": self.name
-        }
-        if self.description:
-            data["description"] = self.description
-        if self.arguments:
-            # Convert arguments to JSON schema format
-            properties = {}
-            required = []
-            for arg in self.arguments:
-                properties[arg.name] = arg.to_json_schema()
-                if arg.required:
-                    required.append(arg.name)
-            
-            data["arguments"] = {
-                "type": "object",
-                "properties": properties,
-                "required": required
-            }
-        if self.metadata:
-            data["metadata"] = self.metadata
-        return data
 
 
 # Connection-related types

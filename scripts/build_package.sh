@@ -35,13 +35,7 @@ twine check dist/*
 echo -e "\n🧪 Step 6: Testing local installation..."
 python -m venv test_install_env
 source test_install_env/bin/activate
-# Handle both alpha and normalized versions
-if [[ $VERSION == *"-alpha"* ]]; then
-    NORMALIZED_VERSION=$(echo $VERSION | sed 's/-alpha/a0/')
-    pip install dist/agenticraft-${NORMALIZED_VERSION}-py3-none-any.whl
-else
-    pip install dist/agenticraft-${VERSION}-py3-none-any.whl
-fi
+pip install dist/agenticraft-${VERSION}-py3-none-any.whl
 python -c "import agenticraft; print(f'✅ AgentiCraft {agenticraft.__version__} installed successfully')"
 deactivate
 rm -rf test_install_env

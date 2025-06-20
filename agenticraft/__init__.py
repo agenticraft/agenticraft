@@ -32,32 +32,6 @@ from .core.exceptions import (
 from .core.tool import BaseTool, tool
 from .core.workflow import Step, Workflow
 
-# Optional security imports (if available)
-try:
-    from .security import (
-        SandboxManager,
-        SecurityContext,
-        SandboxType,
-        SecureResult
-    )
-    SECURITY_AVAILABLE = True
-except ImportError:
-    # Security module is optional
-    SECURITY_AVAILABLE = False
-
-# Optional fabric imports (if available)
-try:
-    from .fabric import (
-        agent as fabric_agent,
-        UnifiedProtocolFabric,
-        initialize_fabric,
-        get_global_fabric,
-    )
-    FABRIC_AVAILABLE = True
-except ImportError:
-    # Fabric module is optional
-    FABRIC_AVAILABLE = False
-
 __all__ = [
     "__version__",
     # Core
@@ -76,12 +50,3 @@ __all__ = [
     "WorkflowError",
     "StepExecutionError",
 ]
-
-# Add fabric exports if available
-if FABRIC_AVAILABLE:
-    __all__.extend([
-        "fabric_agent",
-        "UnifiedProtocolFabric",
-        "initialize_fabric",
-        "get_global_fabric",
-    ])

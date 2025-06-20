@@ -9,7 +9,7 @@ import sys
 import click
 
 from agenticraft import __version__
-from agenticraft.cli.commands import new, plugin, run, templates, deploy, monitor
+from agenticraft.cli.commands import new, plugin, run, templates
 
 
 @click.group(invoke_without_command=True)
@@ -70,8 +70,6 @@ cli.add_command(new.new)
 cli.add_command(run.run)
 cli.add_command(templates.templates)
 cli.add_command(plugin.plugin)
-cli.add_command(deploy.deploy)
-cli.add_command(monitor.monitor)
 
 
 def main():

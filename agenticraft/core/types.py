@@ -79,29 +79,7 @@ class Message(BaseModel):
         data = {"role": str(self.role), "content": self.content}
 
         if self.tool_calls:
-            # Format tool calls properly for OpenAI
-            formatted_tool_calls = []
-            for tc in self.tool_calls:
-                if isinstance(tc, dict):
-                    # Ensure proper format for OpenAI
-                    if "type" not in tc:
-                        # Convert from simplified format to OpenAI format
-                        formatted_tc = {
-                            "id": tc.get("id"),
-                            "type": "function",
-                            "function": {
-                                "name": tc.get("name"),
-                                "arguments": json.dumps(tc.get("arguments", {}))
-                                if isinstance(tc.get("arguments"), dict)
-                                else tc.get("arguments")
-                            }
-                        }
-                        formatted_tool_calls.append(formatted_tc)
-                    else:
-                        formatted_tool_calls.append(tc)
-                else:
-                    formatted_tool_calls.append(tc)
-            data["tool_calls"] = formatted_tool_calls
+            data["tool_calls"] = self.tool_calls
 
         # Some providers need specific metadata
         if self.role == MessageRole.TOOL and "tool_call_id" in self.metadata:

@@ -57,17 +57,6 @@ from .streaming import StreamChunk, StreamInterruptedError
 from .tool import BaseTool, ToolRegistry
 from .types import Message, MessageRole, ToolCall, ToolResult
 
-# Security imports - optional to avoid breaking existing code
-try:
-    from ..security import SandboxManager, SecurityContext, SandboxType, SecureResult
-    from ..security.exceptions import SecurityException
-    SECURITY_AVAILABLE = True
-except ImportError:
-    SECURITY_AVAILABLE = False
-    SecurityContext = None
-    SandboxType = None
-    SecureResult = None
-
 logger = logging.getLogger(__name__)
 
 
@@ -139,11 +128,6 @@ class AgentConfig(BaseModel):
     timeout: int = Field(default_factory=lambda: settings.default_timeout, gt=0)
     max_retries: int = Field(default_factory=lambda: settings.default_max_retries, ge=0)
     metadata: dict[str, Any] = Field(default_factory=dict)
-    # Security settings
-    sandbox_enabled: bool = Field(default=False, description="Enable sandboxed execution")
-    sandbox_type: str | None = Field(default=None, description="Type of sandbox to use")
-    memory_limit: int = Field(default=512, description="Memory limit in MB for sandboxed execution")
-    cpu_limit: float = Field(default=50.0, description="CPU limit percentage for sandboxed execution")
 
     @field_validator("provider")
     def validate_provider(cls, provider: str | None) -> str | None:
@@ -247,36 +231,8 @@ class Agent:
 
         # Message history
         self._messages: list[Message] = []
-        
-        # Security components
-        self._sandbox_manager: SandboxManager | None = None
-        self._security_context: SecurityContext | None = None
-        
-        # Initialize security if enabled
-        if self.config.sandbox_enabled and SECURITY_AVAILABLE:
-            self._init_security()
 
         logger.info(f"Initialized agent '{self.name}' with ID {self.id}")
-    
-    def _init_security(self) -> None:
-        """Initialize security components."""
-        from ..security import SandboxManager, SecurityContext, SandboxType
-        
-        # Initialize sandbox manager
-        self._sandbox_manager = SandboxManager()
-        
-        # Create default security context
-        self._security_context = SecurityContext(
-            user_id="agent",
-            permissions=["execute"],
-            resource_limits={
-                "memory_mb": self.config.memory_limit,
-                "cpu_percent": self.config.cpu_limit,
-                "timeout_seconds": self.config.timeout,
-                "network_access": False,
-                "filesystem_access": False
-            }
-        )
 
     @property
     def name(self) -> str:
@@ -400,19 +356,7 @@ class Agent:
                     tool_message = Message(
                         role=MessageRole.ASSISTANT,
                         content=response.content,
-                        tool_calls=[
-                            {
-                                "id": tc.id,
-                                "type": "function",
-                                "function": {
-                                    "name": tc.name,
-                                    "arguments": json.dumps(tc.arguments)
-                                    if isinstance(tc.arguments, dict)
-                                    else tc.arguments
-                                }
-                            }
-                            for tc in response.tool_calls
-                        ],
+                        tool_calls=[tc.model_dump() for tc in response.tool_calls],
                     )
                     self._messages.append(tool_message)
 
@@ -457,12 +401,7 @@ class Agent:
                 content=response.content,
                 reasoning=self._reasoning.format_trace(reasoning_trace),
                 tool_calls=[
-                    {
-                        "id": tc.id,
-                        "name": tc.name,
-                        "arguments": tc.arguments
-                    }
-                    for tc in executed_tool_calls
+                    tc.model_dump() for tc in executed_tool_calls
                 ],  # Use the saved tool calls
                 metadata={
                     "model": self.config.model,
@@ -587,19 +526,7 @@ class Agent:
                             tool_message = Message(
                                 role=MessageRole.ASSISTANT,
                                 content=accumulated_content,
-                                tool_calls=[
-                                    {
-                                        "id": tc.id,
-                                        "type": "function",
-                                        "function": {
-                                            "name": tc.name,
-                                            "arguments": json.dumps(tc.arguments)
-                                            if isinstance(tc.arguments, dict)
-                                            else tc.arguments
-                                        }
-                                    }
-                                    for tc in tool_calls
-                                ],
+                                tool_calls=[tc.model_dump() for tc in tool_calls],
                             )
                             self._messages.append(tool_message)
 
@@ -672,49 +599,9 @@ class Agent:
         for msg in memory_context:
             messages.append(msg.to_dict())
 
-        # Clean message history before building messages
-        self._clean_message_history()
-        
-        # Add recent messages, filtering out incomplete tool call sequences
-        recent_messages = self._messages[-10:]  # Last 10 messages
-        
-        # Process messages to ensure tool call/response pairs are complete
-        i = 0
-        while i < len(recent_messages):
-            msg = recent_messages[i]
-            msg_dict = msg.to_dict()
-            
-            # If this is an assistant message with tool calls
-            if msg.role == MessageRole.ASSISTANT and msg.tool_calls:
-                # Check if we have corresponding tool responses
-                tool_call_ids = set()
-                for tc in msg.tool_calls:
-                    if isinstance(tc, dict) and "id" in tc:
-                        tool_call_ids.add(tc["id"])
-                
-                # Look for tool responses in subsequent messages
-                j = i + 1
-                found_responses = set()
-                while j < len(recent_messages) and recent_messages[j].role == MessageRole.TOOL:
-                    tool_msg = recent_messages[j]
-                    if "tool_call_id" in tool_msg.metadata:
-                        found_responses.add(tool_msg.metadata["tool_call_id"])
-                    j += 1
-                
-                # Only include this message if all tool calls have responses
-                if tool_call_ids.issubset(found_responses):
-                    messages.append(msg_dict)
-                    # Add the tool response messages
-                    for k in range(i + 1, j):
-                        messages.append(recent_messages[k].to_dict())
-                    i = j  # Skip to after tool responses
-                else:
-                    # Skip this message and its incomplete tool responses
-                    i = j if j > i + 1 else i + 1
-            else:
-                # Regular message, just add it
-                messages.append(msg_dict)
-                i += 1
+        # Add recent messages
+        for msg in self._messages[-10:]:  # Last 10 messages
+            messages.append(msg.to_dict())
 
         return messages
 
@@ -776,166 +663,6 @@ class Agent:
         """Clear the agent's memory."""
         self._memory_store.clear()
         self._messages.clear()
-    
-    async def execute_secure(
-        self,
-        operation: Any,
-        *args,
-        user_context: dict[str, Any] | None = None,
-        **kwargs
-    ) -> Any:
-        """Execute an operation in a secure sandbox.
-        
-        Args:
-            operation: The operation to execute (callable or code string)
-            *args: Positional arguments for the operation
-            user_context: Optional user context for security
-            **kwargs: Keyword arguments for the operation
-            
-        Returns:
-            Result of the operation or SecureResult if sandbox is enabled
-            
-        Raises:
-            SecurityException: If security check fails
-            RuntimeError: If sandbox is not available
-        """
-        if not self.config.sandbox_enabled or not SECURITY_AVAILABLE:
-            # Fallback to direct execution
-            if callable(operation):
-                if asyncio.iscoroutinefunction(operation):
-                    return await operation(*args, **kwargs)
-                else:
-                    return operation(*args, **kwargs)
-            else:
-                raise ValueError("Non-sandboxed execution requires callable operation")
-        
-        if not self._sandbox_manager:
-            raise RuntimeError("Sandbox manager not initialized")
-        
-        # Update security context with user context
-        security_context = self._security_context
-        if user_context and "user_id" in user_context:
-            from ..security import SecurityContext
-            security_context = SecurityContext(
-                user_id=user_context["user_id"],
-                permissions=user_context.get("permissions", ["execute"]),
-                resource_limits=self._security_context.resource_limits,
-                metadata=user_context
-            )
-        
-        # Get appropriate sandbox
-        if self.config.sandbox_type:
-            from ..security import SandboxType
-            sandbox_type = SandboxType(self.config.sandbox_type)
-            sandbox = await self._sandbox_manager.get_sandbox(sandbox_type)
-        else:
-            # Use default sandbox type
-            sandbox = await self._sandbox_manager.get_sandbox()
-        
-        # Execute in sandbox
-        if isinstance(operation, str):
-            # Code execution
-            result = await sandbox.execute_code(operation, security_context)
-        else:
-            # Callable execution
-            result = await sandbox.execute(operation, security_context, *args, **kwargs)
-        
-        if not result.success:
-            raise SecurityException(f"Secure execution failed: {result.error}")
-        
-        return result.result
-    
-    async def execute_tool_secure(
-        self,
-        tool_name: str,
-        user_context: dict[str, Any] | None = None,
-        **kwargs
-    ) -> Any:
-        """Execute a tool in a secure sandbox.
-        
-        Args:
-            tool_name: Name of the tool to execute
-            user_context: Optional user context for security
-            **kwargs: Arguments for the tool
-            
-        Returns:
-            Tool execution result
-            
-        Raises:
-            SecurityException: If security check fails
-        """
-        # Get the tool
-        tool = self._tool_registry.get_tool(tool_name)
-        if not tool:
-            raise ValueError(f"Tool '{tool_name}' not found")
-        
-        # For sandbox execution, check if we're using RestrictedPythonSandbox
-        # which doesn't support callable execution
-        if self.config.sandbox_enabled and SECURITY_AVAILABLE:
-            from ..security import SandboxType
-            
-            # If using restricted sandbox, execute tool directly with security checks
-            if not self.config.sandbox_type or self.config.sandbox_type == "restricted":
-                # Log security event but execute outside sandbox
-                # This is a limitation of RestrictedPythonSandbox
-                logger.warning(
-                    "RestrictedPythonSandbox doesn't support tool execution. "
-                    "Executing with security context but outside sandbox."
-                )
-                return await tool.arun(**kwargs)
-            else:
-                # Other sandboxes can handle callables
-                async def tool_wrapper():
-                    return await tool.arun(**kwargs)
-                
-                return await self.execute_secure(
-                    tool_wrapper,
-                    user_context=user_context
-                )
-        else:
-            # Direct execution without sandbox
-            return await tool.arun(**kwargs)
-    
-    def _clean_message_history(self) -> None:
-        """Clean message history to remove incomplete tool call sequences."""
-        cleaned_messages = []
-        i = 0
-        
-        while i < len(self._messages):
-            msg = self._messages[i]
-            
-            # If this is an assistant message with tool calls
-            if msg.role == MessageRole.ASSISTANT and msg.tool_calls:
-                # Collect tool call IDs
-                tool_call_ids = set()
-                for tc in msg.tool_calls:
-                    if isinstance(tc, dict) and "id" in tc:
-                        tool_call_ids.add(tc["id"])
-                
-                # Look for corresponding tool responses
-                j = i + 1
-                tool_responses = []
-                found_ids = set()
-                
-                while j < len(self._messages) and self._messages[j].role == MessageRole.TOOL:
-                    tool_msg = self._messages[j]
-                    if "tool_call_id" in tool_msg.metadata:
-                        found_ids.add(tool_msg.metadata["tool_call_id"])
-                        tool_responses.append(tool_msg)
-                    j += 1
-                
-                # Only keep if all tool calls have responses
-                if tool_call_ids.issubset(found_ids):
-                    cleaned_messages.append(msg)
-                    cleaned_messages.extend(tool_responses)
-                
-                i = j  # Skip to after tool responses
-            else:
-                # Keep regular messages
-                cleaned_messages.append(msg)
-                i += 1
-        
-        self._messages = cleaned_messages
 
     def __repr__(self) -> str:
         """String representation of the agent."""

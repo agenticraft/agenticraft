@@ -59,17 +59,6 @@ providers = [
     "openai>=1.0.0",
     "anthropic>=0.3.0",
 ]
-# Protocol support
-protocols = [
-    "aiohttp>=3.8.0",
-    "websockets>=12.0",
-]
-# Official SDK support (when available)
-sdk = [
-    # "mcp>=0.1.0",  # Model Context Protocol SDK
-    # "a2a-protocol>=0.1.0",  # Google A2A SDK
-    "aiohttp>=3.8.0",  # For now, just ensure HTTP support
-]
 telemetry = [
     "opentelemetry-exporter-otlp>=1.20.0",
     "opentelemetry-exporter-otlp-proto-grpc>=1.20.0",
@@ -117,7 +106,7 @@ docs = [
     "pymdown-extensions>=10.0",
 ]
 all = [
-    "agenticraft[providers,protocols,sdk,telemetry,memory,api,cli,docs]",
+    "agenticraft[providers,telemetry,memory,api,cli,docs]",
 ]
 
 [project.urls]
